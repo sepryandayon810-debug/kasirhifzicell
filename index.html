@@ -13,7 +13,8 @@
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .header h1 { font-size: 20px; font-weight: 700; }
         .header-actions { display: flex; gap: 10px; align-items: center; }
-        .sync-status { display: flex; align-items: center; gap: 5px; font-size: 11px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px; }
+        .sync-status { display: flex; align-items: center; gap: 5px; font-size: 11px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px; cursor: pointer; transition: all 0.2s; }
+        .sync-status:hover { background: rgba(255,255,255,0.3); }
         .sync-status.syncing { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .icon-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); border: none; color: white; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; }
@@ -239,6 +240,36 @@
         .store-info-display { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px; margin-top: 10px; backdrop-filter: blur(10px); }
         .store-info-name { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
         .store-info-address { font-size: 12px; opacity: 0.9; line-height: 1.4; }
+
+        /* Product delete button in list */
+        .product-delete-btn { 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 50%; 
+            background: #ffebee; 
+            border: none; 
+            color: var(--danger); 
+            font-size: 16px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+        .product-delete-btn:active { background: var(--danger); color: white; transform: scale(0.9); }
+        
+        /* Receipt header preview */
+        .receipt-preview { 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            padding: 15px; 
+            margin: 15px 0; 
+            font-family: monospace; 
+            font-size: 12px; 
+            white-space: pre-wrap; 
+            border: 2px dashed #ddd;
+        }
         
         @media (max-width: 380px) { 
             .products-grid { grid-template-columns: 1fr; } 
@@ -263,7 +294,7 @@
                 <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;" id="headerStoreAddress">Alamat Toko</div>
             </div>
             <div class="header-actions">
-                <div class="sync-status" id="syncStatus">
+                <div class="sync-status" id="syncStatus" onclick="app.manualSync()">
                     <span>☁️</span>
                     <span id="syncText">Offline</span>
                 </div>
@@ -548,11 +579,59 @@
         </div>
     </div>
 
-    <!-- Receipt Section (Tanpa OCR) -->
+    <!-- Receipt Section (Dengan Header Manual) -->
     <div class="content-section" id="receiptSection">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">🧾 Input Manual Struk Transfer</span>
+                <span class="card-title">🧾 Pengaturan Header Struk</span>
+            </div>
+            
+            <div class="info-box" style="background: #fff8e1; border-left-color: #f57c00;">
+                <div class="info-title" style="color: #e65100;">📌 Header Struk Manual</div>
+                <div class="info-text">
+                    Atur header struk sesuai keinginan Anda. Header ini akan muncul di setiap struk yang dicetak.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nama Konter *</label>
+                <input type="text" id="receiptStoreName" placeholder="Contoh: Hifzi Cell">
+            </div>
+
+            <div class="form-group">
+                <label>Alamat *</label>
+                <textarea id="receiptAddress" rows="2" placeholder="Alamat lengkap konter..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Nomor HP / WhatsApp</label>
+                <input type="text" id="receiptPhone" placeholder="Contoh: 0812-3456-7890">
+            </div>
+
+            <div class="form-group">
+                <label>Catatan Tambahan (Opsional)</label>
+                <textarea id="receiptNote" rows="2" placeholder="Contoh: Terima kasih atas kunjungan Anda"></textarea>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Preview Header:</label>
+                <div class="receipt-preview" id="receiptHeaderPreview">
+================================
+    HIFZI CELL
+    Alamat Belum Diatur
+    HP: -
+================================
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="app.saveReceiptHeader()" style="width: 100%; margin-bottom: 10px;">
+                💾 Simpan Header Struk
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📝 Input Manual Struk Transfer</span>
             </div>
             
             <div class="info-box" style="background: #fff8e1; border-left-color: #f57c00;">
@@ -732,7 +811,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 10px 0;">
                     <span>Versi Aplikasi</span>
-                    <b>Hifzi Cell 5.0</b>
+                    <b>Hifzi Cell 5.1</b>
                 </div>
             </div>
         </div>
@@ -1500,7 +1579,13 @@
                     address: '',
                     taxRate: 0,
                     modalAwal: 0,
-                    currentCash: 0
+                    currentCash: 0,
+                    receiptHeader: {
+                        storeName: 'HIFZI CELL',
+                        address: 'Alamat Belum Diatur',
+                        phone: '',
+                        note: 'Terima kasih atas kunjungan Anda'
+                    }
                 },
                 shift: {
                     active: false,
@@ -1557,6 +1642,7 @@
                 this.updateKasirStatus();
                 this.initCloudSync();
                 this.updateHeaderDisplay(); // Update header dengan nama & alamat toko
+                this.initReceiptHeader(); // Initialize receipt header settings
                 
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('startDate').value = today;
@@ -1582,6 +1668,126 @@
                 }
                 
                 console.log('Hifzi Cell initialized successfully');
+            },
+
+            // ==================== RECEIPT HEADER MANAGEMENT ====================
+            initReceiptHeader() {
+                // Load saved receipt header if exists
+                if (this.data.settings.receiptHeader) {
+                    document.getElementById('receiptStoreName').value = this.data.settings.receiptHeader.storeName || '';
+                    document.getElementById('receiptAddress').value = this.data.settings.receiptHeader.address || '';
+                    document.getElementById('receiptPhone').value = this.data.settings.receiptHeader.phone || '';
+                    document.getElementById('receiptNote').value = this.data.settings.receiptHeader.note || '';
+                    this.updateReceiptPreview();
+                }
+
+                // Add event listeners for live preview
+                ['receiptStoreName', 'receiptAddress', 'receiptPhone', 'receiptNote'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', () => this.updateReceiptPreview());
+                    }
+                });
+            },
+
+            updateReceiptPreview() {
+                const storeName = document.getElementById('receiptStoreName').value || 'NAMA KONTER';
+                const address = document.getElementById('receiptAddress').value || 'Alamat Belum Diatur';
+                const phone = document.getElementById('receiptPhone').value || '-';
+                const note = document.getElementById('receiptNote').value || 'Terima kasih atas kunjungan Anda';
+
+                const preview = `================================
+    ${storeName.toUpperCase()}
+    ${address}
+    HP: ${phone}
+================================`;
+                
+                document.getElementById('receiptHeaderPreview').textContent = preview;
+            },
+
+            saveReceiptHeader() {
+                const storeName = document.getElementById('receiptStoreName').value.trim();
+                const address = document.getElementById('receiptAddress').value.trim();
+                const phone = document.getElementById('receiptPhone').value.trim();
+                const note = document.getElementById('receiptNote').value.trim();
+
+                if (!storeName || !address) {
+                    this.showToast('Nama Konter dan Alamat wajib diisi!');
+                    return;
+                }
+
+                this.data.settings.receiptHeader = {
+                    storeName: storeName,
+                    address: address,
+                    phone: phone,
+                    note: note
+                };
+
+                this.saveData();
+                this.showToast('Header struk berhasil disimpan!');
+            },
+
+            getReceiptHeader() {
+                return this.data.settings.receiptHeader || {
+                    storeName: this.data.settings.storeName || 'HIFZI CELL',
+                    address: this.data.settings.address || 'Alamat Belum Diatur',
+                    phone: '',
+                    note: 'Terima kasih atas kunjungan Anda'
+                };
+            },
+
+            // ==================== MANUAL SYNC ====================
+            async manualSync() {
+                if (!CONFIG.GOOGLE_SCRIPT_URL) {
+                    this.showToast('Cloud belum dikonfigurasi! Buka menu Cloud untuk setup.');
+                    this.switchTab('backup');
+                    return;
+                }
+
+                if (this.isOnline) {
+                    this.showToast('Menyinkronkan ke cloud...');
+                    await this.syncToCloud();
+                } else {
+                    this.showToast('Mencoba terhubung ke cloud...');
+                    await this.checkCloudConnection();
+                    if (this.isOnline) {
+                        await this.syncToCloud();
+                    } else {
+                        this.showToast('Gagal terhubung ke cloud. Periksa koneksi internet.');
+                    }
+                }
+            },
+
+            // ==================== PRODUCT DELETE FUNCTION ====================
+            async deleteProduct(productId) {
+                const product = this.data.products.find(p => p.id === productId);
+                if (!product) return;
+
+                // Check if product is in any transaction
+                const inTransaction = this.data.transactions.some(t => 
+                    t.items.some(i => i.id === productId) && t.status !== 'deleted'
+                );
+
+                let message = `Hapus produk "${product.name}"?\n\n`;
+                if (inTransaction) {
+                    message += '⚠️ Produk ini pernah terjual dalam transaksi.\n';
+                    message += 'Menghapus produk tidak akan mempengaruhi riwayat transaksi.\n\n';
+                }
+                message += 'Data produk akan dihapus permanen. Lanjutkan?';
+
+                if (!confirm(message)) return;
+
+                this.data.products = this.data.products.filter(p => p.id !== productId);
+                await this.saveDataAsync();
+                
+                this.renderProducts();
+                this.renderProductList();
+                
+                if (this.isOnline && CONFIG.GOOGLE_SCRIPT_URL) {
+                    this.syncToCloud();
+                }
+
+                this.showToast(`Produk "${product.name}" berhasil dihapus!`);
             },
 
             // ==================== UPDATE HEADER DISPLAY ====================
@@ -1892,6 +2098,7 @@
                         <div style="flex: 1; font-weight: 600; font-size: 14px;">${product.name}</div>
                         <div style="font-size: 12px; color: #666; margin-right: 10px;">Stok: ${currentStock}</div>
                         <input type="number" placeholder="0" value="${inputValue}" onchange="app.updateBatchStock(${product.id}, this.value)" inputmode="numeric" style="width: 80px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; text-align: center; font-size: 14px;">
+                        <button class="product-delete-btn" onclick="event.stopPropagation(); app.deleteProduct(${product.id})" title="Hapus Produk">🗑️</button>
                     `;
                     
                     container.appendChild(item);
@@ -2093,6 +2300,7 @@
                     this.updateStats();
                     this.updateKasirStatus();
                     this.updateHeaderDisplay(); // Update header setelah sync
+                    this.initReceiptHeader(); // Update receipt header setelah sync
                     
                     this.lastSync = new Date();
                     this.updateSyncStatus('online');
@@ -2773,9 +2981,9 @@
                             <div class="transaction-title">${product.name}</div>
                             <div class="transaction-meta">Stok: ${product.stock} | ${this.getCategoryName(product.category)}</div>
                         </div>
-                        <div style="text-align: right;">
-                            <div style="font-weight: 700;">Rp ${this.formatNumber(product.price)}</div>
-                            <button class="btn-sm btn-primary-sm" onclick="event.stopPropagation(); app.openProductModal(app.data.products.find(p => p.id === ${product.id}))" style="margin-top: 5px;">Edit</button>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn-sm btn-primary-sm" onclick="event.stopPropagation(); app.openProductModal(app.data.products.find(p => p.id === ${product.id}))">Edit</button>
+                            <button class="product-delete-btn" onclick="event.stopPropagation(); app.deleteProduct(${product.id})" title="Hapus Produk">🗑️</button>
                         </div>
                     `;
                     container.appendChild(item);
@@ -3017,10 +3225,12 @@
             },
 
             printReceipt(transaction) {
-                const receipt = `
-================================
-    ${this.data.settings.storeName}
-    ${this.data.settings.address || ''}
+                const header = this.getReceiptHeader();
+                
+                const receipt = `================================
+    ${header.storeName.toUpperCase()}
+    ${header.address}
+    ${header.phone ? 'HP: ' + header.phone : ''}
 ================================
 No: ${transaction.transactionNumber}
 Tgl: ${new Date(transaction.date).toLocaleString('id-ID')}
@@ -3036,7 +3246,7 @@ Bayar:      Rp ${this.formatNumber(transaction.received)}
 Kembali:    Rp ${this.formatNumber(transaction.change)}
 Metode:     ${transaction.paymentMethod.toUpperCase()}
 ================================
-    Terima Kasih
+${header.note}
 ================================
                 `;
                 
@@ -3044,7 +3254,7 @@ Metode:     ${transaction.paymentMethod.toUpperCase()}
                 printWindow.document.write(`
                     <html>
                     <head>
-                        <title>Struk ${this.data.settings.storeName}</title>
+                        <title>Struk ${header.storeName}</title>
                         <style>
                             body { font-family: monospace; white-space: pre; padding: 20px; }
                         </style>
@@ -3794,7 +4004,7 @@ Metode:     ${transaction.paymentMethod.toUpperCase()}
                 }
             },
 
-            // ==================== RETURN / REFUND ITEM - BARU ====================
+            // ==================== RETURN/REFUND MODAL - BARU ====================
             openReturnModal(transactionId) {
                 const t = this.data.transactions.find(tr => tr.id === transactionId);
                 if (!t) return;
@@ -4071,6 +4281,8 @@ Metode:     ${transaction.paymentMethod.toUpperCase()}
             },
 
             generateReceiptOnly() {
+                const header = this.getReceiptHeader();
+                
                 const date = document.getElementById('manualDate').value;
                 const time = document.getElementById('manualTime').value;
                 const sender = document.getElementById('manualSender').value;
@@ -4090,10 +4302,10 @@ Metode:     ${transaction.paymentMethod.toUpperCase()}
                 const total = nominal + admin;
                 const receiptNumber = 'RCPT-' + Date.now().toString().slice(-8);
                 
-                const receipt = `
-================================
-    ${this.data.settings.storeName}
-    STRUK TRANSFER
+                const receipt = `================================
+    ${header.storeName.toUpperCase()}
+    ${header.address}
+    ${header.phone ? 'HP: ' + header.phone : ''}
 ================================
 No: ${receiptNumber}
 Tgl: ${date} ${time}
@@ -4113,7 +4325,7 @@ Admin: Rp ${this.formatNumber(admin)}
 --------------------------------
 TOTAL: Rp ${this.formatNumber(total)}
 ================================
-    Terima Kasih
+${header.note}
 ================================
                 `;
                 
@@ -4121,7 +4333,7 @@ TOTAL: Rp ${this.formatNumber(total)}
                 printWindow.document.write(`
                     <html>
                     <head>
-                        <title>Struk Transfer - ${this.data.settings.storeName}</title>
+                        <title>Struk Transfer - ${header.storeName}</title>
                         <style>
                             body { font-family: monospace; white-space: pre; padding: 20px; }
                         </style>
@@ -4254,6 +4466,14 @@ TOTAL: Rp ${this.formatNumber(total)}
                         if (!this.data.shift) this.data.shift = { active: false, startTime: null, modalAwal: 0 };
                         if (!this.data.settings) this.data.settings = { storeName: 'Hifzi Cell', address: '', taxRate: 0, modalAwal: 0, currentCash: 0 };
                         if (!this.data.kasir) this.data.kasir = { isOpen: false, openTime: null, closeTime: null, date: null };
+                        if (!this.data.settings.receiptHeader) {
+                            this.data.settings.receiptHeader = {
+                                storeName: this.data.settings.storeName || 'HIFZI CELL',
+                                address: this.data.settings.address || 'Alamat Belum Diatur',
+                                phone: '',
+                                note: 'Terima kasih atas kunjungan Anda'
+                            };
+                        }
                     }
                 } catch (e) {
                     console.error('Error loading data:', e);
@@ -4315,6 +4535,8 @@ TOTAL: Rp ${this.formatNumber(total)}
                     this.renderProductList();
                 } else if (tab === 'transactions') {
                     this.renderTransactionList();
+                } else if (tab === 'receipt') {
+                    this.initReceiptHeader();
                 }
                 
                 const cartBar = document.getElementById('cartBar');
