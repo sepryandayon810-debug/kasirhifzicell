@@ -270,6 +270,24 @@
             white-space: pre-wrap; 
             border: 2px dashed #ddd;
         }
+
+        /* Cash transaction delete button */
+        .delete-cash-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ffebee;
+            border: none;
+            color: var(--danger);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            transition: all 0.2s;
+        }
+        .delete-cash-btn:active { background: var(--danger); color: white; transform: scale(0.9); }
         
         @media (max-width: 380px) { 
             .products-grid { grid-template-columns: 1fr; } 
@@ -811,7 +829,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 10px 0;">
                     <span>Versi Aplikasi</span>
-                    <b>Hifzi Cell 5.1</b>
+                    <b>Hifzi Cell 5.2</b>
                 </div>
             </div>
         </div>
@@ -987,29 +1005,57 @@
         </div>
     </div>
 
-    <!-- Tarik Tunai Modal -->
+    <!-- Tarik Tunai Modal - DENGAN ADMIN FEE -->
     <div class="modal" id="tarikTunaiModal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 450px;">
             <div class="modal-header">
                 <span class="modal-title">🏧 Tarik Tunai</span>
                 <button class="close-btn" onclick="app.closeModal('tarikTunaiModal')">×</button>
             </div>
             
-            <div class="info-box">
-                <div class="info-title">💡 Catatan Tarik Tunai</div>
+            <div class="info-box" style="background: #e1f5fe; border-left-color: #0288d1;">
+                <div class="info-title" style="color: #01579b;">💡 Catatan Tarik Tunai</div>
                 <div class="info-text">
-                    Masukkan nominal tarik tunai saja. Admin dicatat terpisah di menu Kasir sebagai pendapatan.
+                    <b>Admin Fee akan tercatat sebagai LABA!</b><br>
+                    Nominal tarik = Uang yang diberikan ke customer<br>
+                    Admin fee = Keuntungan konter (masuk ke laba)
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Nominal Tarik Tunai (Rp)</label>
-                <input type="number" id="tarikNominal" placeholder="Contoh: 100000" inputmode="numeric">
+                <label>Nominal Tarik Tunai (Rp) *</label>
+                <input type="number" id="tarikNominal" placeholder="Contoh: 100000" inputmode="numeric" oninput="app.updateTarikTunaiCalculation()">
+                <div style="font-size: 11px; color: #666; margin-top: 5px;">Uang yang diberikan ke customer</div>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Fee (Rp) *</label>
+                <input type="number" id="tarikAdminFee" placeholder="Contoh: 2500" inputmode="numeric" oninput="app.updateTarikTunaiCalculation()">
+                <div style="font-size: 11px; color: #666; margin-top: 5px;">Ini adalah keuntungan konter yang akan masuk ke LABA</div>
             </div>
             
             <div class="form-group">
                 <label>Keterangan (Opsional)</label>
                 <textarea id="tarikNote" rows="2" placeholder="Contoh: Tarik tunai BCA"></textarea>
+            </div>
+
+            <div class="calculation-box" style="background: #e1f5fe; border: 2px solid #0288d1;">
+                <div class="calc-row">
+                    <span>Nominal Tarik:</span>
+                    <span id="calcTarikNominal">Rp 0</span>
+                </div>
+                <div class="calc-row">
+                    <span>Admin Fee (Laba):</span>
+                    <span id="calcTarikAdmin" style="color: var(--success); font-weight: 700;">Rp 0</span>
+                </div>
+                <div class="calc-row" style="border-top: 2px solid #0288d1; padding-top: 10px; margin-top: 5px;">
+                    <span style="font-weight: 700; color: var(--danger);">Total Keluar dari Kas:</span>
+                    <span id="calcTarikTotal" style="font-weight: 700; color: var(--danger); font-size: 18px;">Rp 0</span>
+                </div>
+                <div class="calc-row" style="color: var(--success); font-size: 16px; margin-top: 5px;">
+                    <span>💰 Laba Bersih:</span>
+                    <span id="calcTarikProfit" style="font-weight: 700;">Rp 0</span>
+                </div>
             </div>
             
             <div class="modal-footer">
@@ -1337,6 +1383,49 @@
         </div>
     </div>
 
+    <!-- Delete Cash Transaction Modal - BARU -->
+    <div class="modal" id="deleteCashModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <span class="modal-title">🗑️ Hapus Transaksi Kas</span>
+                <button class="close-btn" onclick="app.closeModal('deleteCashModal')">×</button>
+            </div>
+            
+            <div class="void-reason-box" style="background: #ffebee; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--danger);">
+                <div class="void-reason-title" style="font-weight: 700; color: var(--danger); margin-bottom: 5px; font-size: 14px;">⚠️ Transaksi kas akan dihapus!</div>
+                <div style="font-size: 13px; color: #666;">
+                    Kas akan disesuaikan (dikurangi jika kas masuk/topup, ditambah jika kas keluar/tarik tunai).
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Alasan Penghapusan *</label>
+                <select id="deleteCashReason">
+                    <option value="salah_input">Salah Input Nominal</option>
+                    <option value="double_input">Double Input</option>
+                    <option value="batal_transaksi">Transaksi Dibatalkan</option>
+                    <option value="lainnya">Lainnya</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Keterangan Tambahan</label>
+                <textarea id="deleteCashNote" rows="3" placeholder="Jelaskan alasan penghapusan..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Password Konfirmasi *</label>
+                <input type="password" id="deleteCashPassword" placeholder="Masukkan password" value="admin">
+                <div style="font-size: 11px; color: #999; margin-top: 5px;">Default: admin</div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="app.closeModal('deleteCashModal')">Tutup</button>
+                <button class="btn btn-danger" onclick="app.confirmDeleteCashTransaction()" id="btnConfirmDeleteCash">🗑️ Hapus Transaksi</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Transaction Detail Modal -->
     <div class="modal" id="transactionDetailModal">
         <div class="modal-content" style="max-width: 450px;">
@@ -1629,6 +1718,9 @@
             isSaving: false,
             
             productViewMode: 'grid', // 'grid' atau 'list'
+
+            // Property untuk delete cash transaction
+            currentDeleteCashTransaction: null,
 
             init() {
                 console.log('Initializing Hifzi Cell...');
@@ -3440,25 +3532,47 @@ ${header.note}
                 }
             },
 
+            // ==================== TARIK TUNAI DENGAN ADMIN FEE - BARU ====================
             openTarikTunaiModal() {
                 document.getElementById('tarikNominal').value = '';
+                document.getElementById('tarikAdminFee').value = '';
                 document.getElementById('tarikNote').value = '';
+                this.updateTarikTunaiCalculation();
                 this.openModal('tarikTunaiModal');
+            },
+
+            updateTarikTunaiCalculation() {
+                const nominal = parseInt(document.getElementById('tarikNominal').value) || 0;
+                const adminFee = parseInt(document.getElementById('tarikAdminFee').value) || 0;
+                const totalKeluar = nominal + adminFee;
+
+                document.getElementById('calcTarikNominal').textContent = 'Rp ' + this.formatNumber(nominal);
+                document.getElementById('calcTarikAdmin').textContent = 'Rp ' + this.formatNumber(adminFee);
+                document.getElementById('calcTarikTotal').textContent = 'Rp ' + this.formatNumber(totalKeluar);
+                document.getElementById('calcTarikProfit').textContent = 'Rp ' + this.formatNumber(adminFee);
             },
 
             async prosesTarikTunai() {
                 if (this.isSaving) return;
                 
                 const nominal = parseInt(document.getElementById('tarikNominal').value) || 0;
+                const adminFee = parseInt(document.getElementById('tarikAdminFee').value) || 0;
                 const note = document.getElementById('tarikNote').value || 'Tarik Tunai';
                 
                 if (nominal <= 0) {
                     this.showToast('Nominal tarik tunai wajib diisi!');
                     return;
                 }
+
+                if (adminFee < 0) {
+                    this.showToast('Admin fee tidak valid!');
+                    return;
+                }
                 
-                if (nominal > this.data.settings.currentCash) {
-                    this.showToast('Kas di laci tidak mencukupi!');
+                const totalKeluar = nominal + adminFee;
+                
+                if (totalKeluar > this.data.settings.currentCash) {
+                    this.showToast('Kas di laci tidak mencukupi untuk total keluar!');
                     return;
                 }
                 
@@ -3466,16 +3580,48 @@ ${header.note}
                 this.isSaving = true;
 
                 try {
-                    this.data.settings.currentCash -= nominal;
+                    // Kurangi kas: total yang keluar (nominal + admin fee)
+                    this.data.settings.currentCash -= totalKeluar;
                     
+                    // Catat transaksi kas
                     this.data.cashTransactions.push({
                         id: Date.now(),
                         date: new Date().toISOString(),
                         type: 'out',
-                        amount: nominal,
+                        amount: totalKeluar,
                         category: 'tarik_tunai',
-                        note: note
+                        note: `${note}${adminFee > 0 ? ' (Termasuk admin Rp ' + this.formatNumber(adminFee) + ')' : ''}`,
+                        details: {
+                            nominal: nominal,
+                            adminFee: adminFee
+                        }
                     });
+
+                    // Buat transaksi penjualan untuk admin fee (sebagai laba)
+                    if (adminFee > 0) {
+                        const tarikFeeTransaction = {
+                            id: Date.now() + 1,
+                            date: new Date().toISOString(),
+                            items: [{
+                                id: 'tarik_tunai_fee',
+                                name: `Admin Fee Tarik Tunai`,
+                                price: adminFee,
+                                cost: 0, // Modal 0 karena ini fee
+                                qty: 1
+                            }],
+                            total: adminFee,
+                            profit: adminFee, // Semua admin fee adalah laba
+                            paymentMethod: 'cash',
+                            received: adminFee,
+                            change: 0,
+                            status: 'completed',
+                            transactionNumber: 'FEE-TARIK-' + Date.now().toString().slice(-8),
+                            type: 'tarik_tunai_fee',
+                            note: `Fee dari Tarik Tunai`
+                        };
+                        
+                        this.data.transactions.push(tarikFeeTransaction);
+                    }
                     
                     await this.saveDataAsync();
                     this.closeModal('tarikTunaiModal');
@@ -3483,7 +3629,13 @@ ${header.note}
                     this.updateCashStats();
                     this.renderCashTransactions();
                     
-                    this.showToast(`Tarik tunai berhasil! Rp ${this.formatNumber(nominal)} keluar dari laci.`);
+                    let msg = `Tarik tunai berhasil! Rp ${this.formatNumber(nominal)} diberikan ke customer`;
+                    if (adminFee > 0) {
+                        msg += `, Laba: Rp ${this.formatNumber(adminFee)}`;
+                    }
+                    msg += `, Total keluar dari kas: Rp ${this.formatNumber(totalKeluar)}`;
+                    
+                    this.showToast(msg);
                 } finally {
                     this.setLoading(false, 'tarikTunaiModal');
                     this.isSaving = false;
@@ -3536,6 +3688,9 @@ ${header.note}
                         }
                     } else if (t.category === 'tarik_tunai') {
                         typeLabel = ' (Tarik Tunai)';
+                        if (t.details && t.details.adminFee > 0) {
+                            typeLabel += ` [Fee: Rp ${this.formatNumber(t.details.adminFee)}]`;
+                        }
                     }
                     
                     item.innerHTML = `
@@ -3543,12 +3698,100 @@ ${header.note}
                             <div class="transaction-title">${t.note || t.category}${typeLabel}</div>
                             <div class="transaction-meta">${new Date(t.date).toLocaleTimeString('id-ID')}</div>
                         </div>
-                        <div class="transaction-amount ${amountClass}">
-                            ${prefix} Rp ${this.formatNumber(t.amount)}
+                        <div style="display: flex; align-items: center;">
+                            <div class="transaction-amount ${amountClass}">
+                                ${prefix} Rp ${this.formatNumber(t.amount)}
+                            </div>
+                            <button class="delete-cash-btn" onclick="event.stopPropagation(); app.openDeleteCashModal(${t.id})" title="Hapus Transaksi Kas">🗑️</button>
                         </div>
                     `;
                     container.appendChild(item);
                 });
+            },
+
+            // ==================== DELETE CASH TRANSACTION - BARU ====================
+            openDeleteCashModal(transactionId) {
+                const t = this.data.cashTransactions.find(tr => tr.id === transactionId);
+                if (!t) return;
+                
+                this.currentDeleteCashTransaction = t;
+                
+                document.getElementById('deleteCashReason').value = 'salah_input';
+                document.getElementById('deleteCashNote').value = '';
+                document.getElementById('deleteCashPassword').value = '';
+                
+                this.openModal('deleteCashModal');
+            },
+
+            async confirmDeleteCashTransaction() {
+                if (this.isSaving) return;
+                
+                if (!this.currentDeleteCashTransaction) return;
+                
+                const reason = document.getElementById('deleteCashReason').value;
+                const note = document.getElementById('deleteCashNote').value;
+                const password = document.getElementById('deleteCashPassword').value;
+                
+                if (!reason) {
+                    this.showToast('Alasan penghapusan wajib diisi!');
+                    return;
+                }
+                
+                if (password !== 'admin') {
+                    this.showToast('Password salah! (default: admin)');
+                    return;
+                }
+                
+                this.setLoading(true, 'deleteCashModal');
+                this.isSaving = true;
+
+                try {
+                    const t = this.currentDeleteCashTransaction;
+                    
+                    // Sesuaikan kas berdasarkan tipe transaksi
+                    if (t.type === 'in' || t.type === 'modal_in' || t.type === 'topup') {
+                        // Jika kas masuk, kurangi kas
+                        this.data.settings.currentCash -= t.amount;
+                    } else if (t.type === 'out') {
+                        // Jika kas keluar, tambahkan kembali ke kas
+                        this.data.settings.currentCash += t.amount;
+                    }
+                    
+                    // Hapus transaksi dari array
+                    this.data.cashTransactions = this.data.cashTransactions.filter(
+                        tr => tr.id !== t.id
+                    );
+                    
+                    // Jika ada admin fee yang tercatat sebagai transaksi penjualan, hapus juga
+                    if (t.details && t.details.adminFee > 0) {
+                        // Cari dan hapus transaksi fee terkait
+                        const feeTransactionTypes = ['topup_fee', 'tarik_tunai_fee'];
+                        this.data.transactions = this.data.transactions.filter(tr => {
+                            // Hapus transaksi fee yang dibuat pada waktu yang sama (dalam 2 detik)
+                            if (feeTransactionTypes.includes(tr.type) && tr.status === 'completed') {
+                                const trTime = new Date(tr.date).getTime();
+                                const cashTime = new Date(t.date).getTime();
+                                const diff = Math.abs(trTime - cashTime);
+                                if (diff < 2000) { // Dalam 2 detik
+                                    return false; // Hapus transaksi fee ini
+                                }
+                            }
+                            return true;
+                        });
+                    }
+                    
+                    await this.saveDataAsync();
+                    this.closeModal('deleteCashModal');
+                    this.updateCashDisplay();
+                    this.updateCashStats();
+                    this.renderCashTransactions();
+                    
+                    this.showToast('Transaksi kas berhasil dihapus! Kas telah disesuaikan.');
+                    this.currentDeleteCashTransaction = null;
+                } finally {
+                    this.setLoading(false, 'deleteCashModal');
+                    this.isSaving = false;
+                }
             },
 
             updateCashStats() {
@@ -3593,6 +3836,7 @@ ${header.note}
                     
                     let amountClass = t.type;
                     let prefix = '+';
+                    let typeLabel = '';
                     
                     if (t.type === 'in' || t.type === 'modal_in' || t.type === 'topup') {
                         amountClass = 'income';
@@ -3601,13 +3845,30 @@ ${header.note}
                         amountClass = 'expense';
                     }
                     
+                    if (t.type === 'modal_in') {
+                        typeLabel = ' (Modal)';
+                    } else if (t.type === 'topup') {
+                        typeLabel = ' (Top Up)';
+                        if (t.details && t.details.adminFee > 0) {
+                            typeLabel += ` [Fee: Rp ${this.formatNumber(t.details.adminFee)}]`;
+                        }
+                    } else if (t.category === 'tarik_tunai') {
+                        typeLabel = ' (Tarik Tunai)';
+                        if (t.details && t.details.adminFee > 0) {
+                            typeLabel += ` [Fee: Rp ${this.formatNumber(t.details.adminFee)}]`;
+                        }
+                    }
+                    
                     item.innerHTML = `
                         <div class="transaction-info">
-                            <div class="transaction-title">${t.note || t.category}</div>
+                            <div class="transaction-title">${t.note || t.category}${typeLabel}</div>
                             <div class="transaction-meta">${new Date(t.date).toLocaleTimeString('id-ID')}</div>
                         </div>
-                        <div class="transaction-amount ${amountClass}">
-                            ${prefix} Rp ${this.formatNumber(t.amount)}
+                        <div style="display: flex; align-items: center;">
+                            <div class="transaction-amount ${amountClass}">
+                                ${prefix} Rp ${this.formatNumber(t.amount)}
+                            </div>
+                            <button class="delete-cash-btn" onclick="event.stopPropagation(); app.openDeleteCashModal(${t.id})" title="Hapus Transaksi Kas">🗑️</button>
                         </div>
                     `;
                     container.appendChild(item);
