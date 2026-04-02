@@ -81,4 +81,44 @@
             <div class="card">
                 <div class="table-responsive">
                     <table class="data-table" id="user-table">
-                        <thead><tr><th>Nama</th><th>Email</th><th>Role</th>
+                        <thead><tr><th>Nama</th><th>Email</th><th>Role</th>th>Status</th><th>Terakhir Login</th><th>Aksi</th></tr></thead>
+                        <tbody id="user-list"><tr class="loading-row"><td colspan="6" class="text-center"><div class="spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="modal-user">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="modal-title"><i class="fas fa-user-plus"></i> Tambah User</h3><button class="btn-close" onclick="closeModal('modal-user')"><i class="fas fa-times"></i></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="user-id">
+                <div class="form-group"><label>Nama Lengkap</label><input type="text" id="user-nama" class="form-control" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="user-email" class="form-control" required></div>
+                <div class="form-group"><label>Password <small id="password-hint">(Kosongkan jika tidak diubah)</small></label><input type="password" id="user-password" class="form-control"></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="user-role-select" class="form-control">
+                        <option value="kasir">Kasir</option>
+                        <option value="admin">Admin</option>
+                        <option value="owner">Owner</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="user-active" checked> Aktif</label></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-user')">Batal</button>
+                <button class="btn btn-primary" id="btn-simpan-user"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/config/firebase-config.js"></script>
+    <script src="../js/utils/formatters.js"></script>
+    <script src="../js/utils/date-helper.js"></script>
+    <script src="../js/utils/session-manager.js"></script>
+    <script src="../js/auth/role-check.js"></script>
+    <script src="../js/auth/logout.js"></script>
+    <script src="../js/modules/user/user-main.js"></script>
+</body>
+</html>
