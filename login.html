@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <!-- ✅ CONFIG INLINE - Tidak pakai file external -->
+    <!-- Firebase Config Inline -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD9XyvgofyFyX5aUMARcA_GO-N2Tcw725Q",
@@ -74,6 +74,14 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
+        
+        // ✅ CEK SESSION - Jika sudah login, redirect ke dashboard
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                console.log("User sudah login:", user.email);
+                window.location.replace('./dashboard.html');
+            }
+        });
     </script>
     
     <script>
@@ -93,7 +101,8 @@
             
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                window.location.href = './dashboard.html';
+                // ✅ Gunakan replace() agar tidak bisa kembali ke login
+                window.location.replace('./dashboard.html');
             } catch (error) {
                 document.getElementById('error-message').textContent = error.message;
                 btnLogin.disabled = false;
