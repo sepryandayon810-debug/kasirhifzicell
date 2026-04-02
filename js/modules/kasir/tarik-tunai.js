@@ -64,4 +64,30 @@ function simpanTarik() {
         harga_modal: tarikData.nominal, // Modal keluar = nominal
         qty: 1,
         jenis: 'tarik',
-        keterangan: `Nominal: ${tarikData.nominal}, Fee: ${tarikData.fee}, Diterima: ${tarikData
+        keterangan: `Nominal: ${tarikData.nominal}, Fee: ${tarikData.fee}, Diterima: ${tarikData.total}`,
+        nominal: tarikData.nominal,
+        fee: tarikData.fee
+    };
+    
+    // Tambah ke keranjang global
+    keranjang.push(itemTarik);
+    renderKeranjang();
+    
+    // Reset form
+    document.getElementById('tarik-nominal').value = '';
+    document.getElementById('tarik-fee-input').value = '0';
+    document.getElementById('tarik-total').textContent = 'Rp 0';
+    tarikData = { nominal: 0, fee: 0, total: 0 };
+    
+    // Tutup modal
+    closeModal('modal-tarik');
+    
+    // Reset jenis transaksi ke penjualan
+    document.querySelectorAll('.jenis-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector('[data-jenis="penjualan"]').classList.add('active');
+    currentJenis = 'penjualan';
+    
+    showToast('Tarik tunai ditambahkan ke keranjang', 'success');
+}
