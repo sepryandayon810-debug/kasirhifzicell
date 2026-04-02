@@ -11,14 +11,13 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        /* ===== LIGHT MODE (Default) ===== */
         :root {
-            /* Warna lebih terang dan variatif */
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
             --bg-card: #ffffff;
             --bg-hover: #f1f5f9;
             
-            /* Accent colors - lebih terang */
             --accent-purple: #8b5cf6;
             --accent-purple-light: #a78bfa;
             --accent-blue: #3b82f6;
@@ -40,14 +39,55 @@
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
             --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            
+            --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #fff1f2 100%);
+            --sidebar-header-bg: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            --kas-calc-bg: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 50%, #dbeafe 100%);
+            --kas-calc-border: #c4b5fd;
+        }
+        
+        /* ===== DARK MODE ===== */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            
+            --accent-purple: #a78bfa;
+            --accent-purple-light: #c4b5fd;
+            --accent-blue: #60a5fa;
+            --accent-cyan: #22d3ee;
+            --accent-teal: #2dd4bf;
+            --accent-green: #34d399;
+            --accent-emerald: #6ee7b7;
+            --accent-red: #f87171;
+            --accent-rose: #fda4af;
+            --accent-orange: #fb923c;
+            --accent-amber: #fcd34d;
+            --accent-pink: #f472b6;
+            --accent-indigo: #818cf8;
+            --accent-violet: #a78bfa;
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.4);
+            
+            --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+            --sidebar-header-bg: linear-gradient(135deg, #3730a3, #581c87);
+            --kas-calc-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e293b 100%);
+            --kas-calc-border: #4c1d95;
         }
         
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #fff1f2 100%);
+            background: var(--gradient-bg);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
+            transition: all 0.3s ease;
         }
         
         /* SIDEBAR - Dengan Dropdown */
@@ -61,7 +101,7 @@
             border-right: 1px solid var(--border);
             overflow-y: auto;
             z-index: 100;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, background 0.3s ease;
             box-shadow: var(--shadow-lg);
         }
         .sidebar.closed { transform: translateX(-100%); }
@@ -72,7 +112,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            background: var(--sidebar-header-bg);
         }
         .sidebar-header .logo {
             width: 42px;
@@ -111,7 +151,7 @@
             background: var(--bg-hover);
         }
         .nav-section-header.active {
-            background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
         }
         
         .nav-section-title-group {
@@ -133,6 +173,11 @@
         .nav-section.transaksi .nav-section-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--accent-emerald); }
         .nav-section.lainnya .nav-section-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: var(--accent-pink); }
         .nav-section.pengaturan .nav-section-icon { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: var(--accent-purple); }
+        
+        [data-theme="dark"] .nav-section.utama .nav-section-icon { background: rgba(59,130,246,0.2); }
+        [data-theme="dark"] .nav-section.transaksi .nav-section-icon { background: rgba(16,185,129,0.2); }
+        [data-theme="dark"] .nav-section.lainnya .nav-section-icon { background: rgba(236,72,153,0.2); }
+        [data-theme="dark"] .nav-section.pengaturan .nav-section-icon { background: rgba(139,92,246,0.2); }
         
         .nav-section-title {
             font-size: 14px;
@@ -209,9 +254,9 @@
             align-items: center;
             gap: 12px;
             padding: 12px;
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05));
             border-radius: 12px;
-            border: 1px solid #bae6fd;
+            border: 1px solid var(--border);
         }
         .user-avatar {
             width: 40px;
@@ -262,7 +307,7 @@
         .mobile-nav a i { font-size: 20px; }
         .mobile-nav a.active { 
             color: var(--accent-indigo); 
-            background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
         }
         
         /* OVERLAY */
@@ -270,7 +315,7 @@
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15,23,42,0.4);
+            background: rgba(15,23,42,0.6);
             backdrop-filter: blur(4px);
             z-index: 99;
         }
@@ -285,13 +330,13 @@
         }
         .main-content.expanded { margin-left: 0; }
         
-        /* HEADER - Lebih terang */
+        /* HEADER */
         .main-header {
-            background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.02));
+            background: var(--bg-secondary);
             border-radius: 20px;
             padding: 24px;
             margin-bottom: 28px;
-            border: 1px solid rgba(99,102,241,0.1);
+            border: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -302,7 +347,7 @@
         .header-left { display: flex; align-items: center; gap: 16px; }
         .menu-toggle {
             display: flex;
-            background: white;
+            background: var(--bg-hover);
             border: 1px solid var(--border);
             color: var(--text-primary);
             font-size: 18px;
@@ -310,10 +355,8 @@
             padding: 12px 16px;
             border-radius: 12px;
             transition: all 0.3s;
-            box-shadow: var(--shadow);
         }
         .menu-toggle:hover {
-            background: var(--bg-hover);
             border-color: var(--accent-indigo);
             color: var(--accent-indigo);
         }
@@ -327,11 +370,13 @@
         }
         .page-title p { color: var(--text-secondary); font-size: 14px; }
         .header-actions { display: flex; gap: 12px; }
-        .btn-icon {
+        
+        /* DARK MODE TOGGLE BUTTON */
+        .btn-darkmode {
             width: 44px;
             height: 44px;
             border-radius: 12px;
-            background: white;
+            background: var(--bg-hover);
             border: 1px solid var(--border);
             color: var(--text-secondary);
             display: flex;
@@ -339,11 +384,41 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: var(--shadow);
+            font-size: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-darkmode:hover {
+            background: var(--accent-indigo);
+            color: white;
+            border-color: var(--accent-indigo);
+            transform: translateY(-2px);
+        }
+        .btn-darkmode i {
+            transition: all 0.3s ease;
+        }
+        .btn-darkmode .fa-sun { display: none; }
+        .btn-darkmode .fa-moon { display: block; }
+        
+        [data-theme="dark"] .btn-darkmode .fa-sun { display: block; }
+        [data-theme="dark"] .btn-darkmode .fa-moon { display: none; }
+        
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
         }
         .btn-icon:hover {
-            background: var(--bg-hover);
-            color: var(--accent-indigo);
+            background: var(--accent-indigo);
+            color: white;
             border-color: var(--accent-indigo);
             transform: translateY(-2px);
         }
@@ -375,7 +450,7 @@
             font-size: 18px;
         }
         
-        /* ===== RINGKASAN HARI INI (3 CARD BESAR) - Warna lebih variatif ===== */
+        /* ===== RINGKASAN HARI INI ===== */
         .summary-section { margin-bottom: 28px; }
         .summary-grid {
             display: grid;
@@ -383,7 +458,7 @@
             gap: 24px;
         }
         .summary-card {
-            background: white;
+            background: var(--bg-card);
             border-radius: 24px;
             padding: 32px;
             border: 1px solid var(--border);
@@ -404,7 +479,6 @@
             right: 0;
             height: 5px;
         }
-        /* Warna berbeda untuk setiap card */
         .summary-card.penjualan::before { background: linear-gradient(90deg, var(--accent-indigo), var(--accent-purple)); }
         .summary-card.laba::before { background: linear-gradient(90deg, var(--accent-emerald), var(--accent-teal)); }
         .summary-card.transaksi::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
@@ -429,15 +503,15 @@
             font-size: 30px;
         }
         .summary-card.penjualan .summary-icon-large { 
-            background: linear-gradient(135deg, #e0e7ff, #c7d2fe); 
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)); 
             color: var(--accent-indigo); 
         }
         .summary-card.laba .summary-icon-large { 
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0); 
+            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(20,184,166,0.1)); 
             color: var(--accent-emerald); 
         }
         .summary-card.transaksi .summary-icon-large { 
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe); 
+            background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(6,182,212,0.1)); 
             color: var(--accent-blue); 
         }
         
@@ -456,7 +530,7 @@
         .summary-card.laba .summary-value-large { color: var(--accent-emerald); }
         .summary-card.transaksi .summary-value-large { color: var(--accent-blue); }
         
-        /* ===== STATISTIK KAS (6 ITEM) - Warna lebih variatif ===== */
+        /* ===== STATISTIK KAS ===== */
         .statistik-section { margin: 28px 0; }
         .statistik-grid {
             display: grid;
@@ -464,7 +538,7 @@
             gap: 20px;
         }
         .statistik-item {
-            background: white;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 24px;
             border: 1px solid var(--border);
@@ -489,15 +563,12 @@
             font-size: 24px;
             flex-shrink: 0;
         }
-        /* Warna icon berbeda-beda */
-        .statistik-icon.purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: var(--accent-purple); }
-        .statistik-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--accent-emerald); }
-        .statistik-icon.red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--accent-rose); }
-        .statistik-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--accent-blue); }
-        .statistik-icon.orange { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: var(--accent-orange); }
-        .statistik-icon.pink { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: var(--accent-pink); }
-        .statistik-icon.teal { background: linear-gradient(135deg, #ccfbf1, #99f6e4); color: var(--accent-teal); }
-        .statistik-icon.amber { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706; }
+        .statistik-icon.purple { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(167,139,250,0.1)); color: var(--accent-purple); }
+        .statistik-icon.green { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.1)); color: var(--accent-emerald); }
+        .statistik-icon.red { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(251,113,133,0.1)); color: var(--accent-rose); }
+        .statistik-icon.blue { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(96,165,250,0.1)); color: var(--accent-blue); }
+        .statistik-icon.orange { background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(251,146,60,0.1)); color: var(--accent-orange); }
+        .statistik-icon.pink { background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(244,114,182,0.1)); color: var(--accent-pink); }
         
         .statistik-content { flex: 1; }
         .statistik-label {
@@ -512,11 +583,11 @@
             color: var(--text-primary);
         }
         
-        /* ===== PERHITUNGAN KAS - Lebih terang ===== */
+        /* ===== PERHITUNGAN KAS ===== */
         .kas-calc-section {
-            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 50%, #dbeafe 100%);
+            background: var(--kas-calc-bg);
             border-radius: 24px;
-            border: 1px solid #c4b5fd;
+            border: 1px solid var(--kas-calc-border);
             padding: 32px;
             margin: 28px 0;
             box-shadow: var(--shadow);
@@ -533,7 +604,7 @@
             width: 48px;
             height: 48px;
             border-radius: 14px;
-            background: white;
+            background: var(--bg-card);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -561,7 +632,7 @@
             transition: all 0.3s ease;
         }
         .kas-formula-row:hover {
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.05);
         }
         .kas-formula-row .label {
             color: var(--text-secondary);
@@ -575,7 +646,7 @@
             font-family: 'SF Mono', monospace;
         }
         .kas-formula-row.total {
-            background: white;
+            background: var(--bg-card);
             margin-top: 8px;
             padding: 20px 16px;
             border-radius: 16px;
@@ -602,8 +673,8 @@
             font-weight: 700;
             font-size: 14px;
         }
-        .operator.plus { background: #d1fae5; color: var(--accent-emerald); }
-        .operator.minus { background: #fee2e2; color: var(--accent-rose); }
+        .operator.plus { background: rgba(16,185,129,0.2); color: var(--accent-emerald); }
+        .operator.minus { background: rgba(239,68,68,0.2); color: var(--accent-rose); }
         
         /* FOOTER */
         .dashboard-footer {
@@ -756,13 +827,18 @@
             </div>
             
             <div class="header-actions">
+                <!-- DARK MODE TOGGLE -->
+                <button class="btn-darkmode" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
                 <button class="btn-icon" onclick="refreshData()" title="Refresh">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
         </header>
 
-        <!-- ===== RINGKASAN HARI INI (3 CARD BESAR) ===== -->
+        <!-- ===== RINGKASAN HARI INI ===== -->
         <section class="summary-section">
             <div class="section-header">
                 <h2 class="section-title"><i class="fas fa-chart-line"></i> Ringkasan Hari Ini</h2>
@@ -795,7 +871,7 @@
             </div>
         </section>
 
-        <!-- ===== STATISTIK KAS (6 ITEM) ===== -->
+        <!-- ===== STATISTIK KAS ===== -->
         <section class="statistik-section">
             <div class="section-header">
                 <h2 class="section-title"><i class="fas fa-th-large"></i> Statistik Kas</h2>
@@ -919,6 +995,35 @@
         const auth = firebase.auth();
         const database = firebase.database();
 
+        // ===== DARK MODE FUNCTIONS =====
+        function initDarkMode() {
+            const savedTheme = localStorage.getItem('webpos-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateMetaThemeColor(savedTheme);
+        }
+        
+        function toggleDarkMode() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('webpos-theme', newTheme);
+            updateMetaThemeColor(newTheme);
+            
+            // Add animation effect
+            document.body.style.transition = 'all 0.5s ease';
+            setTimeout(() => {
+                document.body.style.transition = 'all 0.3s ease';
+            }, 500);
+        }
+        
+        function updateMetaThemeColor(theme) {
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#6366f1');
+            }
+        }
+
         // Dropdown Toggle Function
         function toggleDropdown(section) {
             const dropdown = document.getElementById(`dropdown-${section}`);
@@ -929,12 +1034,10 @@
             arrow.classList.toggle('rotate');
             header.classList.toggle('active');
             
-            // Save state to localStorage
             const isOpen = dropdown.classList.contains('open');
             localStorage.setItem(`dropdown-${section}`, isOpen);
         }
         
-        // Restore dropdown states on load
         function restoreDropdowns() {
             ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
                 const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
@@ -997,7 +1100,6 @@
             const today = getToday();
             
             try {
-                // ===== DATA TRANSAKSI =====
                 const transaksiSnap = await database.ref(`transaksi/${today}`).once('value');
                 let penjualan = 0, transaksi = 0, laba = 0;
                 let uangMasuk = 0, uangKeluar = 0;
@@ -1034,17 +1136,14 @@
                     });
                 }
 
-                // ===== MODAL HARIAN =====
                 const modalSnap = await database.ref(`modal_harian/${today}`).once('value');
                 const modalAwal = modalSnap.val()?.jumlah || 0;
 
-                // ===== PEMBELIAN (Uang Keluar) =====
                 const beliSnap = await database.ref(`pembelian/${today}`).once('value');
                 let pembelian = 0;
                 beliSnap.forEach(c => pembelian += c.val().total || 0);
                 uangKeluar += pembelian;
 
-                // ===== KAS MANAGEMENT =====
                 const kasSnap = await database.ref(`kas_management/${today}`).once('value');
                 if (kasSnap.exists()) {
                     kasSnap.forEach(child => {
@@ -1059,10 +1158,8 @@
                     });
                 }
 
-                // ===== PERHITUNGAN KAS =====
                 const sisaKas = modalAwal + uangMasuk - uangKeluar + topUp - tarikTunai + hutangMasuk - hutangBayar;
 
-                // ===== UPDATE UI =====
                 updateElement('total-penjualan', formatRupiah(penjualan));
                 updateElement('total-laba', formatRupiah(laba));
                 updateElement('total-transaksi', transaksi + ' Transaksi');
@@ -1107,6 +1204,7 @@
             updateElement('user-name', email);
             updateElement('user-avatar', email.charAt(0).toUpperCase());
             
+            initDarkMode(); // Initialize dark mode on load
             restoreDropdowns();
             updateDate();
             loadDashboardData();
