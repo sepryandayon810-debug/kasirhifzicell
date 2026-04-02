@@ -208,3 +208,33 @@ style.textContent = `
     .error { border-color: #dc3545 !important; }
 `;
 document.head.appendChild(style);
+
+// Tambahkan di AKHIR file utils.js
+
+// ============================================
+// ALIAS UNTUK KOMPATIBILITAS
+// ============================================
+
+/**
+ * Alias untuk showNotification (dipanggil sebagai showToast di kasir-main.js)
+ */
+function showToast(message, type = 'info', duration = 3000) {
+    return showNotification(message, type, duration);
+}
+
+/**
+ * Alias untuk generateId dengan prefix TRX
+ */
+function generateKodeTransaksi() {
+    const now = new Date();
+    const date = now.toISOString().slice(0,10).replace(/-/g, '');
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `TRX-${date}-${random}`;
+}
+
+/**
+ * Alias untuk formatRupiah dengan prefix default
+ */
+function formatCurrency(angka) {
+    return formatRupiah(angka, 'Rp ');
+}
