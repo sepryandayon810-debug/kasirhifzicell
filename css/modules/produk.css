@@ -1,0 +1,699 @@
+/* ============================================
+   PRODUK MODULE STYLES
+   ============================================ */
+
+/* Toolbar */
+.produk-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    padding: 15px;
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.toolbar-left {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.toolbar-center {
+    flex: 1;
+    max-width: 400px;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-box-produk {
+    position: relative;
+    width: 100%;
+}
+
+.search-box-produk i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.search-box-produk input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+.search-box-produk input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    gap: 5px;
+}
+
+.view-toggle .view-btn {
+    padding: 8px 12px;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.view-toggle .view-btn.active,
+.view-toggle .view-btn:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Produk Container */
+.produk-main-container {
+    min-height: 400px;
+}
+
+.produk-main-container.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.produk-main-container.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Produk Card (Grid) */
+.produk-card-manajemen {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.produk-card-manajemen:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    border-color: var(--primary-color);
+}
+
+.produk-card-manajemen.hidden-produk {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+}
+
+.produk-card-manajemen .produk-image-container {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+}
+
+.produk-card-manajemen .produk-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.produk-card-manajemen .produk-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: var(--text-secondary);
+    background: linear-gradient(135deg, var(--bg-dark), var(--bg-card));
+}
+
+.produk-card-manajemen .produk-status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.produk-card-manajemen .produk-status-badge.aktif {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--success-color);
+}
+
+.produk-card-manajemen .produk-status-badge.nonaktif {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: var(--text-secondary);
+}
+
+.produk-card-manajemen .produk-info {
+    padding: 15px;
+}
+
+.produk-card-manajemen .produk-kode {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.produk-card-manajemen .produk-nama {
+    font-weight: 600;
+    font-size: var(--font-normal);
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.produk-card-manajemen .produk-harga {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.produk-card-manajemen .harga-jual {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: var(--font-large);
+}
+
+.produk-card-manajemen .harga-modal {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.produk-card-manajemen .produk-stok {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.produk-card-manajemen .stok-value {
+    font-weight: 600;
+}
+
+.produk-card-manajemen .stok-value.menipis {
+    color: var(--warning-color);
+}
+
+.produk-card-manajemen .stok-value.habis {
+    color: var(--danger-color);
+}
+
+.produk-card-manajemen .produk-actions {
+    display: flex;
+    gap: 5px;
+    padding: 10px 15px;
+    background-color: var(--bg-dark);
+    border-top: 1px solid var(--border-color);
+}
+
+.produk-card-manajemen .btn-action {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: var(--font-small);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.3s;
+}
+
+.produk-card-manajemen .btn-action.edit {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--info-color);
+}
+
+.produk-card-manajemen .btn-action.edit:hover {
+    background-color: var(--info-color);
+    color: white;
+}
+
+.produk-card-manajemen .btn-action.delete {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.produk-card-manajemen .btn-action.delete:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Produk List Item */
+.produk-list-item-manajemen {
+    display: grid;
+    grid-template-columns: 60px 2fr 1fr 1fr 100px 150px;
+    gap: 15px;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.produk-list-item-manajemen:hover {
+    border-color: var(--primary-color);
+}
+
+.produk-list-item-manajemen.hidden-produk {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+}
+
+.produk-list-item-manajemen .list-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: var(--bg-dark);
+}
+
+.produk-list-item-manajemen .list-image-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-dark);
+    color: var(--text-secondary);
+    font-size: 24px;
+}
+
+.produk-list-item-manajemen .list-info h4 {
+    margin-bottom: 4px;
+    font-size: var(--font-normal);
+}
+
+.produk-list-item-manajemen .list-info p {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.produk-list-item-manajemen .list-harga .jual {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.produk-list-item-manajemen .list-harga .modal {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.produk-list-item-manajemen .list-stok {
+    text-align: center;
+}
+
+.produk-list-item-manajemen .list-stok .value {
+    font-weight: 700;
+    font-size: var(--font-large);
+}
+
+.produk-list-item-manajemen .list-stok .value.menipis {
+    color: var(--warning-color);
+}
+
+.produk-list-item-manajemen .list-stok .value.habis {
+    color: var(--danger-color);
+}
+
+.produk-list-item-manajemen .list-status {
+    text-align: center;
+}
+
+.produk-list-item-manajemen .list-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 25px;
+    padding: 15px;
+}
+
+.pagination-btn {
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover,
+.pagination-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal Styles Specific */
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-sm {
+    max-width: 400px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.row .col-4 {
+    grid-column: span 1;
+}
+
+.row .col-6 {
+    grid-column: span 1;
+}
+
+.form-group .required {
+    color: var(--danger-color);
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group .form-control {
+    flex: 1;
+}
+
+/* Image Upload */
+.image-upload-container {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.image-preview {
+    width: 150px;
+    height: 150px;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.image-preview.has-image {
+    border-style: solid;
+    border-color: var(--primary-color);
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview i {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.image-upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Kategori List */
+.kategori-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 15px;
+}
+
+.kategori-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.kategori-item .kategori-nama {
+    font-weight: 500;
+}
+
+.kategori-item .kategori-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Stok Masal */
+.stok-masal-info {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-left: 4px solid var(--info-color);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.stok-masal-info i {
+    color: var(--info-color);
+    margin-right: 8px;
+}
+
+.stok-masal-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.table-stok-masal {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-stok-masal th,
+.table-stok-masal td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-stok-masal th {
+    background-color: var(--bg-dark);
+    font-weight: 600;
+    color: var(--text-secondary);
+    position: sticky;
+    top: 0;
+}
+
+.table-stok-masal input {
+    width: 100px;
+    padding: 8px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.table-stok-masal input.perubahan-positif {
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.table-stok-masal input.perubahan-negatif {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* Import */
+.import-info {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-left: 4px solid var(--warning-color);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.file-upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.file-upload-area.dragover {
+    border-color: var(--primary-color);
+    background-color: rgba(99, 102, 241, 0.05);
+}
+
+.file-upload-area i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.file-upload-area p {
+    margin-bottom: 10px;
+}
+
+.import-preview {
+    margin-top: 20px;
+}
+
+.preview-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 15px 0;
+}
+
+/* Toggle List */
+.toggle-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.toggle-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.toggle-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+}
+
+.toggle-item .toggle-info {
+    flex: 1;
+}
+
+.toggle-item .toggle-status {
+    font-size: var(--font-small);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.toggle-item .toggle-status.aktif {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--success-color);
+}
+
+.toggle-item .toggle-status.nonaktif {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .produk-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .toolbar-center {
+        max-width: 100%;
+        order: -1;
+    }
+    
+    .toolbar-right {
+        justify-content: center;
+    }
+    
+    .produk-list-item-manajemen {
+        grid-template-columns: 60px 1fr auto;
+        gap: 10px;
+    }
+    
+    .produk-list-item-manajemen .list-harga,
+    .produk-list-item-manajemen .list-stok,
+    .produk-list-item-manajemen .list-status {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .produk-main-container.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .row {
+        grid-template-columns: 1fr;
+    }
+    
+    .row .col-4,
+    .row .col-6 {
+        grid-column: span 1;
+    }
+    
+    .image-upload-container {
+        flex-direction: column;
+        align-items: center;
+    }
+}
