@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPOS - Pembelian</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/modules/pembelian.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="../assets/images/logo.png" alt="Logo" id="sidebar-logo">
+                <div class="brand">
+                    <h3 id="nama-toko">WebPOS</h3>
+                    <small id="alamat-toko">Sistem POS</small>
+                </div>
+            </div>
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-search">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="menu-search" placeholder="Cari menu...">
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul id="menu-list">
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="kasir.html" class="menu-link">
+                        <i class="fas fa-cash-register"></i>
+                        <span>Kasir</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="produk.html" class="menu-link">
+                        <i class="fas fa-box"></i>
+                        <span>Produk</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin">
+                    <a href="pembelian.html" class="menu-link active">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Pembelian</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="riwayat-transaksi.html" class="menu-link">
+                        <i class="fas fa-history"></i>
+                        <span>Riwayat Transaksi</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="modal-harian.html" class="menu-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Modal Harian</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin">
+                    <a href="kas-management.html" class="menu-link">
+                        <i class="fas fa-wallet"></i>
+                        <span>Kas Management</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="hutang-piutang.html" class="menu-link">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Hutang Piutang</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin">
+                    <a href="laporan.html" class="menu-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin">
+                    <a href="saldo-telegram.html" class="menu-link">
+                        <i class="fab fa-telegram"></i>
+                        <span>Saldo Telegram</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="data-pelanggan.html" class="menu-link">
+                        <i class="fas fa-users"></i>
+                        <span>Data Pelanggan</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin">
+                    <a href="management-user.html" class="menu-link">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Management User</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="setting.html" class="menu-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Setting</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner,admin,kasir">
+                    <a href="printer-struk.html" class="menu-link">
+                        <i class="fas fa-print"></i>
+                        <span>Printer & Struk</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-role="owner" id="menu-reset">
+                    <a href="reset-data.html" class="menu-link">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Reset Data</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <span id="user-name">Loading...</span>
+                    <small id="user-role">Loading...</small>
+                </div>
+            </div>
+            <button class="btn-logout" id="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 id="page-title">Pembelian Barang</h2>
+            </div>
+            
+            <div class="header-center">
+                <div class="status-indicators">
+                    <div class="status-item">
+                        <span class="status-label">Total Pembelian Hari Ini</span>
+                        <span class="status-value" id="total-pembelian-hari">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Total Belanja Hari Ini</span>
+                        <span class="status-value" id="total-belanja-hari">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <button class="header-btn" id="cloud-status">
+                    <i class="fas fa-cloud"></i>
+                    <span>Online</span>
+                </button>
+                <div class="datetime" id="header-datetime">
+                    <span id="current-time">--:--</span>
+                    <small id="current-date">--/--/----</small>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pembelian Content -->
+        <div class="content-area">
+            <div class="pembelian-container">
+                <!-- Left Panel: Input Pembelian -->
+                <div class="pembelian-input-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-cart-plus"></i> Input Pembelian</h3>
+                    </div>
+                    
+                    <div class="supplier-section">
+                        <div class="form-group">
+                            <label>Supplier</label>
+                            <div class="input-group">
+                                <select id="select-supplier" class="form-control">
+                                    <option value="">Pilih Supplier</option>
+                                </select>
+                                <button class="btn btn-secondary" id="btn-tambah-supplier">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="produk-input-section">
+                        <div class="form-group">
+                            <label>Cari Produk</label>
+                            <div class="search-box-pembelian">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="cari-produk-pembelian" placeholder="Ketik nama/kode produk...">
+                                <div class="search-results" id="search-results"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>Harga Beli</label>
+                                <input type="number" id="harga-beli-input" class="form-control" placeholder="0" min="0">
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Jumlah</label>
+                                <input type="number" id="jumlah-input" class="form-control" placeholder="1" min="1" value="1">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" id="btn-tambah-item">
+                            <i class="fas fa-plus"></i> Tambah ke Keranjang
+                        </button>
+                    </div>
+                    
+                    <div class="keranjang-pembelian">
+                        <h4><i class="fas fa-shopping-basket"></i> Keranjang Pembelian</h4>
+                        <div class="keranjang-list" id="keranjang-list">
+                            <div class="keranjang-empty">
+                                <i class="fas fa-shopping-basket"></i>
+                                <p>Keranjang masih kosong</p>
+                            </div>
+                        </div>
+                        
+                        <div class="keranjang-summary">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span id="subtotal-pembelian">Rp 0</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Diskon</span>
+                                <input type="number" id="diskon-pembelian" class="form-control-sm" placeholder="0" value="0">
+                            </div>
+                            <div class="summary-row">
+                                <span>Pajak (%)</span>
+                                <input type="number" id="pajak-pembelian" class="form-control-sm" placeholder="0" value="0">
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span id="total-pembelian">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pembelian-actions">
+                        <div class="form-group">
+                            <label>Metode Pembayaran</label>
+                            <select id="metode-pembayaran" class="form-control">
+                                <option value="tunai">Tunai</option>
+                                <option value="transfer">Transfer Bank</option>
+                                <option value="hutang">Hutang (Tempo)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="jatuh-tempo-group" style="display: none;">
+                            <label>Jatuh Tempo</label>
+                            <input type="date" id="jatuh-tempo" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Catatan</label>
+                            <textarea id="catatan-pembelian" class="form-control" rows="2" placeholder="Catatan pembelian..."></textarea>
+                        </div>
+                        
+                        <button class="btn btn-success btn-block btn-lg" id="btn-simpan-pembelian">
+                            <i class="fas fa-save"></i> Simpan Pembelian
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Right Panel: Riwayat Pembelian -->
+                <div class="pembelian-history-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-history"></i> Riwayat Pembelian</h3>
+                        <div class="panel-actions">
+                            <input type="date" id="filter-tanggal" class="form-control-sm">
+                            <button class="btn btn-secondary btn-sm" id="btn-filter">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-list" id="history-list">
+                        <div class="loading-history">
+                            <div class="spinner"></div>
+                            <p>Memuat data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Tambah Supplier -->
+    <div class="modal" id="modal-supplier">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tambah Supplier Baru</h3>
+                <button class="btn-close" onclick="closeModal('modal-supplier')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Supplier <span class="required">*</span></label>
+                    <input type="text" id="supplier-nama" class="form-control" placeholder="Nama supplier">
+                </div>
+                <div class="form-group">
+                    <label>No. Telepon</label>
+                    <input type="text" id="supplier-telepon" class="form-control" placeholder="08123456789">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="supplier-email" class="form-control" placeholder="email@supplier.com">
+                </div>
+                <div class="form-group">
+                    <label>Alamat</label>
+                    <textarea id="supplier-alamat" class="form-control" rows="3" placeholder="Alamat lengkap"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modal-supplier')">Batal</button>
+                <button type="button" class="btn btn-primary" id="btn-simpan-supplier">Simpan Supplier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Pembelian -->
+    <div class="modal" id="modal-detail">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Detail Pembelian</h3>
+                <button class="btn-close" onclick="closeModal('modal-detail')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-info" id="detail-info">
+                    <!-- Info pembelian akan di-render di sini -->
+                </div>
+                <div class="detail-items">
+                    <table class="table-detail">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Harga Beli</th>
+                                <th>Jumlah</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-items-body">
+                            <!-- Items akan di-render di sini -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modal-detail')">Tutup</button>
+                <button type="button" class="btn btn-danger" id="btn-batalkan">
+                    <i class="fas fa-times-circle"></i> Batalkan Pembelian
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config/firebase-config.js"></script>
+    <script src="../js/utils/formatters.js"></script>
+    <script src="../js/utils/date-helper.js"></script>
+    <script src="../js/utils/session-manager.js"></script>
+    <script src="../js/auth/role-check.js"></script>
+    <script src="../js/auth/logout.js"></script>
+    
+    <!-- Pembelian Modules -->
+    <script src="../js/modules/pembelian/pembelian-main.js"></script>
+    <script src="../js/modules/pembelian/keranjang-pembelian.js"></script>
+    <script src="../js/modules/pembelian/supplier-manager.js"></script>
+    <script src="../js/modules/pembelian/riwayat-pembelian.js"></script>
+    <script src="../js/modules/pembelian/detail-pembelian.js"></script>
+</body>
+</html>
