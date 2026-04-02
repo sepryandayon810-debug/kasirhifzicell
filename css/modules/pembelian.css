@@ -1,0 +1,480 @@
+/* ============================================
+   PEMBELIAN MODULE STYLES
+   ============================================ */
+
+.pembelian-container {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 25px;
+    height: calc(100vh - 140px);
+}
+
+/* Input Panel */
+.pembelian-input-panel {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: var(--font-large);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.supplier-section {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.produk-input-section {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-box-pembelian {
+    position: relative;
+}
+
+.search-box-pembelian i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.search-box-pembelian input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+.search-box-pembelian input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: var(--bg-dark);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item .nama {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.search-result-item .info {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.keranjang-pembelian {
+    flex: 1;
+    padding: 15px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.keranjang-pembelian h4 {
+    margin: 0 0 15px 0;
+    font-size: var(--font-normal);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+}
+
+.keranjang-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.keranjang-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.keranjang-empty i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.keranjang-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.keranjang-item .item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.keranjang-item .item-nama {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+.keranjang-item .item-harga {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.keranjang-item .item-qty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.keranjang-item .qty-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.keranjang-item .qty-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.keranjang-item .qty-value {
+    min-width: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.keranjang-item .item-subtotal {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 80px;
+    text-align: right;
+}
+
+.keranjang-item .btn-remove {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.keranjang-item .btn-remove:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.keranjang-summary {
+    padding-top: 15px;
+    border-top: 2px solid var(--border-color);
+    margin-top: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: var(--font-normal);
+}
+
+.summary-row.total {
+    font-size: var(--font-large);
+    font-weight: 700;
+    color: var(--primary-color);
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.summary-row input {
+    width: 100px;
+    text-align: right;
+}
+
+.pembelian-actions {
+    padding: 15px 20px 20px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+}
+
+/* History Panel */
+.pembelian-history-panel {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pembelian-history-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.loading-history {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.pembelian-card {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pembelian-card:hover {
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.pembelian-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.pembelian-card .kode-pembelian {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: var(--font-normal);
+}
+
+.pembelian-card .tanggal {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.pembelian-card .supplier-info {
+    margin-bottom: 12px;
+}
+
+.pembelian-card .supplier-nama {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.pembelian-card .supplier-detail {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+}
+
+.pembelian-card .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.pembelian-card .total-belanja {
+    font-weight: 700;
+    font-size: var(--font-large);
+    color: var(--primary-color);
+}
+
+.pembelian-card .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.pembelian-card .status-lunas {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--success-color);
+}
+
+.pembelian-card .status-hutang {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: var(--warning-color);
+}
+
+.pembelian-card .status-dibatalkan {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: var(--danger-color);
+}
+
+/* Detail Modal */
+.detail-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-info-item label {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.detail-info-item value {
+    font-weight: 600;
+    font-size: var(--font-normal);
+}
+
+.table-detail {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-detail th,
+.table-detail td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-detail th {
+    background-color: var(--bg-dark);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.table-detail td {
+    color: var(--text-primary);
+}
+
+.table-detail .text-right {
+    text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .pembelian-container {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    
+    .pembelian-input-panel {
+        max-height: none;
+    }
+    
+    .pembelian-history-panel {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .pembelian-card .card-header {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .pembelian-card .card-footer {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}
