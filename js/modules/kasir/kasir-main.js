@@ -3,12 +3,28 @@
  * Controller utama untuk modul kasir
  */
 
+// Variable global untuk user (tambahan untuk fix auth timing)
+let currentUser = null;
+
 // State global
 let keranjang = [];
 let currentView = 'grid';
 let currentJenis = 'penjualan';
 let produkData = [];
 let pelangganData = [];
+
+// Tunggu auth siap sebelum init (tambahan)
+auth.onAuthStateChanged(function(user) {
+    if (user) {
+        currentUser = user;
+        console.log('Auth ready:', user.email);
+    } else {
+        // Redirect ke login jika belum login
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.replace('../login.html');
+        }
+    }
+});
 
 // Inisialisasi saat DOM ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -536,8 +552,8 @@ function handleMetodeChange() {
  * Proses pembayaran
  */
 async function prosesPembayaran() {
-    // ✅ TAMBAHKAN INI: Cek auth dulu
-    const user = auth.currentUser;
+    // ✅ PERBAIKAN 1: Gunakan currentUser (global) atau auth.currentUser
+    const user = currentUser || auth.currentUser;
     if (!user) {
         showToast('Sesi habis, silakan login ulang', 'error');
         setTimeout(() => {
@@ -546,15 +562,12 @@ async function prosesPembayaran() {
         return;
     }
     
-    // Baru cek keranjang
+    // Cek keranjang
     if (keranjang.length === 0) {
         showToast('Keranjang masih kosong', 'warning');
         return;
     }
 
-    // Lanjutkan proses...
-    const userId = user.uid;  // ✅ Sekarang aman, tidak null
-    
     const total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
     const metodeSelect = document.getElementById('metode-pembayaran');
     const metode = metodeSelect ? metodeSelect.value : 'tunai';
@@ -584,7 +597,12 @@ async function prosesPembayaran() {
     try {
         const session = JSON.parse(localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session'));
         const today = getToday();
-        const kodeTransaksi = generateKodeTransaksi('TRX');
+        
+        // ✅ PERBAIKAN 2: Gunakan shift dari session atau default
+        const shift = session?.shift || 'shift-1';
+        
+        // ✅ PERBAIKAN 3: Panggil tanpa parameter
+        const kodeTransaksi = generateKodeTransaksi();
         
         // Data transaksi
         const transaksiData = {
@@ -593,7 +611,7 @@ async function prosesPembayaran() {
             waktu: new Date().toISOString(),
             kasir_id: session.uid,
             kasir_nama: session.nama,
-            shift: getCurrentShift().id,
+            shift: shift,
             items: keranjang.map(item => ({
                 ...item,
                 laba: (item.harga - (item.harga_modal || 0)) * item.qty
