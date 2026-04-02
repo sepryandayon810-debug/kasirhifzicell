@@ -552,7 +552,7 @@ function handleMetodeChange() {
  * Proses pembayaran
  */
 async function prosesPembayaran() {
-    // ✅ PERBAIKAN 1: Gunakan currentUser (global) atau auth.currentUser
+    // ✅ Cek auth dulu
     const user = currentUser || auth.currentUser;
     if (!user) {
         showToast('Sesi habis, silakan login ulang', 'error');
@@ -595,13 +595,33 @@ async function prosesPembayaran() {
     }
     
     try {
-        const session = JSON.parse(localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session'));
+        // ✅ PERBAIKAN: Ambil session dengan aman
+        let sessionData = localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session');
+        let session = null;
+        
+        if (sessionData) {
+            try {
+                session = JSON.parse(sessionData);
+            } catch (e) {
+                console.error('Error parsing session:', e);
+            }
+        }
+        
+        // ✅ PERBAIKAN: Cek session valid, kalau tidak ada buat dari auth
+        if (!session || !session.uid) {
+            session = {
+                uid: user.uid,
+                nama: user.displayName || user.email.split('@')[0],
+                role: 'kasir',
+                shift: 'shift-1'
+            };
+            // Simpan ke storage untuk penggunaan berikutnya
+            localStorage.setItem('webpos_session', JSON.stringify(session));
+            console.log('Session created from auth:', session);
+        }
+        
         const today = getToday();
-        
-        // ✅ PERBAIKAN 2: Gunakan shift dari session atau default
-        const shift = session?.shift || 'shift-1';
-        
-        // ✅ PERBAIKAN 3: Panggil tanpa parameter
+        const shift = session.shift || 'shift-1';
         const kodeTransaksi = generateKodeTransaksi();
         
         // Data transaksi
@@ -610,7 +630,7 @@ async function prosesPembayaran() {
             tanggal: today,
             waktu: new Date().toISOString(),
             kasir_id: session.uid,
-            kasir_nama: session.nama,
+            kasir_nama: session.nama || user.email,
             shift: shift,
             items: keranjang.map(item => ({
                 ...item,
