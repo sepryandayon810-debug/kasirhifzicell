@@ -1,0 +1,68 @@
+// Format mata uang Rupiah
+function formatRupiah(angka) {
+    if (angka === null || angka === undefined) return 'Rp 0';
+    const number = typeof angka === 'string' ? parseInt(angka) : angka;
+    return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+// Format angka tanpa simbol
+function formatAngka(angka) {
+    if (angka === null || angka === undefined) return '0';
+    return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+// Parse rupiah ke number
+function parseRupiah(rupiahString) {
+    if (!rupiahString) return 0;
+    return parseInt(rupiahString.replace(/[^0-9]/g, '')) || 0;
+}
+
+// Format tanggal lengkap
+function formatTanggalLengkap(date) {
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(date).toLocaleDateString('id-ID', options);
+}
+
+// Format tanggal singkat
+function formatTanggal(date) {
+    const d = new Date(date);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+// Format waktu
+function formatWaktu(date) {
+    const d = new Date(date);
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+}
+
+// Format datetime untuk input
+function formatDateTimeLocal(date) {
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+}
+
+// Generate kode transaksi
+function generateKodeTransaksi(prefix = 'TRX') {
+    const now = new Date();
+    const timestamp = now.getTime().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}-${timestamp}${random}`;
+}
+
+// Export fungsi
+window.formatRupiah = formatRupiah;
+window.formatAngka = formatAngka;
+window.parseRupiah = parseRupiah;
+window.formatTanggalLengkap = formatTanggalLengkap;
+window.formatTanggal = formatTanggal;
+window.formatWaktu = formatWaktu;
+window.formatDateTimeLocal = formatDateTimeLocal;
+window.generateKodeTransaksi = generateKodeTransaksi;
