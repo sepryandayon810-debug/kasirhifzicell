@@ -5,119 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebPOS - Login</title>
     <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .login-container {
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .login-header h1 {
-            color: #8b5cf6;
-            font-size: 2.5rem;
-            margin: 0;
-        }
-        .login-header p {
-            color: #888;
-            margin: 10px 0 0;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            color: #ccc;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #333;
-            background: #0f0f1a;
-            color: white;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        .btn-login {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn-login:hover {
-            opacity: 0.9;
-        }
-    </style>
-    
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-header">
-            <h1><i class="fas fa-cash-register"></i> WebPOS</h1>
-            <p>Sistem Point of Sale</p>
+        <div class="login-box">
+            <div class="logo-section">
+                <img src="./assets/images/logo.png" alt="Logo" id="login-logo" onerror="this.style.display='none'">
+                <h1>WebPOS</h1>
+                <p>Sistem Point of Sale</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Masukkan email" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Masukkan password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="remember-me">
+                    <label>
+                        <input type="checkbox" id="remember"> Ingat saya
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-login" id="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Masuk
+                </button>
+                
+                <div id="error-message" class="error-message"></div>
+            </form>
+            
+            <div class="login-footer">
+                <p id="date-info"></p>
+            </div>
         </div>
-        
-        <form id="login-form">
-            <div class="form-group">
-                <label><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" id="email" class="form-control" placeholder="admin@toko.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="password" class="form-control" placeholder="••••••" required>
-            </div>
-            
-            <button type="submit" class="btn-login">
-                <i class="fas fa-sign-in-alt"></i> Masuk
-            </button>
-        </form>
     </div>
 
-    <!-- Path sesuai struktur repo Anda -->
+    <!-- Scripts - Path untuk root folder -->
     <script src="./js/firebase-config.js"></script>
     <script src="./js/utils.js"></script>
     <script src="./js/auth.js"></script>
     
     <script>
-        // Login handler
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.classList.remove('fa-eye');
+                toggleBtn.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.classList.remove('fa-eye-slash');
+                toggleBtn.classList.add('fa-eye');
+            }
+        }
+
+        // Update date
+        document.getElementById('date-info').textContent = new Date().toLocaleDateString('id-ID', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // Login form handler
         document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const btnLogin = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('error-message');
+            
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            errorMsg.textContent = '';
             
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Get user data from database
+                const snapshot = await database.ref('users/' + user.uid).once('value');
+                const userData = snapshot.val();
+                
+                if (userData && userData.active === false) {
+                    await auth.signOut();
+                    errorMsg.textContent = 'Akun Anda dinonaktifkan!';
+                    return;
+                }
+                
+                // Update last login
+                await database.ref('users/' + user.uid).update({
+                    last_login: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Save to session
+                sessionStorage.setItem('user_uid', user.uid);
+                sessionStorage.setItem('user_email', user.email);
+                sessionStorage.setItem('user_role', userData?.role || 'kasir');
+                sessionStorage.setItem('user_nama', userData?.nama || user.email);
+                
+                // Redirect to dashboard
                 window.location.href = './dashboard.html';
-            } catch(error) {
-                alert('Login gagal: ' + error.message);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                let message = 'Login gagal!';
+                switch(error.code) {
+                    case 'auth/user-not-found': message = 'Email tidak terdaftar!'; break;
+                    case 'auth/wrong-password': message = 'Password salah!'; break;
+                    case 'auth/invalid-email': message = 'Format email tidak valid!'; break;
+                    case 'auth/too-many-requests': message = 'Terlalu banyak percobaan, coba lagi nanti!'; break;
+                    default: message = error.message;
+                }
+                errorMsg.textContent = message;
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
             }
         });
     </script>
