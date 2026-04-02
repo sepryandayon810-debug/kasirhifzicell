@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="./css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -24,157 +23,87 @@
             
             <form id="login-form">
                 <div class="input-group">
-                    <label for="email">Email</label>
+                    <label>Email</label>
                     <div class="input-icon">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" placeholder="Masukkan email" required>
+                        <input type="email" id="email" placeholder="admin@toko.com" required>
                     </div>
                 </div>
                 
                 <div class="input-group">
-                    <label for="password">Password</label>
+                    <label>Password</label>
                     <div class="input-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Masukkan password" required>
+                        <input type="password" id="password" placeholder="admin123" required>
                         <button type="button" class="toggle-password" onclick="togglePassword()">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="remember-me">
-                    <label>
-                        <input type="checkbox" id="remember"> Ingat saya
-                    </label>
-                </div>
-                
                 <button type="submit" class="btn-login" id="btn-login">
                     <i class="fas fa-sign-in-alt"></i> Masuk
                 </button>
                 
-                <div id="error-message" class="error-message"></div>
+                <div id="error-message" style="color: red; margin-top: 10px; text-align: center;"></div>
             </form>
             
-            <!-- ✅ TOMBOL BUAT AKUN ADMIN - WARNA HIJAU -->
+            <!-- TOMBOL BUAT AKUN ADMIN -->
             <div style="margin-top: 20px; text-align: center; border-top: 1px solid #333; padding-top: 20px;">
                 <p style="color: #666; font-size: 12px; margin-bottom: 10px;">Belum punya akun?</p>
-                <button onclick="buatAkunAdmin()" style="padding: 12px 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                <button onclick="buatAkun()" style="padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer;">
                     <i class="fas fa-user-plus"></i> Buat Akun Admin
                 </button>
-            </div>
-            
-            <div class="login-footer">
-                <p id="date-info"></p>
             </div>
         </div>
     </div>
 
-    <!-- ✅ PATH YANG BENAR -->
     <script src="./js/firebase-config.js"></script>
     <script src="./js/utils.js"></script>
     <script src="./js/auth.js"></script>
     
     <script>
-        // Toggle password
         function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.classList.remove('fa-eye');
-                toggleBtn.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.classList.remove('fa-eye-slash');
-                toggleBtn.classList.add('fa-eye');
-            }
+            const input = document.getElementById('password');
+            input.type = input.type === 'password' ? 'text' : 'password';
         }
 
-        // Update date
-        document.getElementById('date-info').textContent = new Date().toLocaleDateString('id-ID', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-        });
-
-        // Login handler
         document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const btnLogin = document.getElementById('btn-login');
-            const errorMsg = document.getElementById('error-message');
-            
-            btnLogin.disabled = true;
-            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            errorMsg.textContent = '';
             
             try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                const snapshot = await database.ref('users/' + user.uid).once('value');
-                const userData = snapshot.val();
-                
-                if (userData && userData.active === false) {
-                    await auth.signOut();
-                    errorMsg.textContent = 'Akun Anda dinonaktifkan!';
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
-                    return;
-                }
-                
-                await database.ref('users/' + user.uid).update({
-                    last_login: firebase.database.ServerValue.TIMESTAMP
-                });
-                
-                sessionStorage.setItem('user_uid', user.uid);
-                sessionStorage.setItem('user_email', user.email);
-                sessionStorage.setItem('user_role', userData?.role || 'kasir');
-                sessionStorage.setItem('user_nama', userData?.nama || user.email);
-                
+                await auth.signInWithEmailAndPassword(email, password);
                 window.location.href = './dashboard.html';
-                
             } catch (error) {
-                console.error('Login error:', error);
-                let message = 'Login gagal!';
-                switch(error.code) {
-                    case 'auth/user-not-found': message = 'Email tidak terdaftar!'; break;
-                    case 'auth/wrong-password': message = 'Password salah!'; break;
-                    case 'auth/invalid-email': message = 'Format email tidak valid!'; break;
-                    case 'auth/too-many-requests': message = 'Terlalu banyak percobaan!'; break;
-                    default: message = error.message;
-                }
-                errorMsg.textContent = message;
-                btnLogin.disabled = false;
-                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+                document.getElementById('error-message').textContent = error.message;
             }
         });
 
-        // ✅ FUNGSI BUAT AKUN ADMIN
-        function buatAkunAdmin() {
-            const email = 'admin@toko.com';
-            const password = 'admin123';
+        function buatAkun() {
+            const email = "admin@toko.com";
+            const password = "admin123";
             
             auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
+                .then(function(userCredential) {
                     const user = userCredential.user;
-                    return database.ref('users/' + user.uid).set({
-                        nama: 'Admin',
+                    return database.ref("users/" + user.uid).set({
+                        nama: "Admin",
                         email: email,
-                        role: 'owner',
+                        role: "owner",
                         active: true,
-                        created_at: firebase.database.ServerValue.TIMESTAMP
+                        created_at: Date.now()
                     });
                 })
-                .then(() => {
-                    alert('✅ Akun admin berhasil dibuat!\n\nEmail: admin@toko.com\nPassword: admin123\n\nSilakan login.');
+                .then(function() {
+                    alert("Akun admin berhasil dibuat!\nEmail: admin@toko.com\nPassword: admin123");
                 })
-                .catch((error) => {
-                    if (error.code === 'auth/email-already-in-use') {
-                        alert('⚠️ Akun sudah ada!\n\nSilakan login dengan:\nEmail: admin@toko.com\nPassword: admin123');
+                .catch(function(error) {
+                    if (error.code === "auth/email-already-in-use") {
+                        alert("Akun sudah ada! Silakan login.");
                     } else {
-                        alert('❌ Error: ' + error.message);
+                        alert("Error: " + error.message);
                     }
                 });
         }
