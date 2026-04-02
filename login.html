@@ -61,7 +61,7 @@
         </div>
     </div>
 
-    <!-- Scripts - Path untuk root folder -->
+    <!-- ✅ PATH YANG BENAR - Sesuai struktur repo Anda -->
     <script src="./js/firebase-config.js"></script>
     <script src="./js/utils.js"></script>
     <script src="./js/auth.js"></script>
@@ -112,6 +112,8 @@
                 if (userData && userData.active === false) {
                     await auth.signOut();
                     errorMsg.textContent = 'Akun Anda dinonaktifkan!';
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
                     return;
                 }
                 
@@ -140,7 +142,6 @@
                     default: message = error.message;
                 }
                 errorMsg.textContent = message;
-            } finally {
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
             }
