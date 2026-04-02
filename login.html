@@ -55,19 +55,27 @@
                 <div id="error-message" class="error-message"></div>
             </form>
             
+            <!-- TOMBOL BUAT AKUN ADMIN -->
+            <div style="margin-top: 20px; text-align: center; border-top: 1px solid #333; padding-top: 20px;">
+                <p style="color: #666; font-size: 12px; margin-bottom: 10px;">Belum punya akun?</p>
+                <button onclick="buatAkunAdmin()" style="padding: 12px 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-user-plus"></i> Buat Akun Admin
+                </button>
+            </div>
+            
             <div class="login-footer">
                 <p id="date-info"></p>
             </div>
         </div>
     </div>
 
-    <!-- ✅ PATH YANG BENAR - Sesuai struktur repo Anda -->
+    <!-- Scripts -->
     <script src="./js/firebase-config.js"></script>
     <script src="./js/utils.js"></script>
     <script src="./js/auth.js"></script>
     
     <script>
-        // Toggle password visibility
+        // Toggle password
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleBtn = document.querySelector('.toggle-password i');
@@ -88,7 +96,7 @@
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
 
-        // Login form handler
+        // Login handler
         document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -105,7 +113,6 @@
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
-                // Get user data from database
                 const snapshot = await database.ref('users/' + user.uid).once('value');
                 const userData = snapshot.val();
                 
@@ -117,18 +124,15 @@
                     return;
                 }
                 
-                // Update last login
                 await database.ref('users/' + user.uid).update({
                     last_login: firebase.database.ServerValue.TIMESTAMP
                 });
                 
-                // Save to session
                 sessionStorage.setItem('user_uid', user.uid);
                 sessionStorage.setItem('user_email', user.email);
                 sessionStorage.setItem('user_role', userData?.role || 'kasir');
                 sessionStorage.setItem('user_nama', userData?.nama || user.email);
                 
-                // Redirect to dashboard
                 window.location.href = './dashboard.html';
                 
             } catch (error) {
@@ -138,7 +142,7 @@
                     case 'auth/user-not-found': message = 'Email tidak terdaftar!'; break;
                     case 'auth/wrong-password': message = 'Password salah!'; break;
                     case 'auth/invalid-email': message = 'Format email tidak valid!'; break;
-                    case 'auth/too-many-requests': message = 'Terlalu banyak percobaan, coba lagi nanti!'; break;
+                    case 'auth/too-many-requests': message = 'Terlalu banyak percobaan!'; break;
                     default: message = error.message;
                 }
                 errorMsg.textContent = message;
@@ -146,6 +150,34 @@
                 btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
             }
         });
+
+        // BUAT AKUN ADMIN
+        function buatAkunAdmin() {
+            const email = 'admin@toko.com';
+            const password = 'admin123';
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return database.ref('users/' + user.uid).set({
+                        nama: 'Admin',
+                        email: email,
+                        role: 'owner',
+                        active: true,
+                        created_at: firebase.database.ServerValue.TIMESTAMP
+                    });
+                })
+                .then(() => {
+                    alert('✅ Akun admin berhasil dibuat!\n\nEmail: admin@toko.com\nPassword: admin123\n\nSilakan login.');
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/email-already-in-use') {
+                        alert('⚠️ Akun sudah ada!\n\nSilakan login dengan:\nEmail: admin@toko.com\nPassword: admin123');
+                    } else {
+                        alert('❌ Error: ' + error.message);
+                    }
+                });
+        }
     </script>
 </body>
 </html>
