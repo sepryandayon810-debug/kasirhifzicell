@@ -1,0 +1,84 @@
+// Helper untuk manajemen tanggal dan shift
+
+// Dapatkan shift saat ini
+function getCurrentShift() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 14) return { id: '1', name: 'Pagi', time: '06:00 - 14:00' };
+    else if (hour >= 14 && hour < 22) return { id: '2', name: 'Siang', time: '14:00 - 22:00' };
+    else return { id: '3', name: 'Malam', time: '22:00 - 06:00' };
+}
+
+// Dapatkan tanggal hari ini (YYYY-MM-DD)
+function getToday() {
+    return new Date().toISOString().split('T')[0];
+}
+
+// Dapatkan tanggal kemarin
+function getYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+}
+
+// Dapatkan awal minggu ini (Senin)
+function getWeekStart() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    d.setDate(diff);
+    return d.toISOString().split('T')[0];
+}
+
+// Dapatkan akhir minggu ini (Minggu)
+function getWeekEnd() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? 0 : 7);
+    d.setDate(diff);
+    return d.toISOString().split('T')[0];
+}
+
+// Dapatkan awal bulan ini
+function getMonthStart() {
+    const d = new Date();
+    return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-01`;
+}
+
+// Dapatkan akhir bulan ini
+function getMonthEnd() {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(0);
+    return d.toISOString().split('T')[0];
+}
+
+// Dapatkan awal tahun ini
+function getYearStart() {
+    return `${new Date().getFullYear()}-01-01`;
+}
+
+// Cek apakah sudah ganti hari (untuk auto reset)
+function isNewDay(lastDate) {
+    if (!lastDate) return true;
+    return getToday() !== lastDate;
+}
+
+// Hitung selisih hari
+function diffInDays(date1, date2) {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    const diffTime = Math.abs(d2 - d1);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+// Export fungsi
+window.getCurrentShift = getCurrentShift;
+window.getToday = getToday;
+window.getYesterday = getYesterday;
+window.getWeekStart = getWeekStart;
+window.getWeekEnd = getWeekEnd;
+window.getMonthStart = getMonthStart;
+window.getMonthEnd = getMonthEnd;
+window.getYearStart = getYearStart;
+window.isNewDay = isNewDay;
+window.diffInDays = diffInDays;
