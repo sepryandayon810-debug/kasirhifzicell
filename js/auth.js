@@ -1,196 +1,204 @@
-// Authentication & Role Management
-class AuthManager {
-    constructor() {
-        this.currentUser = null;
-        this.userRole = null;
-        this.sessionTimeout = 30 * 60 * 1000; // 30 menit
-        this.lastActivity = Date.now();
-        this.init();
-    }
-
-    init() {
-        // Monitor activity
-        document.addEventListener('mousemove', () => this.resetTimer());
-        document.addEventListener('keypress', () => this.resetTimer());
+// Login Logic
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('login-form');
+    const errorMessage = document.getElementById('error-message');
+    
+    // Cek apakah sudah login
+    checkExistingSession();
+    
+    // Update info shift dan tanggal
+    updateLoginInfo();
+    
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        // Check session every minute
-        setInterval(() => this.checkSession(), 60000);
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const remember = document.getElementById('remember').checked;
+        const submitBtn = loginForm.querySelector('.btn-login');
         
-        // Check day change
-        setInterval(() => this.checkDayChange(), 60000);
-    }
-
-    resetTimer() {
-        this.lastActivity = Date.now();
-    }
-
-    checkSession() {
-        const inactive = Date.now() - this.lastActivity;
-        if (inactive > this.sessionTimeout) {
-            this.logout('Sesi berakhir karena tidak aktif selama 30 menit');
+        // Validasi
+        if (!email || !password) {
+            showError('Email dan password wajib diisi');
+            return;
         }
-    }
-
-    async checkDayChange() {
-        const lastLogin = localStorage.getItem('lastLoginDate');
-        const today = new Date().toDateString();
         
-        if (lastLogin && lastLogin !== today) {
-            // Reset semua transaksi harian
-            await this.resetDailyData();
-            // Auto close kasir
-            await this.closeAllCashier();
-            localStorage.setItem('lastLoginDate', today);
-        }
-    }
-
-    async resetDailyData() {
-        const today = new Date().toISOString().split('T')[0];
-        const updates = {};
-        updates[`/dailyReset/${today}`] = {
-            timestamp: firebase.database.ServerValue.TIMESTAMP,
-            resetBy: 'system'
-        };
-        await database.ref().update(updates);
-    }
-
-    async closeAllCashier() {
-        await database.ref('/cashierStatus').set({
-            status: 'closed',
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-    }
-
-    async login(email, password) {
+        // Loading state
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        
         try {
+            // Login dengan Firebase Auth
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
             
-            // Get user role from database
-            const snapshot = await database.ref(`/users/${user.uid}`).once('value');
-            const userData = snapshot.val();
+            // Ambil data user dari database
+            const userSnapshot = await database.ref('users/' + user.uid).once('value');
+            const userData = userSnapshot.val();
             
             if (!userData) {
                 throw new Error('Data user tidak ditemukan');
             }
-
-            this.currentUser = {
+            
+            // Cek apakah user aktif
+            if (userData.status === 'nonaktif') {
+                await auth.signOut();
+                throw new Error('Akun Anda telah dinonaktifkan');
+            }
+            
+            // Simpan session
+            const sessionData = {
                 uid: user.uid,
                 email: user.email,
                 role: userData.role,
-                name: userData.name,
-                device: this.getDeviceInfo()
+                nama: userData.nama,
+                loginTime: new Date().toISOString(),
+                device: getDeviceInfo()
             };
             
-            this.userRole = userData.role;
-            
-            // Save to localStorage
-            localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-            localStorage.setItem('lastLoginDate', new Date().toDateString());
-            
-            // Log device
-            await this.logDeviceLogin();
-            
-            return { success: true, user: this.currentUser };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    getDeviceInfo() {
-        return {
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            screen: `${screen.width}x${screen.height}`,
-            timestamp: new Date().toISOString()
-        };
-    }
-
-    async logDeviceLogin() {
-        if (!this.currentUser) return;
-        
-        const deviceData = {
-            ...this.currentUser.device,
-            uid: this.currentUser.uid,
-            name: this.currentUser.name,
-            role: this.currentUser.role
-        };
-        
-        await database.ref(`/deviceLogs/${this.currentUser.uid}`).push(deviceData);
-    }
-
-    logout(message = 'Anda telah logout') {
-        auth.signOut();
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('lastLoginDate');
-        alert(message);
-        window.location.href = 'index.html';
-    }
-
-    checkRoleAccess(requiredRole) {
-        if (!this.currentUser) return false;
-        
-        const roleHierarchy = {
-            'owner': 3,
-            'admin': 2,
-            'kasir': 1
-        };
-        
-        const userLevel = roleHierarchy[this.currentUser.role] || 0;
-        const requiredLevel = roleHierarchy[requiredRole] || 0;
-        
-        return userLevel >= requiredLevel;
-    }
-
-    canAccessMenu(menuName) {
-        if (!this.currentUser) return false;
-        
-        const permissions = {
-            'owner': ['kasir', 'produk', 'pembelian', 'riwayat-transaksi', 'modal-harian', 
-                     'kas-management', 'hutang-piutang', 'laporan', 'saldo-telegram', 
-                     'data-pelanggan', 'setting', 'user-management', 'printer', 'reset-data'],
-            'admin': ['kasir', 'produk', 'pembelian', 'riwayat-transaksi', 'modal-harian', 
-                     'kas-management', 'hutang-piutang', 'laporan', 'saldo-telegram', 
-                     'data-pelanggan', 'setting', 'user-management', 'printer'],
-            'kasir': ['kasir', 'produk', 'riwayat-transaksi', 'modal-harian', 
-                     'hutang-piutang', 'data-pelanggan', 'printer']
-        };
-        
-        const allowedMenus = permissions[this.currentUser.role] || [];
-        return allowedMenus.includes(menuName);
-    }
-
-    getCurrentUser() {
-        if (!this.currentUser) {
-            const saved = localStorage.getItem('currentUser');
-            if (saved) {
-                this.currentUser = JSON.parse(saved);
-                this.userRole = this.currentUser.role;
+            if (remember) {
+                localStorage.setItem('webpos_session', JSON.stringify(sessionData));
+            } else {
+                sessionStorage.setItem('webpos_session', JSON.stringify(sessionData));
             }
+            
+            // Log device login
+            await logDeviceLogin(user.uid, sessionData.device);
+            
+            // Cek reset harian
+            await checkDailyReset(user.uid, userData.role);
+            
+            // Redirect ke dashboard
+            window.location.href = 'dashboard.html';
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            showError(getErrorMessage(error.code));
+            submitBtn.classList.remove('loading');
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
         }
-        return this.currentUser;
+    });
+});
+
+// Fungsi helper
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.querySelector('.toggle-password i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.classList.remove('fa-eye');
+        toggleBtn.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
     }
 }
 
-// Initialize
-const authManager = new AuthManager();
-
-// Route guard
-function checkAuth() {
-    const user = authManager.getCurrentUser();
-    if (!user) {
-        window.location.href = 'index.html';
-        return false;
-    }
-    return true;
+function showError(message) {
+    const errorElement = document.getElementById('error-message');
+    errorElement.textContent = message;
+    errorElement.classList.add('show');
+    
+    setTimeout(() => {
+        errorElement.classList.remove('show');
+    }, 5000);
 }
 
-function checkPageAccess(menuName) {
-    if (!checkAuth()) return false;
-    if (!authManager.canAccessMenu(menuName)) {
-        alert('Anda tidak memiliki akses ke menu ini');
-        window.location.href = 'dashboard.html';
-        return false;
+function getErrorMessage(code) {
+    const messages = {
+        'auth/user-not-found': 'Email tidak terdaftar',
+        'auth/wrong-password': 'Password salah',
+        'auth/invalid-email': 'Format email tidak valid',
+        'auth/user-disabled': 'Akun telah dinonaktifkan',
+        'auth/too-many-requests': 'Terlalu banyak percobaan, coba lagi nanti',
+        'auth/network-request-failed': 'Koneksi internet bermasalah'
+    };
+    return messages[code] || 'Terjadi kesalahan, coba lagi';
+}
+
+function checkExistingSession() {
+    const session = localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session');
+    if (session) {
+        const sessionData = JSON.parse(session);
+        const loginTime = new Date(sessionData.loginTime);
+        const now = new Date();
+        const diffMinutes = (now - loginTime) / (1000 * 60);
+        
+        // Jika kurang dari 30 menit, redirect ke dashboard
+        if (diffMinutes < 30) {
+            window.location.href = 'dashboard.html';
+        } else {
+            // Hapus session yang expired
+            localStorage.removeItem('webpos_session');
+            sessionStorage.removeItem('webpos_session');
+        }
     }
-    return true;
+}
+
+function updateLoginInfo() {
+    const shiftElement = document.getElementById('current-shift');
+    const dateElement = document.getElementById('date-info');
+    
+    const now = new Date();
+    const hour = now.getHours();
+    let shift = 'Shift 1';
+    
+    if (hour >= 6 && hour < 14) shift = 'Shift 1 (Pagi)';
+    else if (hour >= 14 && hour < 22) shift = 'Shift 2 (Siang)';
+    else shift = 'Shift 3 (Malam)';
+    
+    shiftElement.textContent = shift;
+    dateElement.textContent = formatTanggalLengkap(now);
+}
+
+function getDeviceInfo() {
+    return {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        timestamp: new Date().toISOString()
+    };
+}
+
+async function logDeviceLogin(uid, deviceInfo) {
+    const today = new Date().toISOString().split('T')[0];
+    const logRef = database.ref(`device_logs/${uid}/${today}`).push();
+    
+    await logRef.set({
+        ...deviceInfo,
+        loginAt: firebase.database.ServerValue.TIMESTAMP
+    });
+}
+
+async function checkDailyReset(uid, role) {
+    const today = new Date().toISOString().split('T')[0];
+    const lastResetRef = database.ref(`system/last_reset/${uid}`);
+    const snapshot = await lastResetRef.once('value');
+    const lastReset = snapshot.val();
+    
+    if (lastReset !== today) {
+        // Reset data harian
+        await database.ref(`daily_data/${uid}/${today}`).set({
+            modal_awal: 0,
+            total_penjualan: 0,
+            total_topup: 0,
+            total_tarik: 0,
+            kas_masuk: 0,
+            kas_keluar: 0,
+            shift: getCurrentShift(),
+            status: role === 'kasir' ? 'closed' : 'open',
+            created_at: firebase.database.ServerValue.TIMESTAMP
+        });
+        
+        await lastResetRef.set(today);
+    }
+}
+
+function getCurrentShift() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 14) return '1';
+    else if (hour >= 14 && hour < 22) return '2';
+    else return '3';
 }
