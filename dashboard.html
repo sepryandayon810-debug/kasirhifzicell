@@ -6,63 +6,26 @@
     <meta name="theme-color" content="#0a0a0f">
     <title>WebPOS - Dashboard</title>
     
-    <!-- CSS Global -->
-    <link rel="stylesheet" href="./css/common.css">
+    <!-- ⭐ CSS Global - Sama dengan halaman lain -->
+    <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./css/sidebar.css">
-    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/responsive.css">
     
     <!-- Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS Khusus Dashboard (Inline - Bisa dipindah nanti kalau mau) -->
+    <!-- CSS Khusus Dashboard (hanya styling konten) -->
     <style>
-        /* Dashboard Specific Styles */
-        .main-content {
-            margin-left: 260px;
-            padding: 24px;
-            min-height: 100vh;
-        }
-        
-        /* Header */
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .page-title h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        
-        .page-title p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-        
         /* Summary Cards */
+        .summary-section {
+            margin-bottom: 24px;
+        }
+        
         .summary-scroll {
             display: flex;
             gap: 16px;
             overflow-x: auto;
             padding-bottom: 8px;
-            margin: 0 -24px;
-            padding: 0 24px 8px;
             scrollbar-width: none;
         }
         
@@ -162,20 +125,16 @@
             align-items: center;
             gap: 6px;
             font-weight: 500;
-        }
-        
-        .summary-change.up {
             color: var(--accent-green);
         }
         
-        /* Cashflow Section */
+        /* Cashflow */
         .cashflow-section {
             background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,130,246,0.05));
             border-radius: 24px;
             border: 1px solid rgba(139,92,246,0.15);
             padding: 28px;
             margin: 24px 0;
-            position: relative;
         }
         
         .cashflow-grid {
@@ -426,71 +385,13 @@
             font-weight: 700;
             font-size: 15px;
         }
-        
-        /* Footer */
-        .dashboard-footer {
-            text-align: center;
-            padding: 32px 24px;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .bento-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
-            }
-            
-            .page-title h1 {
-                font-size: 22px;
-            }
-            
-            .cashflow-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .bento-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .summary-card {
-                min-width: 160px;
-            }
-            
-            .quick-pills {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-                padding-bottom: 8px;
-            }
-            
-            .quick-pill {
-                white-space: nowrap;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .bento-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .summary-value, .cashflow-value {
-                font-size: 22px;
-            }
-        }
     </style>
 </head>
 <body>
     <!-- Overlay -->
     <div class="overlay" id="overlay"></div>
     
-    <!-- Mobile Bottom Navigation -->
+    <!-- ⭐ Mobile Bottom Navigation - Sama dengan halaman lain -->
     <nav class="mobile-nav">
         <ul>
             <li><a href="./dashboard.html" class="active"><i class="fas fa-home"></i>Beranda</a></li>
@@ -501,7 +402,7 @@
         </ul>
     </nav>
 
-    <!-- Desktop Sidebar -->
+    <!-- ⭐ Desktop Sidebar - Sama persis dengan halaman lain -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo"><i class="fas fa-cash-register"></i></div>
@@ -533,8 +434,12 @@
                 <div class="nav-section-title">Lainnya</div>
                 <ul>
                     <li><a href="./pages/laporan/laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+                    <li><a href="./pages/saldo-telegram/saldo-telegram.html"><i class="fab fa-telegram"></i> Telegram</a></li>
                     <li><a href="./pages/data-pelanggan/data-pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
+                    <li><a href="./pages/management-user/management-user.html"><i class="fas fa-user-cog"></i> Users</a></li>
                     <li><a href="./pages/setting/setting.html"><i class="fas fa-cog"></i> Setting</a></li>
+                    <li><a href="./pages/printer-struk/printer-struk.html"><i class="fas fa-print"></i> Printer</a></li>
+                    <li><a href="./pages/reset-data/reset-data.html"><i class="fas fa-trash-alt"></i> Reset</a></li>
                 </ul>
             </div>
         </nav>
@@ -572,13 +477,13 @@
                 </button>
                 <button class="btn-icon" title="Notifikasi">
                     <i class="fas fa-bell"></i>
-                    <span class="badge" id="notif-badge" style="display: none;">3</span>
+                    <span class="badge badge-danger" id="notif-badge" style="display: none;">3</span>
                 </button>
             </div>
         </header>
 
         <!-- Summary Cards -->
-        <section>
+        <section class="summary-section">
             <div class="section-header">
                 <h2 class="section-title"><i class="fas fa-chart-line"></i> Ringkasan Hari Ini</h2>
                 <a href="./pages/laporan/laporan.html" class="view-all">Lihat Detail <i class="fas fa-arrow-right"></i></a>
@@ -589,28 +494,28 @@
                     <div class="summary-icon"><i class="fas fa-money-bill-wave"></i></div>
                     <div class="summary-value" id="total-penjualan">-</div>
                     <div class="summary-label">Penjualan</div>
-                    <div class="summary-change up"><i class="fas fa-arrow-up"></i> Hari ini</div>
+                    <div class="summary-change"><i class="fas fa-arrow-up"></i> Hari ini</div>
                 </div>
                 
                 <div class="summary-card transaksi">
                     <div class="summary-icon"><i class="fas fa-receipt"></i></div>
                     <div class="summary-value" id="total-transaksi">-</div>
                     <div class="summary-label">Transaksi</div>
-                    <div class="summary-change up"><i class="fas fa-arrow-up"></i> <span id="transaksi-count">0</span></div>
+                    <div class="summary-change"><i class="fas fa-arrow-up"></i> <span id="transaksi-count">0</span></div>
                 </div>
                 
                 <div class="summary-card produk">
                     <div class="summary-icon"><i class="fas fa-box"></i></div>
                     <div class="summary-value" id="total-produk">-</div>
                     <div class="summary-label">Produk Terjual</div>
-                    <div class="summary-change up"><i class="fas fa-arrow-up"></i> Item</div>
+                    <div class="summary-change"><i class="fas fa-arrow-up"></i> Item</div>
                 </div>
                 
                 <div class="summary-card laba">
                     <div class="summary-icon"><i class="fas fa-chart-line"></i></div>
                     <div class="summary-value" id="total-laba">-</div>
                     <div class="summary-label">Keuntungan</div>
-                    <div class="summary-change up"><i class="fas fa-arrow-up"></i> Profit</div>
+                    <div class="summary-change"><i class="fas fa-arrow-up"></i> Profit</div>
                 </div>
             </div>
         </section>
@@ -729,7 +634,7 @@
         </footer>
     </main>
 
-    <!-- Firebase & Logic -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -765,7 +670,7 @@
             if (el) el.textContent = value;
         }
 
-        // UI Functions
+        // Toggle Sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
