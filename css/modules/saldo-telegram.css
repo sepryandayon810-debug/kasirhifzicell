@@ -1,0 +1,14 @@
+.telegram-container { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+.config-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+.history-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+.card-header { padding: 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-dark); }
+.card-header h3 { margin: 0; font-size: var(--font-normal); display: flex; align-items: center; gap: 10px; }
+.card-body { padding: 20px; }
+.checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.checkbox-label input { width: 18px; height: 18px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; padding: 12px; font-size: var(--font-small); color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+.data-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: var(--font-small); }
+.status-success { color: var(--success-color); }
+.status-failed { color: var(--danger-color); }
+@media (max-width: 1024px) { .telegram-container { grid-template-columns: 1fr; } }
