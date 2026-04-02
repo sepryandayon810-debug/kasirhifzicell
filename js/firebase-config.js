@@ -15,7 +15,6 @@ firebase.initializeApp(firebaseConfig);
 // Export untuk digunakan di file lain
 const auth = firebase.auth();
 const database = firebase.database();
-const storage = firebase.storage();
 
 // Fungsi helper untuk cek koneksi
 function checkFirebaseConnection() {
@@ -23,33 +22,12 @@ function checkFirebaseConnection() {
     connectedRef.on("value", (snap) => {
         if (snap.val() === true) {
             console.log("Firebase terhubung");
-            updateCloudStatus(true);
         } else {
             console.log("Firebase tidak terhubung");
-            updateCloudStatus(false);
         }
     });
 }
 
-// Update status cloud di UI
-function updateCloudStatus(isConnected) {
-    const cloudBtn = document.getElementById('cloud-status');
-    if (cloudBtn) {
-        if (isConnected) {
-            cloudBtn.classList.remove('offline');
-            cloudBtn.classList.add('online');
-            cloudBtn.innerHTML = '<i class="fas fa-cloud"></i> Online';
-        } else {
-            cloudBtn.classList.remove('online');
-            cloudBtn.classList.add('offline');
-            cloudBtn.innerHTML = '<i class="fas fa-cloud-slash"></i> Offline';
-        }
-    }
-}
-
-// Export variabel dan fungsi
-window.firebaseConfig = firebaseConfig;
+// Export variabel
 window.auth = auth;
 window.database = database;
-window.storage = storage;
-window.checkFirebaseConnection = checkFirebaseConnection;
