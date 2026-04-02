@@ -1,51 +1,26 @@
-/* ============================================
-   RESPONSIVE.CSS - Responsive tambahan
-   ============================================ */
+/* Responsive tambahan */
 
-/* Tablet */
 @media (max-width: 1200px) {
-    .bento-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
+    .bento-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
-/* Mobile */
 @media (max-width: 768px) {
     .summary-scroll {
         margin: 0 -16px !important;
         padding: 0 16px 8px !important;
     }
-    
-    .summary-card {
-        min-width: 160px !important;
-    }
-    
-    .cashflow-grid {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .bento-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-    
+    .summary-card { min-width: 160px !important; }
+    .cashflow-grid { grid-template-columns: 1fr !important; }
+    .bento-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .quick-pills {
         overflow-x: auto;
         flex-wrap: nowrap !important;
         padding-bottom: 8px;
     }
-    
-    .quick-pill {
-        white-space: nowrap;
-    }
+    .quick-pill { white-space: nowrap; }
 }
 
-/* Small Mobile */
 @media (max-width: 480px) {
-    .bento-grid {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .summary-value, .cashflow-value {
-        font-size: 22px !important;
-    }
+    .bento-grid { grid-template-columns: 1fr !important; }
+    .summary-value, .cashflow-value { font-size: 22px !important; }
 }
