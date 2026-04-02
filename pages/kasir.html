@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/responsive.css">
-    
-    <!-- CSS KHUSUS KASIR -->
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,7 +23,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR - SAMA PERSIS DASHBOARD -->
+        <!-- SIDEBAR - SAMA PERSIS DASHBOARD (DENGAN DROPDOWN) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -47,10 +45,10 @@
                 </div>
             </div>
             
-            <!-- SIDEBAR NAV DENGAN DROPDOWN -->
+            <!-- NAV DENGAN SECTION DROPDOWN -->
             <nav class="sidebar-nav">
                 <ul id="menu-list">
-                    <!-- UTAMA - DROPDOWN -->
+                    <!-- UTAMA - DROPDOWN (EXPANDED KARENA KASIR AKTIF) -->
                     <li class="menu-item has-dropdown active">
                         <a href="#" class="menu-link dropdown-toggle">
                             <i class="fas fa-th-large"></i>
@@ -113,7 +111,7 @@
             
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <div class="user-avatar">
+                    <div class="user-avatar" id="user-avatar">
                         <i class="fas fa-user-circle"></i>
                     </div>
                     <div class="user-details">
@@ -129,7 +127,7 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER - SAMA PERSIS DASHBOARD + DARK MODE TOGGLE -->
+            <!-- HEADER - SAMA DASHBOARD + DARK MODE TOGGLE -->
             <header class="main-header">
                 <div class="header-left">
                     <button class="mobile-menu-toggle" id="mobile-menu-toggle">
@@ -173,11 +171,9 @@
                 </div>
             </header>
 
-            <!-- KASIR CONTENT - SAMA STRUKTUR DENGAN YANG ANDA PUNYA -->
+            <!-- KASIR CONTENT - TETAP SAMA -->
             <div class="kasir-container">
-                <!-- Left Side: Produk -->
                 <div class="produk-section">
-                    <!-- Search & Filter -->
                     <div class="produk-toolbar">
                         <div class="search-produk">
                             <i class="fas fa-search"></i>
@@ -193,7 +189,6 @@
                         </button>
                     </div>
 
-                    <!-- View Toggle -->
                     <div class="view-toggle">
                         <button class="view-btn active" data-view="grid" title="Tampilan Grid">
                             <i class="fas fa-th-large"></i>
@@ -203,7 +198,6 @@
                         </button>
                     </div>
 
-                    <!-- Produk Container -->
                     <div class="produk-container grid-view" id="produk-container">
                         <div class="loading-produk">
                             <div class="spinner"></div>
@@ -212,7 +206,6 @@
                     </div>
                 </div>
 
-                <!-- Right Side: Keranjang -->
                 <div class="keranjang-section">
                     <div class="keranjang-header">
                         <h3><i class="fas fa-shopping-cart"></i> Keranjang</h3>
@@ -221,7 +214,6 @@
                         </button>
                     </div>
 
-                    <!-- Jenis Transaksi -->
                     <div class="jenis-transaksi">
                         <button class="jenis-btn active" data-jenis="penjualan">
                             <i class="fas fa-shopping-bag"></i> Penjualan
@@ -234,7 +226,6 @@
                         </button>
                     </div>
 
-                    <!-- Keranjang Items -->
                     <div class="keranjang-items" id="keranjang-items">
                         <div class="empty-keranjang">
                             <i class="fas fa-cart-plus"></i>
@@ -243,7 +234,6 @@
                         </div>
                     </div>
 
-                    <!-- Ringkasan -->
                     <div class="keranjang-summary">
                         <div class="summary-row">
                             <span>Subtotal</span>
@@ -259,7 +249,6 @@
                         </div>
                     </div>
 
-                    <!-- Pembayaran -->
                     <div class="pembayaran-section">
                         <div class="form-group">
                             <label>Metode Pembayaran</label>
@@ -304,13 +293,13 @@
         </main>
     </div>
 
-    <!-- MODALS - SAMA DENGAN YANG ANDA PUNYA -->
+    <!-- MODALS -->
     <div class="modal" id="modal-transaksi-manual">...</div>
     <div class="modal" id="modal-topup">...</div>
     <div class="modal" id="modal-tarik">...</div>
     <div class="modal" id="modal-edit-harga">...</div>
 
-    <!-- SCRIPTS - MEMANGGIL FILE JS TERPISAH -->
+    <!-- SCRIPTS - TETAP SAMA -->
     <script src="../js/firebase-config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
