@@ -2,14 +2,23 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Dashboard</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            height: -webkit-fill-available;
+        }
         
         /* ===== LIGHT MODE (Default) ===== */
         :root {
@@ -42,8 +51,9 @@
             
             --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #fff1f2 100%);
             --sidebar-header-bg: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
-            --kas-calc-bg: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 50%, #dbeafe 100%);
-            --kas-calc-border: #c4b5fd;
+            
+            --mobile-nav-height: 70px;
+            --sidebar-width: 280px;
         }
         
         /* ===== DARK MODE ===== */
@@ -77,8 +87,6 @@
             
             --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
             --sidebar-header-bg: linear-gradient(135deg, #3730a3, #581c87);
-            --kas-calc-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e293b 100%);
-            --kas-calc-border: #4c1d95;
         }
         
         body {
@@ -86,53 +94,64 @@
             background: var(--gradient-bg);
             color: var(--text-primary);
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             line-height: 1.6;
             transition: all 0.3s ease;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
         
-        /* SIDEBAR - Dengan Dropdown */
+        /* ===== SIDEBAR ===== */
         .sidebar {
-            width: 280px;
+            width: var(--sidebar-width);
             height: 100vh;
+            height: -webkit-fill-available;
             background: var(--bg-secondary);
             position: fixed;
             left: 0;
             top: 0;
             border-right: 1px solid var(--border);
             overflow-y: auto;
+            overflow-x: hidden;
             z-index: 100;
             transition: transform 0.3s ease, background 0.3s ease;
             box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
         }
-        .sidebar.closed { transform: translateX(-100%); }
         
         .sidebar-header {
-            padding: 24px 20px;
+            padding: 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 12px;
             background: var(--sidebar-header-bg);
+            flex-shrink: 0;
         }
         .sidebar-header .logo {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             background: rgba(255,255,255,0.2);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             color: white;
             backdrop-filter: blur(10px);
         }
         .sidebar-header h3 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: white;
         }
         
-        .sidebar-nav { padding: 16px 12px; }
+        .sidebar-nav { 
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
         
         /* Dropdown Section */
         .nav-section { margin-bottom: 8px; }
@@ -141,7 +160,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 16px;
+            padding: 12px 16px;
             cursor: pointer;
             border-radius: 12px;
             transition: all 0.3s ease;
@@ -168,7 +187,6 @@
             justify-content: center;
             font-size: 16px;
         }
-        /* Warna icon berbeda per section */
         .nav-section.utama .nav-section-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--accent-blue); }
         .nav-section.transaksi .nav-section-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--accent-emerald); }
         .nav-section.lainnya .nav-section-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: var(--accent-pink); }
@@ -197,7 +215,6 @@
         }
         .dropdown-arrow.rotate { transform: rotate(180deg); color: var(--accent-purple); }
         
-        /* Dropdown Content */
         .nav-dropdown {
             max-height: 0;
             overflow: hidden;
@@ -241,13 +258,10 @@
         .nav-dropdown a i { width: 18px; text-align: center; font-size: 14px; }
         
         .sidebar-footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
             padding: 16px;
             border-top: 1px solid var(--border);
             background: var(--bg-secondary);
+            flex-shrink: 0;
         }
         .user-card {
             display: flex;
@@ -274,13 +288,14 @@
         .user-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
         .user-role { font-size: 12px; color: var(--text-muted); }
         
-        /* MOBILE NAV */
+        /* ===== MOBILE NAV ===== */
         .mobile-nav {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+            height: var(--mobile-nav-height);
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
             padding: 8px 0;
@@ -290,12 +305,15 @@
         .mobile-nav ul {
             display: flex;
             justify-content: space-around;
+            align-items: center;
+            height: 100%;
             list-style: none;
         }
         .mobile-nav a {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             color: var(--text-muted);
             text-decoration: none;
             font-size: 11px;
@@ -303,6 +321,7 @@
             padding: 6px 12px;
             border-radius: 12px;
             transition: all 0.3s ease;
+            height: 100%;
         }
         .mobile-nav a i { font-size: 20px; }
         .mobile-nav a.active { 
@@ -310,7 +329,7 @@
             background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
         }
         
-        /* OVERLAY */
+        /* ===== OVERLAY ===== */
         .overlay {
             display: none;
             position: fixed;
@@ -321,21 +340,22 @@
         }
         .overlay.active { display: block; }
         
-        /* MAIN CONTENT */
+        /* ===== MAIN CONTENT ===== */
         .main-content {
-            margin-left: 280px;
-            padding: 24px;
+            margin-left: var(--sidebar-width);
             min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
             transition: margin-left 0.3s ease;
         }
-        .main-content.expanded { margin-left: 0; }
         
-        /* HEADER */
+        /* ===== HEADER ===== */
         .main-header {
             background: var(--bg-secondary);
             border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 28px;
+            padding: 20px 24px;
+            margin: 20px 24px 24px 24px;
             border: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -343,10 +363,11 @@
             flex-wrap: wrap;
             gap: 16px;
             box-shadow: var(--shadow);
+            flex-shrink: 0;
         }
         .header-left { display: flex; align-items: center; gap: 16px; }
         .menu-toggle {
-            display: flex;
+            display: none;
             background: var(--bg-hover);
             border: 1px solid var(--border);
             color: var(--text-primary);
@@ -361,7 +382,7 @@
             color: var(--accent-indigo);
         }
         .page-title h1 { 
-            font-size: 28px; 
+            font-size: 24px; 
             font-weight: 700; 
             margin-bottom: 4px;
             background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
@@ -371,7 +392,7 @@
         .page-title p { color: var(--text-secondary); font-size: 14px; }
         .header-actions { display: flex; gap: 12px; }
         
-        /* DARK MODE TOGGLE BUTTON */
+        /* Dark Mode Toggle */
         .btn-darkmode {
             width: 44px;
             height: 44px;
@@ -385,17 +406,12 @@
             cursor: pointer;
             transition: all 0.3s;
             font-size: 20px;
-            position: relative;
-            overflow: hidden;
         }
         .btn-darkmode:hover {
             background: var(--accent-indigo);
             color: white;
             border-color: var(--accent-indigo);
             transform: translateY(-2px);
-        }
-        .btn-darkmode i {
-            transition: all 0.3s ease;
         }
         .btn-darkmode .fa-sun { display: none; }
         .btn-darkmode .fa-moon { display: block; }
@@ -423,52 +439,30 @@
             transform: translateY(-2px);
         }
         
-        /* SECTION HEADER */
-        .section-header {
+        /* ===== CONTENT AREA ===== */
+        .content-wrapper {
+            flex: 1;
+            padding: 0 24px 24px 24px;
+            overflow-y: auto;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-primary);
-        }
-        .section-title i {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
-            color: white;
-            font-size: 18px;
+            flex-direction: column;
         }
         
         /* ===== RINGKASAN HARI INI ===== */
-        .summary-section { margin-bottom: 28px; }
+        .summary-section { margin-bottom: 24px; }
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
+            gap: 20px;
         }
         .summary-card {
             background: var(--bg-card);
-            border-radius: 24px;
-            padding: 32px;
+            border-radius: 20px;
+            padding: 24px;
             border: 1px solid var(--border);
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
             box-shadow: var(--shadow);
         }
         .summary-card::before {
@@ -477,30 +471,30 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
+            height: 4px;
         }
         .summary-card.penjualan::before { background: linear-gradient(90deg, var(--accent-indigo), var(--accent-purple)); }
         .summary-card.laba::before { background: linear-gradient(90deg, var(--accent-emerald), var(--accent-teal)); }
         .summary-card.transaksi::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
         
         .summary-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
         }
         .summary-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
         .summary-icon-large {
-            width: 68px;
-            height: 68px;
-            border-radius: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 24px;
         }
         .summary-card.penjualan .summary-icon-large { 
             background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)); 
@@ -516,14 +510,14 @@
         }
         
         .summary-label-large {
-            font-size: 16px;
+            font-size: 14px;
             color: var(--text-secondary);
             font-weight: 500;
         }
         .summary-value-large {
-            font-size: 40px;
+            font-size: 32px;
             font-weight: 800;
-            margin-top: 8px;
+            margin-top: 6px;
             letter-spacing: -1px;
         }
         .summary-card.penjualan .summary-value-large { color: var(--accent-indigo); }
@@ -531,36 +525,36 @@
         .summary-card.transaksi .summary-value-large { color: var(--accent-blue); }
         
         /* ===== STATISTIK KAS ===== */
-        .statistik-section { margin: 28px 0; }
+        .statistik-section { margin: 24px 0; }
         .statistik-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 16px;
         }
         .statistik-item {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 20px;
             border: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
         }
         .statistik-item:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
             border-color: var(--accent-indigo);
         }
         .statistik-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             flex-shrink: 0;
         }
         .statistik-icon.purple { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(167,139,250,0.1)); color: var(--accent-purple); }
@@ -572,71 +566,70 @@
         
         .statistik-content { flex: 1; }
         .statistik-label {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-weight: 500;
         }
         .statistik-value {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--text-primary);
         }
         
         /* ===== PERHITUNGAN KAS - DENGAN DROPDOWN ===== */
         .kas-calc-section {
-            background: var(--kas-calc-bg);
-            border-radius: 24px;
-            border: 1px solid var(--kas-calc-border);
-            margin: 28px 0;
+            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 50%, #dbeafe 100%);
+            border-radius: 20px;
+            border: 1px solid #c4b5fd;
+            margin: 24px 0;
             box-shadow: var(--shadow);
             overflow: hidden;
         }
         
-        /* Header Dropdown Perhitungan Kas */
+        [data-theme="dark"] .kas-calc-section {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e293b 100%);
+            border-color: #4c1d95;
+        }
+        
         .kas-calc-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 24px 32px;
+            padding: 20px 24px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border-bottom: 1px solid transparent;
         }
         .kas-calc-header:hover {
             background: rgba(255,255,255,0.1);
-        }
-        .kas-calc-header.active {
-            border-bottom-color: rgba(99,102,241,0.2);
         }
         
         .kas-calc-title-group {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
         .kas-calc-title-group i {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             background: var(--bg-card);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             color: var(--accent-indigo);
             box-shadow: var(--shadow);
         }
         .kas-calc-title-group h3 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
         }
         
-        /* Arrow untuk dropdown */
         .kas-calc-arrow {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -651,29 +644,28 @@
             color: var(--accent-indigo);
         }
         
-        /* Content yang bisa di-collapse */
         .kas-calc-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease, padding 0.3s ease;
         }
         .kas-calc-content.open {
-            max-height: 800px;
-            padding: 0 32px 32px 32px;
+            max-height: 600px;
+            padding: 0 24px 24px 24px;
         }
         
         .kas-formula {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            font-size: 15px;
+            font-size: 14px;
         }
         .kas-formula-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
-            border-radius: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
             transition: all 0.3s ease;
         }
         .kas-formula-row:hover {
@@ -693,78 +685,107 @@
         .kas-formula-row.total {
             background: var(--bg-card);
             margin-top: 8px;
-            padding: 20px 16px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: 14px;
             box-shadow: var(--shadow);
             border: 2px solid var(--accent-indigo);
         }
         .kas-formula-row.total .label {
             color: var(--text-primary);
             font-weight: 700;
-            font-size: 18px;
+            font-size: 16px;
         }
         .kas-formula-row.total .value {
             color: var(--accent-indigo);
             font-weight: 800;
-            font-size: 28px;
+            font-size: 24px;
         }
         .kas-formula .operator {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 12px;
         }
         .operator.plus { background: rgba(16,185,129,0.2); color: var(--accent-emerald); }
         .operator.minus { background: rgba(239,68,68,0.2); color: var(--accent-rose); }
         
-        /* FOOTER */
-        .dashboard-footer {
+        /* ===== FOOTER ===== */
+        .page-footer {
             text-align: center;
-            padding: 40px 24px;
+            padding: 20px;
             color: var(--text-muted);
             font-size: 14px;
+            margin-top: auto;
         }
         
-        /* RESPONSIVE */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1200px) {
             .summary-grid { grid-template-columns: repeat(2, 1fr); }
             .statistik-grid { grid-template-columns: repeat(2, 1fr); }
         }
+        
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); width: 300px; }
-            .sidebar.open { transform: translateX(0); }
-            .mobile-nav { display: block; }
-            .main-content { margin-left: 0; padding: 16px; padding-bottom: 90px; }
-            .page-title h1 { font-size: 24px; }
+            .sidebar {
+                transform: translateX(-100%);
+                width: 85%;
+                max-width: 300px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .mobile-nav {
+                display: block;
+            }
+            
+            .main-header {
+                margin: 16px 16px 20px 16px;
+                padding: 16px 20px;
+            }
+            
+            .page-title h1 {
+                font-size: 20px;
+            }
+            
+            .content-wrapper {
+                padding: 0 16px 100px 16px;
+            }
+            
             .summary-grid { grid-template-columns: 1fr; }
             .statistik-grid { grid-template-columns: 1fr; }
-            .summary-card { min-height: 160px; padding: 24px; }
-            .summary-value-large { font-size: 32px; }
-            
-            .kas-calc-header { padding: 20px 24px; }
-            .kas-calc-content.open { padding: 0 24px 24px 24px; }
-            .kas-formula-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .kas-formula-row.total .value { font-size: 22px; }
+            .summary-value-large { font-size: 28px; }
+            .kas-calc-content.open { padding: 0 16px 16px 16px; }
+            .kas-formula-row.total .value { font-size: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="overlay" id="overlay"></div>
     
+    <!-- MOBILE NAV -->
     <nav class="mobile-nav">
         <ul>
-            <li><a href="./dashboard.html" class="active"><i class="fas fa-home"></i>Beranda</a></li>
-            <li><a href="./pages/kasir.html"><i class="fas fa-cash-register"></i>Kasir</a></li>
-            <li><a href="./pages/produk.html"><i class="fas fa-box"></i>Produk</a></li>
-            <li><a href="./pages/laporan.html"><i class="fas fa-chart-bar"></i>Laporan</a></li>
-            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i>Menu</a></li>
+            <li><a href="./dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="./pages/kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
+            <li><a href="./pages/produk.html"><i class="fas fa-box"></i> Produk</a></li>
+            <li><a href="./pages/laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Menu</a></li>
         </ul>
     </nav>
 
+    <!-- SIDEBAR - HANYA 1X -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo"><i class="fas fa-cash-register"></i></div>
@@ -784,9 +805,9 @@
                 <div class="nav-dropdown" id="dropdown-utama">
                     <ul>
                         <li><a href="./dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-                        <li><a href="./pages/kasir/kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
-                        <li><a href="./pages/produk/produk.html"><i class="fas fa-box"></i> Produk</a></li>
-                        <li><a href="./pages/pembelian/pembelian.html"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
+                        <li><a href="./pages/kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
+                        <li><a href="./pages/produk.html"><i class="fas fa-box"></i> Produk</a></li>
+                        <li><a href="./pages/pembelian.html"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
                     </ul>
                 </div>
             </div>
@@ -802,10 +823,10 @@
                 </div>
                 <div class="nav-dropdown" id="dropdown-transaksi">
                     <ul>
-                        <li><a href="./pages/riwayat-transaksi/riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat</a></li>
-                        <li><a href="./pages/modal-harian/modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal</a></li>
-                        <li><a href="./pages/kas-management/kas-management.html"><i class="fas fa-wallet"></i> Kas</a></li>
-                        <li><a href="./pages/hutang-piutang/hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang</a></li>
+                        <li><a href="./pages/riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat Transaksi</a></li>
+                        <li><a href="./pages/modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal Harian</a></li>
+                        <li><a href="./pages/kas-management.html"><i class="fas fa-wallet"></i> Kas Management</a></li>
+                        <li><a href="./pages/hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang Piutang</a></li>
                     </ul>
                 </div>
             </div>
@@ -821,9 +842,9 @@
                 </div>
                 <div class="nav-dropdown" id="dropdown-lainnya">
                     <ul>
-                        <li><a href="./pages/laporan/laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
-                        <li><a href="./pages/data-pelanggan/data-pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
-                        <li><a href="./pages/telegram/telegram.html"><i class="fas fa-paper-plane"></i> Telegram</a></li>
+                        <li><a href="./pages/laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+                        <li><a href="./pages/data-pelanggan.html"><i class="fas fa-users"></i> Data Pelanggan</a></li>
+                        <li><a href="./pages/telegram.html"><i class="fas fa-paper-plane"></i> Telegram</a></li>
                     </ul>
                 </div>
             </div>
@@ -839,10 +860,10 @@
                 </div>
                 <div class="nav-dropdown" id="dropdown-pengaturan">
                     <ul>
-                        <li><a href="./pages/setting/setting.html"><i class="fas fa-sliders-h"></i> Setting</a></li>
-                        <li><a href="./pages/printer/printer.html"><i class="fas fa-print"></i> Printer</a></li>
-                        <li><a href="./pages/user/user.html"><i class="fas fa-user-cog"></i> User</a></li>
-                        <li><a href="./pages/reset/reset.html"><i class="fas fa-redo"></i> Reset Data</a></li>
+                        <li><a href="./pages/setting.html"><i class="fas fa-sliders-h"></i> Setting</a></li>
+                        <li><a href="./pages/printer.html"><i class="fas fa-print"></i> Printer</a></li>
+                        <li><a href="./pages/user.html"><i class="fas fa-user-cog"></i> User</a></li>
+                        <li><a href="./pages/reset.html"><i class="fas fa-redo"></i> Reset Data</a></li>
                     </ul>
                 </div>
             </div>
@@ -875,7 +896,6 @@
             </div>
             
             <div class="header-actions">
-                <!-- DARK MODE TOGGLE -->
                 <button class="btn-darkmode" onclick="toggleDarkMode()" title="Toggle Dark Mode">
                     <i class="fas fa-moon"></i>
                     <i class="fas fa-sun"></i>
@@ -886,151 +906,145 @@
             </div>
         </header>
 
-        <!-- ===== RINGKASAN HARI INI ===== -->
-        <section class="summary-section">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fas fa-chart-line"></i> Ringkasan Hari Ini</h2>
-            </div>
+        <!-- CONTENT WRAPPER -->
+        <div class="content-wrapper">
             
-            <div class="summary-grid">
-                <div class="summary-card penjualan">
-                    <div class="summary-header">
-                        <div class="summary-icon-large"><i class="fas fa-shopping-bag"></i></div>
-                        <div class="summary-label-large">Penjualan Produk</div>
+            <!-- RINGKASAN HARI INI -->
+            <section class="summary-section">
+                <div class="summary-grid">
+                    <div class="summary-card penjualan">
+                        <div class="summary-header">
+                            <div class="summary-icon-large"><i class="fas fa-shopping-bag"></i></div>
+                            <div class="summary-label-large">Penjualan Produk</div>
+                        </div>
+                        <div class="summary-value-large" id="total-penjualan">-</div>
                     </div>
-                    <div class="summary-value-large" id="total-penjualan">-</div>
-                </div>
-                
-                <div class="summary-card laba">
-                    <div class="summary-header">
-                        <div class="summary-icon-large"><i class="fas fa-chart-line"></i></div>
-                        <div class="summary-label-large">Laba Bersih</div>
+                    
+                    <div class="summary-card laba">
+                        <div class="summary-header">
+                            <div class="summary-icon-large"><i class="fas fa-chart-line"></i></div>
+                            <div class="summary-label-large">Laba Bersih</div>
+                        </div>
+                        <div class="summary-value-large" id="total-laba">-</div>
                     </div>
-                    <div class="summary-value-large" id="total-laba">-</div>
-                </div>
-                
-                <div class="summary-card transaksi">
-                    <div class="summary-header">
-                        <div class="summary-icon-large"><i class="fas fa-receipt"></i></div>
-                        <div class="summary-label-large">Jumlah Transaksi</div>
+                    
+                    <div class="summary-card transaksi">
+                        <div class="summary-header">
+                            <div class="summary-icon-large"><i class="fas fa-receipt"></i></div>
+                            <div class="summary-label-large">Jumlah Transaksi</div>
+                        </div>
+                        <div class="summary-value-large" id="total-transaksi">-</div>
                     </div>
-                    <div class="summary-value-large" id="total-transaksi">-</div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- ===== STATISTIK KAS ===== -->
-        <section class="statistik-section">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fas fa-th-large"></i> Statistik Kas</h2>
-            </div>
-            
-            <div class="statistik-grid">
-                <div class="statistik-item">
-                    <div class="statistik-icon purple"><i class="fas fa-coins"></i></div>
-                    <div class="statistik-content">
-                        <div class="statistik-label">Modal Awal</div>
-                        <div class="statistik-value" id="modal-awal">-</div>
+            <!-- STATISTIK KAS -->
+            <section class="statistik-section">
+                <div class="statistik-grid">
+                    <div class="statistik-item">
+                        <div class="statistik-icon purple"><i class="fas fa-coins"></i></div>
+                        <div class="statistik-content">
+                            <div class="statistik-label">Modal Awal</div>
+                            <div class="statistik-value" id="modal-awal">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="statistik-item">
+                        <div class="statistik-icon green"><i class="fas fa-arrow-down"></i></div>
+                        <div class="statistik-content">
+                            <div class="statistik-label">Uang Masuk</div>
+                            <div class="statistik-value" id="uang-masuk">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="statistik-item">
+                        <div class="statistik-icon red"><i class="fas fa-arrow-up"></i></div>
+                        <div class="statistik-content">
+                            <div class="statistik-label">Uang Keluar</div>
+                            <div class="statistik-value" id="uang-keluar">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="statistik-item">
+                        <div class="statistik-icon blue"><i class="fas fa-mobile-alt"></i></div>
+                        <div class="statistik-content">
+                            <div class="statistik-label">Top Up</div>
+                            <div class="statistik-value" id="top-up">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="statistik-item">
+                        <div class="statistik-icon orange"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="statistik-content">
+                            <div class="statistik-label">Tarik Tunai</div>
+                            <div class="statistik-value" id="tarik-tunai">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="statistik-item">
+                        <div class="statistik-icon pink"><i class="fas fa-exchange-alt"></i></div>
+                        <div class="statistik-content">
+                            <div class="statistik-label">Hutang Masuk Kas</div>
+                            <div class="statistik-value" id="hutang-masuk">-</div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="statistik-item">
-                    <div class="statistik-icon green"><i class="fas fa-arrow-down"></i></div>
-                    <div class="statistik-content">
-                        <div class="statistik-label">Uang Masuk</div>
-                        <div class="statistik-value" id="uang-masuk">-</div>
-                    </div>
-                </div>
-                
-                <div class="statistik-item">
-                    <div class="statistik-icon red"><i class="fas fa-arrow-up"></i></div>
-                    <div class="statistik-content">
-                        <div class="statistik-label">Uang Keluar</div>
-                        <div class="statistik-value" id="uang-keluar">-</div>
-                    </div>
-                </div>
-                
-                <div class="statistik-item">
-                    <div class="statistik-icon blue"><i class="fas fa-mobile-alt"></i></div>
-                    <div class="statistik-content">
-                        <div class="statistik-label">Top Up</div>
-                        <div class="statistik-value" id="top-up">-</div>
-                    </div>
-                </div>
-                
-                <div class="statistik-item">
-                    <div class="statistik-icon orange"><i class="fas fa-hand-holding-usd"></i></div>
-                    <div class="statistik-content">
-                        <div class="statistik-label">Tarik Tunai</div>
-                        <div class="statistik-value" id="tarik-tunai">-</div>
-                    </div>
-                </div>
-                
-                <div class="statistik-item">
-                    <div class="statistik-icon pink"><i class="fas fa-exchange-alt"></i></div>
-                    <div class="statistik-content">
-                        <div class="statistik-label">Hutang Masuk Kas</div>
-                        <div class="statistik-value" id="hutang-masuk">-</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- ===== PERHITUNGAN KAS - DENGAN DROPDOWN ===== -->
-        <section class="kas-calc-section">
-            <!-- Header yang bisa diklik -->
-            <div class="kas-calc-header" onclick="toggleKasCalc()">
-                <div class="kas-calc-title-group">
-                    <i class="fas fa-calculator"></i>
-                    <h3>Perhitungan Kas</h3>
-                </div>
-                <div class="kas-calc-arrow" id="kas-calc-arrow">
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
-            
-            <!-- Content yang bisa di-expand/collapse -->
-            <div class="kas-calc-content" id="kas-calc-content">
-                <div class="kas-formula">
-                    <div class="kas-formula-row">
-                        <span class="label">Modal Awal</span>
-                        <span class="value" id="calc-modal">-</span>
+            <!-- PERHITUNGAN KAS - DENGAN DROPDOWN -->
+            <section class="kas-calc-section">
+                <div class="kas-calc-header" onclick="toggleKasCalc()">
+                    <div class="kas-calc-title-group">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Perhitungan Kas</h3>
                     </div>
-                    <div class="kas-formula-row">
-                        <span class="label"><span class="operator plus">+</span> Uang Masuk</span>
-                        <span class="value" id="calc-masuk">-</span>
-                    </div>
-                    <div class="kas-formula-row">
-                        <span class="label"><span class="operator minus">−</span> Uang Keluar</span>
-                        <span class="value" id="calc-keluar">-</span>
-                    </div>
-                    <div class="kas-formula-row">
-                        <span class="label"><span class="operator plus">+</span> Top Up</span>
-                        <span class="value" id="calc-topup">-</span>
-                    </div>
-                    <div class="kas-formula-row">
-                        <span class="label"><span class="operator minus">−</span> Tarik Tunai</span>
-                        <span class="value" id="calc-tarik">-</span>
-                    </div>
-                    <div class="kas-formula-row">
-                        <span class="label"><span class="operator plus">+</span> Hutang Masuk Kas</span>
-                        <span class="value" id="calc-hutang-masuk">-</span>
-                    </div>
-                    <div class="kas-formula-row">
-                        <span class="label"><span class="operator minus">−</span> Hutang Dibayar</span>
-                        <span class="value" id="calc-hutang-bayar">-</span>
-                    </div>
-                    <div class="kas-formula-row total">
-                        <span class="label"><i class="fas fa-wallet"></i> Sisa Kas</span>
-                        <span class="value" id="sisa-kas">-</span>
+                    <div class="kas-calc-arrow" id="kas-calc-arrow">
+                        <i class="fas fa-chevron-down"></i>
                     </div>
                 </div>
-            </div>
-        </section>
+                
+                <div class="kas-calc-content" id="kas-calc-content">
+                    <div class="kas-formula">
+                        <div class="kas-formula-row">
+                            <span class="label">Modal Awal</span>
+                            <span class="value" id="calc-modal">-</span>
+                        </div>
+                        <div class="kas-formula-row">
+                            <span class="label"><span class="operator plus">+</span> Uang Masuk</span>
+                            <span class="value" id="calc-masuk">-</span>
+                        </div>
+                        <div class="kas-formula-row">
+                            <span class="label"><span class="operator minus">−</span> Uang Keluar</span>
+                            <span class="value" id="calc-keluar">-</span>
+                        </div>
+                        <div class="kas-formula-row">
+                            <span class="label"><span class="operator plus">+</span> Top Up</span>
+                            <span class="value" id="calc-topup">-</span>
+                        </div>
+                        <div class="kas-formula-row">
+                            <span class="label"><span class="operator minus">−</span> Tarik Tunai</span>
+                            <span class="value" id="calc-tarik">-</span>
+                        </div>
+                        <div class="kas-formula-row">
+                            <span class="label"><span class="operator plus">+</span> Hutang Masuk Kas</span>
+                            <span class="value" id="calc-hutang-masuk">-</span>
+                        </div>
+                        <div class="kas-formula-row">
+                            <span class="label"><span class="operator minus">−</span> Hutang Dibayar</span>
+                            <span class="value" id="calc-hutang-bayar">-</span>
+                        </div>
+                        <div class="kas-formula-row total">
+                            <span class="label"><i class="fas fa-wallet"></i> Sisa Kas</span>
+                            <span class="value" id="sisa-kas">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <footer class="dashboard-footer">
-            <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
-        </footer>
+            <footer class="page-footer">
+                <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
+            </footer>
+        </div>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1052,7 +1066,7 @@
         const auth = firebase.auth();
         const database = firebase.database();
 
-        // ===== DARK MODE FUNCTIONS =====
+        // Dark Mode
         function initDarkMode() {
             const savedTheme = localStorage.getItem('webpos-theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1062,16 +1076,9 @@
         function toggleDarkMode() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('webpos-theme', newTheme);
             updateMetaThemeColor(newTheme);
-            
-            // Add animation effect
-            document.body.style.transition = 'all 0.5s ease';
-            setTimeout(() => {
-                document.body.style.transition = 'all 0.3s ease';
-            }, 500);
         }
         
         function updateMetaThemeColor(theme) {
@@ -1081,35 +1088,27 @@
             }
         }
 
-        // ===== TOGGLE PERHITUNGAN KAS DROPDOWN =====
+        // Toggle Perhitungan Kas Dropdown
         function toggleKasCalc() {
             const content = document.getElementById('kas-calc-content');
             const arrow = document.getElementById('kas-calc-arrow');
-            const header = document.querySelector('.kas-calc-header');
             
             content.classList.toggle('open');
             arrow.classList.toggle('rotate');
-            header.classList.toggle('active');
             
-            // Save state to localStorage
             const isOpen = content.classList.contains('open');
             localStorage.setItem('kas-calc-open', isOpen);
         }
         
-        // Restore Perhitungan Kas dropdown state
         function restoreKasCalc() {
             const isOpen = localStorage.getItem('kas-calc-open') === 'true';
             if (isOpen) {
-                const content = document.getElementById('kas-calc-content');
-                const arrow = document.getElementById('kas-calc-arrow');
-                const header = document.querySelector('.kas-calc-header');
-                content.classList.add('open');
-                arrow.classList.add('rotate');
-                header.classList.add('active');
+                document.getElementById('kas-calc-content').classList.add('open');
+                document.getElementById('kas-calc-arrow').classList.add('rotate');
             }
         }
 
-        // Dropdown Toggle Function untuk Sidebar
+        // Dropdown Sidebar
         function toggleDropdown(section) {
             const dropdown = document.getElementById(`dropdown-${section}`);
             const arrow = document.getElementById(`arrow-${section}`);
@@ -1137,42 +1136,28 @@
             });
         }
 
-        function formatRupiah(angka) {
-            if (!angka || angka === 0) return 'Rp 0';
-            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-
-        function getToday() {
-            return new Date().toISOString().split('T')[0];
-        }
-
-        function updateElement(id, value) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value;
-        }
-
+        // Sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
             const overlay = document.getElementById('overlay');
             
-            if (window.innerWidth > 768) {
-                sidebar.classList.toggle('closed');
-                mainContent.classList.toggle('expanded');
-            } else {
+            if (window.innerWidth <= 768) {
                 sidebar.classList.toggle('open');
                 overlay.classList.toggle('active');
             }
         }
 
-        document.getElementById('overlay').addEventListener('click', toggleSidebar);
+        document.getElementById('overlay').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
 
-        function refreshData() {
-            const btn = document.querySelector('.btn-icon i.fa-sync-alt');
-            btn.classList.add('fa-spin');
-            loadDashboardData().then(() => {
-                setTimeout(() => btn.classList.remove('fa-spin'), 500);
-            });
+        // Utility
+        function formatRupiah(angka) {
+            if (!angka || angka === 0) return 'Rp 0';
+            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
         function updateDate() {
@@ -1181,10 +1166,29 @@
                 new Date().toLocaleDateString('id-ID', options);
         }
 
+        function updateElement(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+
+        function refreshData() {
+            const btn = document.querySelector('.btn-icon i.fa-sync-alt');
+            if (btn) {
+                btn.classList.add('fa-spin');
+                loadDashboardData().then(() => {
+                    setTimeout(() => btn.classList.remove('fa-spin'), 500);
+                });
+            } else {
+                loadDashboardData();
+            }
+        }
+
+        // Load Dashboard Data
         async function loadDashboardData() {
-            const today = getToday();
+            const today = new Date().toISOString().split('T')[0];
             
             try {
+                // Data Transaksi
                 const transaksiSnap = await database.ref(`transaksi/${today}`).once('value');
                 let penjualan = 0, transaksi = 0, laba = 0;
                 let uangMasuk = 0, uangKeluar = 0;
@@ -1221,14 +1225,17 @@
                     });
                 }
 
+                // Modal Harian
                 const modalSnap = await database.ref(`modal_harian/${today}`).once('value');
                 const modalAwal = modalSnap.val()?.jumlah || 0;
 
+                // Pembelian
                 const beliSnap = await database.ref(`pembelian/${today}`).once('value');
                 let pembelian = 0;
                 beliSnap.forEach(c => pembelian += c.val().total || 0);
                 uangKeluar += pembelian;
 
+                // Kas Management
                 const kasSnap = await database.ref(`kas_management/${today}`).once('value');
                 if (kasSnap.exists()) {
                     kasSnap.forEach(child => {
@@ -1243,8 +1250,10 @@
                     });
                 }
 
+                // Perhitungan Kas
                 const sisaKas = modalAwal + uangMasuk - uangKeluar + topUp - tarikTunai + hutangMasuk - hutangBayar;
 
+                // Update UI
                 updateElement('total-penjualan', formatRupiah(penjualan));
                 updateElement('total-laba', formatRupiah(laba));
                 updateElement('total-transaksi', transaksi + ' Transaksi');
@@ -1278,10 +1287,12 @@
         }
 
         function setupRealtime() {
-            database.ref(`transaksi/${getToday()}`).on('value', loadDashboardData);
-            database.ref(`kas_management/${getToday()}`).on('value', loadDashboardData);
+            const today = new Date().toISOString().split('T')[0];
+            database.ref(`transaksi/${today}`).on('value', loadDashboardData);
+            database.ref(`kas_management/${today}`).on('value', loadDashboardData);
         }
 
+        // Auth
         auth.onAuthStateChanged(user => {
             if (!user) return window.location.replace('./login.html');
             
@@ -1291,7 +1302,7 @@
             
             initDarkMode();
             restoreDropdowns();
-            restoreKasCalc(); // Restore Perhitungan Kas dropdown state
+            restoreKasCalc();
             updateDate();
             loadDashboardData();
             setupRealtime();
@@ -1301,6 +1312,7 @@
             auth.signOut().then(() => window.location.replace('./login.html'));
         }
 
+        // Auto refresh setiap 30 detik
         setInterval(loadDashboardData, 30000);
     </script>
 </body>
