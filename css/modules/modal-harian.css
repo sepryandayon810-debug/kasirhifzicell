@@ -1,0 +1,27 @@
+.modal-harian-container { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+.modal-input-card { grid-row: span 2; }
+.card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+.card-header { padding: 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-dark); }
+.card-header h3 { margin: 0; font-size: var(--font-normal); display: flex; align-items: center; gap: 10px; }
+.card-body { padding: 20px; }
+.current-date-display { text-align: center; padding: 15px; background: var(--bg-dark); border-radius: 10px; margin-bottom: 20px; font-size: var(--font-large); font-weight: 600; color: var(--primary-color); }
+.current-date-display i { margin-right: 10px; }
+.input-group { display: flex; align-items: center; background: var(--bg-dark); border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; }
+.input-prefix { padding: 12px 15px; background: var(--bg-card); border-right: 1px solid var(--border-color); font-weight: 600; color: var(--text-secondary); }
+.input-group input { flex: 1; border: none; background: transparent; padding: 12px 15px; color: var(--text-primary); font-size: var(--font-large); font-weight: 600; }
+.input-group input:focus { outline: none; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-lg { padding: 15px 30px; font-size: var(--font-normal); }
+.history-card { grid-column: 2; }
+.summary-card { grid-column: 2; }
+.summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.summary-item { background: var(--bg-dark); padding: 15px; border-radius: 8px; }
+.summary-item label { display: block; font-size: var(--font-small); color: var(--text-secondary); margin-bottom: 5px; }
+.summary-item value { display: block; font-size: var(--font-large); font-weight: 700; color: var(--text-primary); }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; padding: 12px; font-size: var(--font-small); color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+.data-table td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.status-aktif { background: rgba(16, 185, 129, 0.2); color: var(--success-color); }
+.status-closed { background: rgba(107, 114, 128, 0.2); color: #6b7280; }
+@media (max-width: 1024px) { .modal-harian-container { grid-template-columns: 1fr; } .history-card, .summary-card { grid-column: 1; } .modal-input-card { grid-row: span 1; } }
