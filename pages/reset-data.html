@@ -1,249 +1,761 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebPOS - Reset Data</title>
-    <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/header.css">
-    <link rel="stylesheet" href="../css/responsive.css">
-    <link rel="stylesheet" href="../css/modules/reset-data.css">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#6366f1">
+    <title>WebPOS - [NAMA_HALAMAN]</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            height: -webkit-fill-available;
+        }
+        
+        /* ===== LIGHT MODE (Default) ===== */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hover: #f1f5f9;
+            
+            --accent-purple: #8b5cf6;
+            --accent-purple-light: #a78bfa;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-green: #10b981;
+            --accent-emerald: #34d399;
+            --accent-red: #ef4444;
+            --accent-rose: #fb7185;
+            --accent-orange: #f97316;
+            --accent-amber: #fbbf24;
+            --accent-pink: #ec4899;
+            --accent-indigo: #6366f1;
+            --accent-violet: #8b5cf6;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            
+            --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #fff1f2 100%);
+            --sidebar-header-bg: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            
+            --mobile-nav-height: 70px;
+            --sidebar-width: 280px;
+        }
+        
+        /* ===== DARK MODE ===== */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            
+            --accent-purple: #a78bfa;
+            --accent-purple-light: #c4b5fd;
+            --accent-blue: #60a5fa;
+            --accent-cyan: #22d3ee;
+            --accent-teal: #2dd4bf;
+            --accent-green: #34d399;
+            --accent-emerald: #6ee7b7;
+            --accent-red: #f87171;
+            --accent-rose: #fda4af;
+            --accent-orange: #fb923c;
+            --accent-amber: #fcd34d;
+            --accent-pink: #f472b6;
+            --accent-indigo: #818cf8;
+            --accent-violet: #a78bfa;
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.4);
+            
+            --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+            --sidebar-header-bg: linear-gradient(135deg, #3730a3, #581c87);
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            height: -webkit-fill-available;
+            background: var(--bg-secondary);
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--sidebar-header-bg);
+            flex-shrink: 0;
+        }
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .sidebar-nav { 
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        /* Dropdown Section */
+        .nav-section { margin-bottom: 8px; }
+        
+        .nav-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+        }
+        .nav-section-header:hover {
+            background: var(--bg-hover);
+        }
+        .nav-section-header.active {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
+        }
+        
+        .nav-section-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .nav-section.utama .nav-section-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--accent-blue); }
+        .nav-section.transaksi .nav-section-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--accent-emerald); }
+        .nav-section.lainnya .nav-section-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: var(--accent-pink); }
+        .nav-section.pengaturan .nav-section-icon { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: var(--accent-purple); }
+        
+        [data-theme="dark"] .nav-section.utama .nav-section-icon { background: rgba(59,130,246,0.2); }
+        [data-theme="dark"] .nav-section.transaksi .nav-section-icon { background: rgba(16,185,129,0.2); }
+        [data-theme="dark"] .nav-section.lainnya .nav-section-icon { background: rgba(236,72,153,0.2); }
+        [data-theme="dark"] .nav-section.pengaturan .nav-section-icon { background: rgba(139,92,246,0.2); }
+        
+        .nav-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .dropdown-arrow {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+        }
+        .dropdown-arrow.rotate { transform: rotate(180deg); color: var(--accent-purple); }
+        
+        .nav-dropdown {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 12px;
+        }
+        .nav-dropdown.open { max-height: 500px; }
+        
+        .nav-dropdown ul { list-style: none; padding: 4px 0; }
+        .nav-dropdown li { margin: 2px 0; }
+        .nav-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px 12px 48px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-dropdown a::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+        .nav-dropdown a:hover, .nav-dropdown a.active {
+            background: var(--bg-hover);
+            color: var(--accent-indigo);
+        }
+        .nav-dropdown a:hover::before, .nav-dropdown a.active::before {
+            background: var(--accent-indigo);
+            transform: scale(1.3);
+        }
+        .nav-dropdown a i { width: 18px; text-align: center; font-size: 14px; }
+        
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+        }
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05));
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: white;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 12px; color: var(--text-muted); }
+        
+        /* ===== MOBILE NAV ===== */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--mobile-nav-height);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+        .mobile-nav ul {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 100%;
+            list-style: none;
+        }
+        .mobile-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 11px;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .mobile-nav a i { font-size: 20px; }
+        .mobile-nav a.active { 
+            color: var(--accent-indigo); 
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+        }
+        
+        /* ===== OVERLAY ===== */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,23,42,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 99;
+        }
+        .overlay.active { display: block; }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* ===== HEADER ===== */
+        .main-header {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin: 20px 24px 24px 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .menu-toggle {
+            display: none;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .menu-toggle:hover {
+            border-color: var(--accent-indigo);
+            color: var(--accent-indigo);
+        }
+        .page-title h1 { 
+            font-size: 24px; 
+            font-weight: 700; 
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-title p { color: var(--text-secondary); font-size: 14px; }
+        .header-actions { display: flex; gap: 12px; }
+        
+        /* Dark Mode Toggle */
+        .btn-darkmode {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 20px;
+        }
+        .btn-darkmode:hover {
+            background: var(--accent-indigo);
+            color: white;
+            border-color: var(--accent-indigo);
+            transform: translateY(-2px);
+        }
+        .btn-darkmode .fa-sun { display: none; }
+        .btn-darkmode .fa-moon { display: block; }
+        
+        [data-theme="dark"] .btn-darkmode .fa-sun { display: block; }
+        [data-theme="dark"] .btn-darkmode .fa-moon { display: none; }
+        
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-icon:hover {
+            background: var(--accent-indigo);
+            color: white;
+            border-color: var(--accent-indigo);
+            transform: translateY(-2px);
+        }
+        
+        /* ===== CONTENT AREA ===== */
+        .content-wrapper {
+            flex: 1;
+            padding: 0 24px 24px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: auto;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 85%;
+                max-width: 300px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .mobile-nav {
+                display: block;
+            }
+            
+            .main-header {
+                margin: 16px 16px 20px 16px;
+                padding: 16px 20px;
+            }
+            
+            .page-title h1 {
+                font-size: 20px;
+            }
+            
+            .content-wrapper {
+                padding: 0 16px 100px 16px; /* 100px = mobile nav height + buffer */
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- MOBILE NAV - [SESUAIKAN ACTIVE] -->
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="[PATH_DASHBOARD]"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="[PATH_KASIR]"><i class="fas fa-cash-register"></i> Kasir</a></li>
+            <li><a href="[PATH_PRODUK]"><i class="fas fa-box"></i> Produk</a></li>
+            <li><a href="[PATH_LAPORAN]"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Menu</a></li>
+        </ul>
+    </nav>
+
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="logo">
-                <img src="../assets/images/logo.png" alt="Logo" id="sidebar-logo">
-                <div class="brand">
-                    <h3 id="nama-toko">WebPOS</h3>
-                    <small id="alamat-toko">Sistem POS</small>
+            <div class="logo"><i class="fas fa-cash-register"></i></div>
+            <h3>WebPOS</h3>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <!-- UTAMA -->
+            <div class="nav-section utama">
+                <div class="nav-section-header" onclick="toggleDropdown('utama')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-th-large"></i></div>
+                        <span class="nav-section-title">Utama</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-utama"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-utama">
+                    <ul>
+                        <li><a href="[PATH_DASHBOARD]"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li><a href="[PATH_KASIR]"><i class="fas fa-cash-register"></i> Kasir</a></li>
+                        <li><a href="[PATH_PRODUK]"><i class="fas fa-box"></i> Produk</a></li>
+                        <li><a href="[PATH_PEMBELIAN]"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
+                    </ul>
                 </div>
             </div>
-            <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
-        </div>
-        <div class="sidebar-search">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="menu-search" placeholder="Cari menu...">
+            
+            <!-- TRANSAKSI -->
+            <div class="nav-section transaksi">
+                <div class="nav-section-header" onclick="toggleDropdown('transaksi')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <span class="nav-section-title">Transaksi</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-transaksi"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-transaksi">
+                    <ul>
+                        <li><a href="[PATH_RIWAYAT]"><i class="fas fa-history"></i> Riwayat</a></li>
+                        <li><a href="[PATH_MODAL]"><i class="fas fa-money-bill-wave"></i> Modal</a></li>
+                        <li><a href="[PATH_KAS]"><i class="fas fa-wallet"></i> Kas</a></li>
+                        <li><a href="[PATH_HUTANG]"><i class="fas fa-hand-holding-usd"></i> Hutang</a></li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <nav class="sidebar-nav">
-            <ul id="menu-list">
-    <!-- ✅ TAMBAHKAN INI: Dashboard -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="../dashboard.html" class="menu-link">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
-    
-    <!-- Kasir -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="kasir.html" class="menu-link">
-            <i class="fas fa-cash-register"></i>
-            <span>Kasir</span>
-        </a>
-    </li>
-    
-    <!-- Produk -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="produk.html" class="menu-link">
-            <i class="fas fa-box"></i>
-            <span>Produk</span>
-        </a>
-    </li>
-    
-    <!-- Pembelian -->
-    <li class="menu-item" data-role="owner,admin">
-        <a href="pembelian.html" class="menu-link">
-            <i class="fas fa-shopping-cart"></i>
-            <span>Pembelian</span>
-        </a>
-    </li>
-    
-    <!-- Riwayat Transaksi -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="riwayat-transaksi.html" class="menu-link">
-            <i class="fas fa-history"></i>
-            <span>Riwayat Transaksi</span>
-        </a>
-    </li>
-    
-    <!-- Modal Harian -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="modal-harian.html" class="menu-link">
-            <i class="fas fa-money-bill-wave"></i>
-            <span>Modal Harian</span>
-        </a>
-    </li>
-    
-    <!-- Kas Management -->
-    <li class="menu-item" data-role="owner,admin">
-        <a href="kas-management.html" class="menu-link">
-            <i class="fas fa-wallet"></i>
-            <span>Kas Management</span>
-        </a>
-    </li>
-    
-    <!-- Hutang Piutang -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="hutang-piutang.html" class="menu-link">
-            <i class="fas fa-hand-holding-usd"></i>
-            <span>Hutang Piutang</span>
-        </a>
-    </li>
-    
-    <!-- Laporan -->
-    <li class="menu-item" data-role="owner,admin">
-        <a href="laporan.html" class="menu-link">
-            <i class="fas fa-chart-bar"></i>
-            <span>Laporan</span>
-        </a>
-    </li>
-    
-    <!-- Saldo Telegram -->
-    <li class="menu-item" data-role="owner,admin">
-        <a href="saldo-telegram.html" class="menu-link">
-            <i class="fab fa-telegram"></i>
-            <span>Saldo Telegram</span>
-        </a>
-    </li>
-    
-    <!-- Data Pelanggan (ACTIVE) -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="data-pelanggan.html" class="menu-link active">
-            <i class="fas fa-users"></i>
-            <span>Data Pelanggan</span>
-        </a>
-    </li>
-    
-    <!-- Management User -->
-    <li class="menu-item" data-role="owner,admin">
-        <a href="management-user.html" class="menu-link">
-            <i class="fas fa-user-cog"></i>
-            <span>Management User</span>
-        </a>
-    </li>
-    
-    <!-- Setting -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="setting.html" class="menu-link">
-            <i class="fas fa-cog"></i>
-            <span>Setting</span>
-        </a>
-    </li>
-    
-    <!-- Printer & Struk -->
-    <li class="menu-item" data-role="owner,admin,kasir">
-        <a href="printer-struk.html" class="menu-link">
-            <i class="fas fa-print"></i>
-            <span>Printer & Struk</span>
-        </a>
-    </li>
-    
-    <!-- Reset Data -->
-    <li class="menu-item" data-role="owner" id="menu-reset">
-        <a href="reset-data.html" class="menu-link">
-            <i class="fas fa-trash-alt"></i>
-            <span>Reset Data</span>
-        </a>
-    </li>
-</ul>
+            
+            <!-- LAINNYA -->
+            <div class="nav-section lainnya">
+                <div class="nav-section-header" onclick="toggleDropdown('lainnya')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-ellipsis-h"></i></div>
+                        <span class="nav-section-title">Lainnya</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-lainnya"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-lainnya">
+                    <ul>
+                        <li><a href="[PATH_LAPORAN]"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+                        <li><a href="[PATH_PELANGGAN]"><i class="fas fa-users"></i> Pelanggan</a></li>
+                        <li><a href="[PATH_TELEGRAM]"><i class="fas fa-paper-plane"></i> Telegram</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- PENGATURAN -->
+            <div class="nav-section pengaturan">
+                <div class="nav-section-header" onclick="toggleDropdown('pengaturan')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-cog"></i></div>
+                        <span class="nav-section-title">Pengaturan</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-pengaturan"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-pengaturan">
+                    <ul>
+                        <li><a href="[PATH_SETTING]"><i class="fas fa-sliders-h"></i> Setting</a></li>
+                        <li><a href="[PATH_PRINTER]"><i class="fas fa-print"></i> Printer</a></li>
+                        <li><a href="[PATH_USER]"><i class="fas fa-user-cog"></i> User</a></li>
+                        <li><a href="[PATH_RESET]"><i class="fas fa-redo"></i> Reset Data</a></li>
+                    </ul>
+                </div>
+            </div>
         </nav>
+        
         <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                <div class="user-details"><span id="user-name">Loading...</span><small id="user-role">Loading...</small></div>
+            <div class="user-card">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">Loading...</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+                <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
-            <button class="btn-logout" id="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" id="main-content">
         <header class="main-header">
             <div class="header-left">
-                <button class="mobile-menu-toggle" id="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
-                <h2 id="page-title">Reset Data</h2>
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1>[NAMA_HALAMAN]</h1>
+                    <p id="current-date">Memuat...</p>
+                </div>
             </div>
-            <div class="header-right">
-                <button class="header-btn" id="cloud-status"><i class="fas fa-cloud"></i><span>Online</span></button>
-                <div class="datetime" id="header-datetime"><span id="current-time">--:--</span><small id="current-date">--/--/----</small></div>
+            
+            <div class="header-actions">
+                <button class="btn-darkmode" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
             </div>
         </header>
 
-        <div class="content-area">
-            <div class="reset-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>PERINGATAN!</h3>
-                <p>Fitur ini akan menghapus data secara permanen. Tindakan ini tidak dapat dibatalkan.</p>
-            </div>
-
-            <div class="reset-options">
-                <div class="card reset-card">
-                    <div class="card-header"><h3><i class="fas fa-shopping-cart"></i> Reset Transaksi</h3></div>
-                    <div class="card-body">
-                        <p>Hapus semua data transaksi penjualan dan riwayat kasir.</p>
-                        <button class="btn btn-danger" onclick="confirmReset('transaksi')"><i class="fas fa-trash"></i> Reset Transaksi</button>
-                    </div>
-                </div>
-
-                <div class="card reset-card">
-                    <div class="card-header"><h3><i class="fas fa-box"></i> Reset Produk</h3></div>
-                    <div class="card-body">
-                        <p>Hapus semua data produk dan stok.</p>
-                        <button class="btn btn-danger" onclick="confirmReset('produk')"><i class="fas fa-trash"></i> Reset Produk</button>
-                    </div>
-                </div>
-
-                <div class="card reset-card">
-                    <div class="card-header"><h3><i class="fas fa-users"></i> Reset Pelanggan</h3></div>
-                    <div class="card-body">
-                        <p>Hapus semua data pelanggan.</p>
-                        <button class="btn btn-danger" onclick="confirmReset('pelanggan')"><i class="fas fa-trash"></i> Reset Pelanggan</button>
-                    </div>
-                </div>
-
-                <div class="card reset-card danger">
-                    <div class="card-header"><h3><i class="fas fa-radiation"></i> Reset TOTAL</h3></div>
-                    <div class="card-body">
-                        <p>Hapus SEMUA DATA kecuali pengaturan dan user.</p>
-                        <button class="btn btn-danger btn-lg" onclick="confirmReset('all')"><i class="fas fa-exclamation-triangle"></i> RESET SEMUA DATA</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="backup-section">
-                <h3><i class="fas fa-download"></i> Backup Data Terlebih Dahulu</h3>
-                <p>Disarankan untuk melakukan backup sebelum reset data.</p>
-                <button class="btn btn-success" id="btn-backup"><i class="fas fa-file-download"></i> Download Backup JSON</button>
-            </div>
+        <!-- CONTENT WRAPPER -->
+        <div class="content-wrapper">
+            
+            <!-- [ISI KONTEN HALAMAN DI SINI] -->
+            
+            <footer class="page-footer">
+                <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
+            </footer>
         </div>
     </main>
 
-    <div class="modal" id="modal-confirm">
-        <div class="modal-content">
-            <div class="modal-header"><h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi Reset</h3></div>
-            <div class="modal-body">
-                <p>Anda akan menghapus data <strong id="reset-target">-</strong>.</p>
-                <p>Masukkan password konfirmasi untuk melanjutkan:</p>
-                <input type="password" id="confirm-password" class="form-control" placeholder="Password">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Batal</button>
-                <button class="btn btn-danger" id="btn-confirm-reset"><i class="fas fa-trash"></i> Ya, Hapus Data</button>
-            </div>
-        </div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9XyvgofyFyX5aUMARcA_GO-N2Tcw725Q",
+            authDomain: "goodhifzicell.firebaseapp.com",
+            databaseURL: "https://goodhifzicell-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "goodhifzicell",
+            storageBucket: "goodhifzicell.firebasestorage.app",
+            messagingSenderId: "306835710868",
+            appId: "1:306835710868:web:817551e6c8c19c8eca6581"
+        };
 
-    <script src="../js/firebase-config.js"></script>
-<script src="../js/utils.js"></script>
-<script src="../js/auth.js"></script>
-    <script src="../js/modules/reset/reset-main.js"></script>
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Dark Mode
+        function initDarkMode() {
+            const savedTheme = localStorage.getItem('webpos-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateMetaThemeColor(savedTheme);
+        }
+        
+        function toggleDarkMode() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('webpos-theme', newTheme);
+            updateMetaThemeColor(newTheme);
+        }
+        
+        function updateMetaThemeColor(theme) {
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#6366f1');
+            }
+        }
+
+        // Dropdown
+        function toggleDropdown(section) {
+            const dropdown = document.getElementById(`dropdown-${section}`);
+            const arrow = document.getElementById(`arrow-${section}`);
+            const header = dropdown.previousElementSibling;
+            
+            dropdown.classList.toggle('open');
+            arrow.classList.toggle('rotate');
+            header.classList.toggle('active');
+            
+            const isOpen = dropdown.classList.contains('open');
+            localStorage.setItem(`dropdown-${section}`, isOpen);
+        }
+        
+        function restoreDropdowns() {
+            ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
+                const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
+                if (isOpen) {
+                    const dropdown = document.getElementById(`dropdown-${section}`);
+                    const arrow = document.getElementById(`arrow-${section}`);
+                    const header = dropdown.previousElementSibling;
+                    dropdown.classList.add('open');
+                    arrow.classList.add('rotate');
+                    header.classList.add('active');
+                }
+            });
+        }
+
+        // Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            }
+        }
+
+        document.getElementById('overlay').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        // Utility
+        function formatRupiah(angka) {
+            if (!angka || angka === 0) return 'Rp 0';
+            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = 
+                new Date().toLocaleDateString('id-ID', options);
+        }
+
+        function updateElement(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+
+        // Auth
+        auth.onAuthStateChanged(user => {
+            if (!user) return window.location.replace('[PATH_LOGIN]');
+            
+            const email = user.email || 'User';
+            updateElement('user-name', email);
+            updateElement('user-avatar', email.charAt(0).toUpperCase());
+            
+            initDarkMode();
+            restoreDropdowns();
+            updateDate();
+        });
+
+        function logout() {
+            auth.signOut().then(() => window.location.replace('[PATH_LOGIN]'));
+        }
+    </script>
 </body>
 </html>
