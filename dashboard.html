@@ -4,9 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebPOS - Dashboard</title>
+    <!-- Gunakan CSS yang sama dengan kasir -->
     <link rel="stylesheet" href="./css/main.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Tambahan style untuk dashboard */
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: white; }
+        .sidebar { width: 250px; height: 100vh; background: #1a1a2e; position: fixed; left: 0; top: 0; border-right: 1px solid #333; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #333; }
+        .sidebar-header h3 { color: #8b5cf6; margin: 0; }
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 20px 0; }
+        .sidebar-nav li { margin: 5px 0; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: #ccc; text-decoration: none; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(139,92,246,0.1); color: #8b5cf6; border-right: 3px solid #8b5cf6; }
+        .main-content { margin-left: 250px; padding: 30px; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .stat-card { background: #1a1a2e; padding: 25px; border-radius: 15px; border: 1px solid #333; }
+    </style>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -15,12 +31,13 @@
 </head>
 <body>
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
         <div class="sidebar-header">
-            <h3>WebPOS</h3>
+            <h3><i class="fas fa-cash-register"></i> WebPOS</h3>
         </div>
         <nav class="sidebar-nav">
             <ul>
+                <!-- ✅ PATH YANG BENAR -->
                 <li><a href="./dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="./pages/kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
                 <li><a href="./pages/produk.html"><i class="fas fa-box"></i> Produk</a></li>
@@ -28,28 +45,37 @@
                 <li><a href="./pages/laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
             </ul>
         </nav>
-        <div class="sidebar-footer">
-            <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
         <header class="main-header">
             <h2>Dashboard</h2>
-            <div class="user-info">
+            <div>
                 <span id="user-name">Loading...</span>
-                <button onclick="logout()">Logout</button>
+                <button onclick="logout()" style="margin-left: 15px; padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </header>
 
-        <div class="content-area">
-            <h3>Selamat Datang di WebPOS!</h3>
-            <p>Dashboard utama sistem point of sale.</p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 style="color: #8b5cf6; margin: 0;">Rp 0</h3>
+                <p style="color: #888; margin: 5px 0 0;">Penjualan Hari Ini</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="color: #8b5cf6; margin: 0;">0</h3>
+                <p style="color: #888; margin: 5px 0 0;">Total Produk</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="color: #8b5cf6; margin: 0;">0</h3>
+                <p style="color: #888; margin: 5px 0 0;">Transaksi Hari Ini</p>
+            </div>
         </div>
     </main>
 
-    <!-- Firebase Config Inline -->
+    <!-- Firebase Config -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD9XyvgofyFyX5aUMARcA_GO-N2Tcw725Q",
@@ -65,17 +91,11 @@
         const auth = firebase.auth();
         const database = firebase.database();
         
-        // ✅ CEK SESSION - Hanya sekali saat load
-        let checked = false;
+        // Cek session
         auth.onAuthStateChanged(function(user) {
-            if (checked) return; // Hindari loop
-            checked = true;
-            
             if (!user) {
-                // Belum login, redirect ke login
                 window.location.replace('./login.html');
             } else {
-                // Sudah login, tampilkan nama user
                 document.getElementById('user-name').textContent = user.email;
             }
         });
