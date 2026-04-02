@@ -5,119 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebPOS - Login</title>
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/darkmode.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
-<body class="login-page">
+<body>
     <div class="login-container">
         <div class="login-box">
             <div class="logo-section">
-                <img src="assets/images/logo.png" alt="Logo" id="loginLogo" onerror="this.style.display='none'">
+                <img src="assets/images/logo.png" alt="Logo" id="login-logo" onerror="this.style.display='none'">
                 <h1>WebPOS</h1>
-                <p>Sistem Point of Sale Modern</p>
+                <p>Sistem Point of Sale</p>
             </div>
             
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
+            <form id="login-form">
+                <div class="input-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="Masukkan email">
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="Masukkan email" required>
+                    </div>
                 </div>
                 
-                <div class="form-group">
+                <div class="input-group">
                     <label for="password">Password</label>
-                    <div class="password-input">
-                        <input type="password" id="password" name="password" required placeholder="Masukkan password">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Masukkan password" required>
                         <button type="button" class="toggle-password" onclick="togglePassword()">
-                            <span id="eyeIcon">👁️</span>
+                            <i class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="form-group remember-me">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="rememberMe">
-                        <span>Ingat saya</span>
+                <div class="remember-me">
+                    <label>
+                        <input type="checkbox" id="remember"> Ingat saya
                     </label>
                 </div>
                 
                 <button type="submit" class="btn-login">
-                    <span id="loginText">Masuk</span>
-                    <div id="loginLoading" class="loading-spinner" style="display: none;"></div>
+                    <i class="fas fa-sign-in-alt"></i> Masuk
                 </button>
+                
+                <div id="error-message" class="error-message"></div>
             </form>
             
-            <div id="loginError" class="error-message"></div>
+            <div class="login-footer">
+                <p id="shift-info">Shift: <span id="current-shift">-</span></p>
+                <p id="date-info"></p>
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="js/firebase-config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <script>
-        // Check if already logged in
-        if (authManager.getCurrentUser()) {
-            window.location.href = 'dashboard.html';
-        }
-
-        // Toggle password visibility
-        function togglePassword() {
-            const password = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-            
-            if (password.type === 'password') {
-                password.type = 'text';
-                eyeIcon.textContent = '🙈';
-            } else {
-                password.type = 'password';
-                eyeIcon.textContent = '👁️';
-            }
-        }
-
-        // Login form handler
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginText = document.getElementById('loginText');
-            const loginLoading = document.getElementById('loginLoading');
-            const errorDiv = document.getElementById('loginError');
-            
-            // Show loading
-            loginText.style.display = 'none';
-            loginLoading.style.display = 'block';
-            errorDiv.textContent = '';
-            
-            const result = await authManager.login(email, password);
-            
-            if (result.success) {
-                // Save remember me
-                if (document.getElementById('rememberMe').checked) {
-                    localStorage.setItem('rememberEmail', email);
-                }
-                window.location.href = 'dashboard.html';
-            } else {
-                loginText.style.display = 'block';
-                loginLoading.style.display = 'none';
-                errorDiv.textContent = result.error;
-            }
-        });
-
-        // Load remembered email
-        window.addEventListener('load', () => {
-            const remembered = localStorage.getItem('rememberEmail');
-            if (remembered) {
-                document.getElementById('email').value = remembered;
-                document.getElementById('rememberMe').checked = true;
-            }
-        });
-    </script>
+    <script src="js/config/firebase-config.js"></script>
+    <script src="js/utils/formatters.js"></script>
+    <script src="js/utils/date-helper.js"></script>
+    <script src="js/auth/login.js"></script>
 </body>
 </html>
