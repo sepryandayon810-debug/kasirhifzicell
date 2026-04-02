@@ -583,24 +583,39 @@
             color: var(--text-primary);
         }
         
-        /* ===== PERHITUNGAN KAS ===== */
+        /* ===== PERHITUNGAN KAS - DENGAN DROPDOWN ===== */
         .kas-calc-section {
             background: var(--kas-calc-bg);
             border-radius: 24px;
             border: 1px solid var(--kas-calc-border);
-            padding: 32px;
             margin: 28px 0;
             box-shadow: var(--shadow);
+            overflow: hidden;
         }
+        
+        /* Header Dropdown Perhitungan Kas */
         .kas-calc-header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(99,102,241,0.2);
+            justify-content: space-between;
+            padding: 24px 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid transparent;
         }
-        .kas-calc-header i {
+        .kas-calc-header:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .kas-calc-header.active {
+            border-bottom-color: rgba(99,102,241,0.2);
+        }
+        
+        .kas-calc-title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .kas-calc-title-group i {
             width: 48px;
             height: 48px;
             border-radius: 14px;
@@ -612,11 +627,41 @@
             color: var(--accent-indigo);
             box-shadow: var(--shadow);
         }
-        .kas-calc-header h3 {
+        .kas-calc-title-group h3 {
             font-size: 20px;
             font-weight: 700;
             color: var(--text-primary);
         }
+        
+        /* Arrow untuk dropdown */
+        .kas-calc-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        .kas-calc-arrow.rotate {
+            transform: rotate(180deg);
+            color: var(--accent-indigo);
+        }
+        
+        /* Content yang bisa di-collapse */
+        .kas-calc-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+        .kas-calc-content.open {
+            max-height: 800px;
+            padding: 0 32px 32px 32px;
+        }
+        
         .kas-formula {
             display: flex;
             flex-direction: column;
@@ -699,8 +744,11 @@
             .statistik-grid { grid-template-columns: 1fr; }
             .summary-card { min-height: 160px; padding: 24px; }
             .summary-value-large { font-size: 32px; }
+            
+            .kas-calc-header { padding: 20px 24px; }
+            .kas-calc-content.open { padding: 0 24px 24px 24px; }
             .kas-formula-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .kas-calc-section { padding: 20px; }
+            .kas-formula-row.total .value { font-size: 22px; }
         }
     </style>
 </head>
@@ -928,45 +976,54 @@
             </div>
         </section>
 
-        <!-- ===== PERHITUNGAN KAS ===== -->
+        <!-- ===== PERHITUNGAN KAS - DENGAN DROPDOWN ===== -->
         <section class="kas-calc-section">
-            <div class="kas-calc-header">
-                <i class="fas fa-calculator"></i>
-                <h3>Perhitungan Kas</h3>
+            <!-- Header yang bisa diklik -->
+            <div class="kas-calc-header" onclick="toggleKasCalc()">
+                <div class="kas-calc-title-group">
+                    <i class="fas fa-calculator"></i>
+                    <h3>Perhitungan Kas</h3>
+                </div>
+                <div class="kas-calc-arrow" id="kas-calc-arrow">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
             </div>
             
-            <div class="kas-formula">
-                <div class="kas-formula-row">
-                    <span class="label">Modal Awal</span>
-                    <span class="value" id="calc-modal">-</span>
-                </div>
-                <div class="kas-formula-row">
-                    <span class="label"><span class="operator plus">+</span> Uang Masuk</span>
-                    <span class="value" id="calc-masuk">-</span>
-                </div>
-                <div class="kas-formula-row">
-                    <span class="label"><span class="operator minus">−</span> Uang Keluar</span>
-                    <span class="value" id="calc-keluar">-</span>
-                </div>
-                <div class="kas-formula-row">
-                    <span class="label"><span class="operator plus">+</span> Top Up</span>
-                    <span class="value" id="calc-topup">-</span>
-                </div>
-                <div class="kas-formula-row">
-                    <span class="label"><span class="operator minus">−</span> Tarik Tunai</span>
-                    <span class="value" id="calc-tarik">-</span>
-                </div>
-                <div class="kas-formula-row">
-                    <span class="label"><span class="operator plus">+</span> Hutang Masuk Kas</span>
-                    <span class="value" id="calc-hutang-masuk">-</span>
-                </div>
-                <div class="kas-formula-row">
-                    <span class="label"><span class="operator minus">−</span> Hutang Dibayar</span>
-                    <span class="value" id="calc-hutang-bayar">-</span>
-                </div>
-                <div class="kas-formula-row total">
-                    <span class="label"><i class="fas fa-wallet"></i> Sisa Kas</span>
-                    <span class="value" id="sisa-kas">-</span>
+            <!-- Content yang bisa di-expand/collapse -->
+            <div class="kas-calc-content" id="kas-calc-content">
+                <div class="kas-formula">
+                    <div class="kas-formula-row">
+                        <span class="label">Modal Awal</span>
+                        <span class="value" id="calc-modal">-</span>
+                    </div>
+                    <div class="kas-formula-row">
+                        <span class="label"><span class="operator plus">+</span> Uang Masuk</span>
+                        <span class="value" id="calc-masuk">-</span>
+                    </div>
+                    <div class="kas-formula-row">
+                        <span class="label"><span class="operator minus">−</span> Uang Keluar</span>
+                        <span class="value" id="calc-keluar">-</span>
+                    </div>
+                    <div class="kas-formula-row">
+                        <span class="label"><span class="operator plus">+</span> Top Up</span>
+                        <span class="value" id="calc-topup">-</span>
+                    </div>
+                    <div class="kas-formula-row">
+                        <span class="label"><span class="operator minus">−</span> Tarik Tunai</span>
+                        <span class="value" id="calc-tarik">-</span>
+                    </div>
+                    <div class="kas-formula-row">
+                        <span class="label"><span class="operator plus">+</span> Hutang Masuk Kas</span>
+                        <span class="value" id="calc-hutang-masuk">-</span>
+                    </div>
+                    <div class="kas-formula-row">
+                        <span class="label"><span class="operator minus">−</span> Hutang Dibayar</span>
+                        <span class="value" id="calc-hutang-bayar">-</span>
+                    </div>
+                    <div class="kas-formula-row total">
+                        <span class="label"><i class="fas fa-wallet"></i> Sisa Kas</span>
+                        <span class="value" id="sisa-kas">-</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1024,7 +1081,35 @@
             }
         }
 
-        // Dropdown Toggle Function
+        // ===== TOGGLE PERHITUNGAN KAS DROPDOWN =====
+        function toggleKasCalc() {
+            const content = document.getElementById('kas-calc-content');
+            const arrow = document.getElementById('kas-calc-arrow');
+            const header = document.querySelector('.kas-calc-header');
+            
+            content.classList.toggle('open');
+            arrow.classList.toggle('rotate');
+            header.classList.toggle('active');
+            
+            // Save state to localStorage
+            const isOpen = content.classList.contains('open');
+            localStorage.setItem('kas-calc-open', isOpen);
+        }
+        
+        // Restore Perhitungan Kas dropdown state
+        function restoreKasCalc() {
+            const isOpen = localStorage.getItem('kas-calc-open') === 'true';
+            if (isOpen) {
+                const content = document.getElementById('kas-calc-content');
+                const arrow = document.getElementById('kas-calc-arrow');
+                const header = document.querySelector('.kas-calc-header');
+                content.classList.add('open');
+                arrow.classList.add('rotate');
+                header.classList.add('active');
+            }
+        }
+
+        // Dropdown Toggle Function untuk Sidebar
         function toggleDropdown(section) {
             const dropdown = document.getElementById(`dropdown-${section}`);
             const arrow = document.getElementById(`arrow-${section}`);
@@ -1204,8 +1289,9 @@
             updateElement('user-name', email);
             updateElement('user-avatar', email.charAt(0).toUpperCase());
             
-            initDarkMode(); // Initialize dark mode on load
+            initDarkMode();
             restoreDropdowns();
+            restoreKasCalc(); // Restore Perhitungan Kas dropdown state
             updateDate();
             loadDashboardData();
             setupRealtime();
