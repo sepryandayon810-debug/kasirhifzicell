@@ -59,6 +59,7 @@
         </div>
     </div>
 
+    <!-- Scripts - TANPA auth.js -->
     <script src="./js/firebase-config.js"></script>
     <script src="./js/utils.js"></script>
     
@@ -72,12 +73,18 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const btnLogin = document.getElementById('btn-login');
+            
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
             
             try {
                 await auth.signInWithEmailAndPassword(email, password);
                 window.location.href = './dashboard.html';
             } catch (error) {
                 document.getElementById('error-message').textContent = error.message;
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
             }
         });
 
@@ -97,13 +104,13 @@
                     });
                 })
                 .then(function() {
-                    alert("Akun admin berhasil dibuat!\nEmail: admin@toko.com\nPassword: admin123");
+                    alert("✅ Akun admin berhasil dibuat!\n\nEmail: admin@toko.com\nPassword: admin123\n\nSilakan login.");
                 })
                 .catch(function(error) {
                     if (error.code === "auth/email-already-in-use") {
-                        alert("Akun sudah ada! Silakan login.");
+                        alert("⚠️ Akun sudah ada!\n\nSilakan login dengan:\nEmail: admin@toko.com\nPassword: admin123");
                     } else {
-                        alert("Error: " + error.message);
+                        alert("❌ Error: " + error.message);
                     }
                 });
         }
