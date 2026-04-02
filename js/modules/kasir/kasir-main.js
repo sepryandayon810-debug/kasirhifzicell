@@ -536,10 +536,24 @@ function handleMetodeChange() {
  * Proses pembayaran
  */
 async function prosesPembayaran() {
+    // ✅ TAMBAHKAN INI: Cek auth dulu
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('Sesi habis, silakan login ulang', 'error');
+        setTimeout(() => {
+            window.location.replace('../login.html');
+        }, 2000);
+        return;
+    }
+    
+    // Baru cek keranjang
     if (keranjang.length === 0) {
         showToast('Keranjang masih kosong', 'warning');
         return;
     }
+
+    // Lanjutkan proses...
+    const userId = user.uid;  // ✅ Sekarang aman, tidak null
     
     const total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
     const metodeSelect = document.getElementById('metode-pembayaran');
