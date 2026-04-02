@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Kasir</title>
     
-    <!-- CSS SAMA PERSIS DASHBOARD -->
+    <!-- CSS DASHBOARD -->
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/header.css">
@@ -14,6 +14,81 @@
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- OVERRIDE: Gradient sama dashboard -->
+    <style>
+        :root {
+            --sidebar-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --accent-indigo: #6366f1;
+            --accent-purple: #8b5cf6;
+            --accent-purple-light: #a78bfa;
+        }
+        
+        /* Sidebar header gradient */
+        .sidebar-header {
+            background: var(--sidebar-gradient) !important;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .sidebar-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        /* Active menu */
+        .menu-link.active {
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)) !important;
+            border-left: 3px solid var(--accent-purple) !important;
+            color: #fff !important;
+        }
+        
+        .menu-link.active i {
+            color: var(--accent-purple-light);
+        }
+        
+        /* Dropdown section */
+        .has-dropdown.active > .dropdown-toggle {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)) !important;
+        }
+        
+        .dropdown-menu {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        .dropdown-menu .menu-link:hover {
+            background: rgba(99,102,241,0.1);
+        }
+        
+        /* Section icons */
+        .dropdown-toggle i:first-child {
+            color: var(--accent-purple-light);
+        }
+        
+        /* Dark mode toggle */
+        #btn-darkmode {
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        
+        #btn-darkmode:hover {
+            background: var(--accent-indigo);
+        }
+    </style>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -23,16 +98,13 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR - SAMA PERSIS DASHBOARD (DENGAN DROPDOWN) -->
+        <!-- SIDEBAR - SAMA PERSIS DASHBOARD -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <img src="../assets/images/logo.png" alt="Logo" id="sidebar-logo">
-                    <div class="brand">
-                        <h3 id="nama-toko">WebPOS</h3>
-                        <small id="alamat-toko">Sistem POS</small>
-                    </div>
+                    <i class="fas fa-cash-register"></i>
                 </div>
+                <h3>WebPOS</h3>
                 <button class="sidebar-toggle" id="sidebar-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -48,7 +120,7 @@
             <!-- NAV DENGAN SECTION DROPDOWN -->
             <nav class="sidebar-nav">
                 <ul id="menu-list">
-                    <!-- UTAMA - DROPDOWN (EXPANDED KARENA KASIR AKTIF) -->
+                    <!-- UTAMA - DROPDOWN (EXPANDED) -->
                     <li class="menu-item has-dropdown active">
                         <a href="#" class="menu-link dropdown-toggle">
                             <i class="fas fa-th-large"></i>
@@ -116,7 +188,7 @@
                     </div>
                     <div class="user-details">
                         <span id="user-name">Loading...</span>
-                        <small id="user-role">Loading...</small>
+                        <small id="user-role">Administrator</small>
                     </div>
                 </div>
                 <button class="btn-logout" id="btn-logout">
@@ -127,7 +199,7 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER - SAMA DASHBOARD + DARK MODE TOGGLE -->
+            <!-- HEADER - SAMA DASHBOARD + DARK MODE -->
             <header class="main-header">
                 <div class="header-left">
                     <button class="mobile-menu-toggle" id="mobile-menu-toggle">
@@ -171,7 +243,7 @@
                 </div>
             </header>
 
-            <!-- KASIR CONTENT - TETAP SAMA -->
+            <!-- KASIR CONTENT -->
             <div class="kasir-container">
                 <div class="produk-section">
                     <div class="produk-toolbar">
@@ -294,12 +366,146 @@
     </div>
 
     <!-- MODALS -->
-    <div class="modal" id="modal-transaksi-manual">...</div>
-    <div class="modal" id="modal-topup">...</div>
-    <div class="modal" id="modal-tarik">...</div>
-    <div class="modal" id="modal-edit-harga">...</div>
+    <div class="modal" id="modal-transaksi-manual">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Transaksi Manual</h3>
+                <button class="btn-close" onclick="closeModal('modal-transaksi-manual')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Produk/Item</label>
+                    <input type="text" id="manual-nama" class="form-control" placeholder="Masukkan nama item">
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Harga Modal</label>
+                            <input type="number" id="manual-harga-modal" class="form-control" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Harga Jual</label>
+                            <input type="number" id="manual-harga-jual" class="form-control" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah</label>
+                    <input type="number" id="manual-jumlah" class="form-control" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Keterangan (Opsional)</label>
+                    <textarea id="manual-keterangan" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-transaksi-manual')">Batal</button>
+                <button class="btn btn-primary" id="btn-simpan-manual">Tambah ke Keranjang</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- SCRIPTS - TETAP SAMA -->
+    <div class="modal" id="modal-topup">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Top Up</h3>
+                <button class="btn-close" onclick="closeModal('modal-topup')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nominal Top Up</label>
+                    <input type="number" id="topup-nominal" class="form-control" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Admin Fee</label>
+                    <input type="number" id="topup-fee-input" class="form-control" placeholder="0" value="0">
+                    <small class="form-text">Fee akan ditambahkan ke total</small>
+                </div>
+                <div class="form-group">
+                    <label>Total</label>
+                    <div class="total-display" id="topup-total">Rp 0</div>
+                </div>
+                <div class="form-group">
+                    <label>Provider</label>
+                    <select id="topup-provider" class="form-control">
+                        <option value="ovo">OVO</option>
+                        <option value="gopay">GoPay</option>
+                        <option value="dana">DANA</option>
+                        <option value="shopeepay">ShopeePay</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-topup')">Batal</button>
+                <button class="btn btn-primary" id="btn-simpan-topup">Tambah ke Keranjang</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-tarik">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tarik Tunai</h3>
+                <button class="btn-close" onclick="closeModal('modal-tarik')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nominal Tarik</label>
+                    <input type="number" id="tarik-nominal" class="form-control" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Admin Fee</label>
+                    <input type="number" id="tarik-fee-input" class="form-control" placeholder="0" value="0">
+                    <small class="form-text">Fee akan dikurangi dari total</small>
+                </div>
+                <div class="form-group">
+                    <label>Total Diterima</label>
+                    <div class="total-display" id="tarik-total">Rp 0</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-tarik')">Batal</button>
+                <button class="btn btn-primary" id="btn-simpan-tarik">Tambah ke Keranjang</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-edit-harga">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Harga</h3>
+                <button class="btn-close" onclick="closeModal('modal-edit-harga')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-index">
+                <div class="form-group">
+                    <label>Harga Jual Baru</label>
+                    <input type="number" id="edit-harga-baru" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Jumlah</label>
+                    <input type="number" id="edit-jumlah-baru" class="form-control" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-edit-harga')">Batal</button>
+                <button class="btn btn-primary" id="btn-simpan-edit">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS - STRUKTUR TETAP SAMA -->
     <script src="../js/firebase-config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
