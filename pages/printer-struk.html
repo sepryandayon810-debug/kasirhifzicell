@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPOS - Printer & Struk</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/modules/printer-struk.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="../assets/images/logo.png" alt="Logo" id="sidebar-logo">
+                <div class="brand">
+                    <h3 id="nama-toko">WebPOS</h3>
+                    <small id="alamat-toko">Sistem POS</small>
+                </div>
+            </div>
+            <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+        <div class="sidebar-search">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="menu-search" placeholder="Cari menu...">
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul id="menu-list">
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="kasir.html" class="menu-link"><i class="fas fa-cash-register"></i><span>Kasir</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="produk.html" class="menu-link"><i class="fas fa-box"></i><span>Produk</span></a></li>
+                <li class="menu-item" data-role="owner,admin"><a href="pembelian.html" class="menu-link"><i class="fas fa-shopping-cart"></i><span>Pembelian</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="riwayat-transaksi.html" class="menu-link"><i class="fas fa-history"></i><span>Riwayat Transaksi</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="modal-harian.html" class="menu-link"><i class="fas fa-money-bill-wave"></i><span>Modal Harian</span></a></li>
+                <li class="menu-item" data-role="owner,admin"><a href="kas-management.html" class="menu-link"><i class="fas fa-wallet"></i><span>Kas Management</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="hutang-piutang.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i><span>Hutang Piutang</span></a></li>
+                <li class="menu-item" data-role="owner,admin"><a href="laporan.html" class="menu-link"><i class="fas fa-chart-bar"></i><span>Laporan</span></a></li>
+                <li class="menu-item" data-role="owner,admin"><a href="saldo-telegram.html" class="menu-link"><i class="fab fa-telegram"></i><span>Saldo Telegram</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="data-pelanggan.html" class="menu-link"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
+                <li class="menu-item" data-role="owner,admin"><a href="management-user.html" class="menu-link"><i class="fas fa-user-cog"></i><span>Management User</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="setting.html" class="menu-link"><i class="fas fa-cog"></i><span>Setting</span></a></li>
+                <li class="menu-item" data-role="owner,admin,kasir"><a href="printer-struk.html" class="menu-link active"><i class="fas fa-print"></i><span>Printer & Struk</span></a></li>
+                <li class="menu-item" data-role="owner" id="menu-reset"><a href="reset-data.html" class="menu-link"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                <div class="user-details"><span id="user-name">Loading...</span><small id="user-role">Loading...</small></div>
+            </div>
+            <button class="btn-logout" id="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <div class="header-left">
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+                <h2 id="page-title">Printer & Struk</h2>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="cloud-status"><i class="fas fa-cloud"></i><span>Online</span></button>
+                <div class="datetime" id="header-datetime"><span id="current-time">--:--</span><small id="current-date">--/--/----</small></div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="printer-container">
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-print"></i> Konfigurasi Printer</h3></div>
+                    <div class="card-body">
+                        <div class="form-group"><label>Tipe Printer</label>
+                            <select id="printer-type" class="form-control">
+                                <option value="browser">Browser Print (PDF/Preview)</option>
+                                <option value="usb">USB Printer</option>
+                                <option value="network">Network Printer</option>
+                                <option value="bluetooth">Bluetooth Printer</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Lebar Kertas</label>
+                            <select id="paper-width" class="form-control">
+                                <option value="58">58mm (Mini)</option>
+                                <option value="80" selected>80mm (Standard)</option>
+                            </select>
+                        </div>
+                        <div id="usb-settings" class="printer-settings" style="display:none;">
+                            <div class="form-group"><button class="btn btn-secondary" id="btn-connect-usb"><i class="fas fa-usb"></i> Connect USB Printer</button></div>
+                        </div>
+                        <div id="network-settings" class="printer-settings" style="display:none;">
+                            <div class="form-group"><label>IP Address</label><input type="text" id="printer-ip" class="form-control" placeholder="192.168.1.100"></div>
+                            <div class="form-group"><label>Port</label><input type="number" id="printer-port" class="form-control" value="9100"></div>
+                        </div>
+                        <button class="btn btn-primary" id="btn-simpan-printer"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
+                        <button class="btn btn-secondary" id="btn-test-print"><i class="fas fa-print"></i> Test Print</button>
+                    </div>
+                </div>
+
+                <div class="card preview-card">
+                    <div class="card-header"><h3><i class="fas fa-eye"></i> Preview Struk</h3></div>
+                    <div class="card-body">
+                        <div class="struk-preview" id="struk-preview">
+                            <div class="struk-header">
+                                <h4 id="preview-nama-toko">NAMA TOKO</h4>
+                                <p id="preview-alamat">Alamat Toko</p>
+                                <p id="preview-telepon">Telp: 08123456789</p>
+                            </div>
+                            <div class="struk-divider">--------------------------------</div>
+                            <div class="struk-info">
+                                <p>No: TRX-001</p>
+                                <p>Tanggal: 01/01/2024 12:00</p>
+                                <p>Kasir: Admin</p>
+                            </div>
+                            <div class="struk-divider">--------------------------------</div>
+                            <div class="struk-items">
+                                <div class="struk-item"><span>Produk A</span><span>Rp 10.000</span></div>
+                                <div class="struk-item"><small>2 x Rp 5.000</small></div>
+                            </div>
+                            <div class="struk-divider">--------------------------------</div>
+                            <div class="struk-total">
+                                <div class="struk-item"><span>TOTAL</span><span><strong>Rp 10.000</strong></span></div>
+                                <div class="struk-item"><span>Bayar</span><span>Rp 10.000</span></div>
+                                <div class="struk-item"><span>Kembali</span><span>Rp 0</span></div>
+                            </div>
+                            <div class="struk-divider">--------------------------------</div>
+                            <div class="struk-footer">
+                                <p>Terima kasih telah berbelanja</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config/firebase-config.js"></script>
+    <script src="../js/utils/formatters.js"></script>
+    <script src="../js/utils/date-helper.js"></script>
+    <script src="../js/utils/session-manager.js"></script>
+    <script src="../js/auth/role-check.js"></script>
+    <script src="../js/auth/logout.js"></script>
+    <script src="../js/modules/printer/printer-main.js"></script>
+</body>
+</html>
