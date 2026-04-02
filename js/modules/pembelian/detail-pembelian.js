@@ -188,4 +188,9 @@ async function batalkanPembelian() {
 document.addEventListener('DOMContentLoaded', function() {
     const btnBatalkan = document.getElementById('btn-batalkan');
     if (btnBatalkan) {
-        btnBatalkan.addEventListener('click', batalkanPem
+        btnBatalkan.addEventListener('click', batalkanPembelian);
+    }
+});
+
+window.lihatDetailPembelian = lihatDetailPembelian;
+window.batalkanPembelian = batalkanPembelian;
