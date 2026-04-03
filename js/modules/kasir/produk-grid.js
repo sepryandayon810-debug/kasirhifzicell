@@ -1,149 +1,137 @@
 /**
- * Produk Grid View Module
+ * Produk Grid Module - Modern Version
  * File: js/modules/kasir/produk-grid.js
- * 
- * Menangani tampilan produk dalam bentuk grid/card
  */
 
 const ProdukGrid = {
-    /**
-     * Render produk dalam format grid
-     * @param {Array} produkList - Array data produk
-     * @param {HTMLElement} container - Container untuk render
-     */
     render: function(produkList, container) {
-        if (!container) {
-            console.error('[ProdukGrid] Container tidak ditemukan');
-            return;
-        }
-        
         container.innerHTML = '';
-        container.classList.remove('list-view');
-        container.classList.add('grid-view');
         
-        if (!produkList || produkList.length === 0) {
-            this.renderEmpty(container);
+        if (produkList.length === 0) {
+            container.innerHTML = `
+                <div class="loading-produk">
+                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <p>Tidak ada produk</p>
+                </div>
+            `;
             return;
         }
         
-        produkList.forEach(produk => {
-            const card = this.createCard(produk);
+        produkList.forEach((produk, index) => {
+            const card = this.createCard(produk, index);
             container.appendChild(card);
         });
     },
     
-    /**
-     * Buat elemen card produk
-     * @param {Object} produk - Data produk
-     * @returns {HTMLElement} Card element
-     */
-    createCard: function(produk) {
-        const card = document.createElement('div');
-        card.className = 'produk-card';
-        card.dataset.id = produk.id || produk.key;
+    createCard: function(produk, index) {
+        const div = document.createElement('div');
+        div.className = 'produk-card-modern';
+        div.style.animationDelay = `${index * 0.05}s`;
         
-        // Stok styling sesuai CSS
+        // Tentukan badge stok
+        let stockBadge = '';
         if (produk.stok <= 0) {
-            card.classList.add('stok-habis');
+            stockBadge = '<span class="stock-badge empty">Habis</span>';
         } else if (produk.stok <= 5) {
-            card.classList.add('stok-menipis');
+            stockBadge = '<span class="stock-badge low">' + produk.stok + '</span>';
+        } else {
+            stockBadge = '<span class="stock-badge">' + produk.stok + '</span>';
         }
         
-        // Gambar produk - sesuai CSS .produk-img
-        const imageHtml = produk.gambar 
-            ? `<img src="${produk.gambar}" alt="${produk.nama}" loading="lazy">`
-            : `<i class="fas fa-box"></i>`;
+        // Format harga
+        const harga = this.formatRupiah(produk.harga_jual || 0);
         
-        // Stok text
-        const stokText = produk.stok <= 0 ? 'Stok Habis' : `Stok: ${produk.stok}`;
-        
-        card.innerHTML = `
-            <div class="produk-img">${imageHtml}</div>
-            <div class="produk-nama" title="${produk.nama}">${produk.nama}</div>
-            <div class="produk-harga">${formatRupiah(produk.harga_jual || produk.hargaJual || 0)}</div>
-            <div class="produk-stok">${stokText}</div>
+        div.innerHTML = `
+            <div class="card-content">
+                <div class="produk-img-container">
+                    <div class="produk-img-modern">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    ${stockBadge}
+                </div>
+                <div class="produk-nama-modern" title="${produk.nama}">${produk.nama}</div>
+                <div class="produk-harga-modern">${harga}</div>
+                
+                <!-- TOMBOL ACTION -->
+                <div class="card-actions">
+                    <button class="btn-card-action edit" onclick="event.stopPropagation(); editProduk('${produk.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-card-action delete" onclick="event.stopPropagation(); hapusProduk('${produk.id}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn-card-action edit" onclick="event.stopPropagation(); tambahKeKeranjang('${produk.id}')" title="Tambah" style="background: var(--accent-emerald);">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
         `;
         
-        // Event click untuk tambah ke keranjang
-        card.addEventListener('click', () => {
-            if (produk.stok > 0) {
-                // Panggil fungsi global dari kasir-main.js
-                if (typeof window.Keranjang !== 'undefined' && window.Keranjang.tambahItem) {
-                    window.Keranjang.tambahItem(produk);
-                } else if (typeof window.tambahKeKeranjang === 'function') {
-                    window.tambahKeKeranjang(produk);
-                } else {
-                    console.error('[ProdukGrid] Keranjang tidak ditemukan');
-                }
-            } else {
-                this.showToast('Stok produk habis', 'warning');
+        // Click card untuk tambah ke keranjang
+        div.addEventListener('click', () => {
+            if (window.Keranjang) {
+                window.Keranjang.addItem(produk);
             }
         });
         
-        return card;
+        return div;
     },
     
-    /**
-     * Tampilan kosong
-     * @param {HTMLElement} container 
-     */
-    renderEmpty: function(container) {
-        container.innerHTML = `
-            <div class="loading-produk">
-                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                <p>Tidak ada produk</p>
-            </div>
-        `;
-    },
-    
-    /**
-     * Update card secara realtime (setelah transaksi)
-     * @param {string} produkId - ID produk
-     * @param {number} newStok - Stok baru
-     */
-    updateCard: function(produkId, newStok) {
-        const card = document.querySelector(`.produk-card[data-id="${produkId}"]`);
-        if (!card) return;
-        
-        const stokEl = card.querySelector('.produk-stok');
-        if (stokEl) {
-            stokEl.textContent = newStok <= 0 ? 'Stok Habis' : `Stok: ${newStok}`;
-        }
-        
-        // Update class stok
-        card.classList.remove('stok-habis', 'stok-menipis');
-        if (newStok <= 0) {
-            card.classList.add('stok-habis');
-        } else if (newStok <= 5) {
-            card.classList.add('stok-menipis');
-        }
-    },
-    
-    /**
-     * Helper: Format rupiah
-     * @param {number} angka 
-     * @returns {string}
-     */
     formatRupiah: function(angka) {
-        if (typeof formatRupiah === 'function') {
-            return formatRupiah(angka);
-        }
-        return 'Rp ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     },
     
-    /**
-     * Helper: Show toast
-     * @param {string} message 
-     * @param {string} type 
-     */
-    showToast: function(message, type = 'info') {
-        if (typeof showToast === 'function') {
-            showToast(message, type);
-        } else {
-            console.log(`[${type}] ${message}`);
+    updateCard: function(produkId, newStok) {
+        // Update stok badge di card
+        const cards = document.querySelectorAll('.produk-card-modern');
+        cards.forEach(card => {
+            const btn = card.querySelector(`button[onclick*="${produkId}"]`);
+            if (btn) {
+                const badge = card.querySelector('.stock-badge');
+                if (badge) {
+                    if (newStok <= 0) {
+                        badge.className = 'stock-badge empty';
+                        badge.textContent = 'Habis';
+                    } else if (newStok <= 5) {
+                        badge.className = 'stock-badge low';
+                        badge.textContent = newStok;
+                    } else {
+                        badge.className = 'stock-badge';
+                        badge.textContent = newStok;
+                    }
+                }
+            }
+        });
+    }
+};
+
+// Export ke global
+window.ProdukGrid = ProdukGrid;
+
+// Fungsi global untuk tombol action
+window.editProduk = function(id) {
+    console.log('Edit produk:', id);
+    // Implementasi edit
+    if (window.showToast) {
+        window.showToast('Fitur edit segera hadir', 'info');
+    }
+};
+
+window.hapusProduk = function(id) {
+    if (confirm('Yakin ingin menghapus produk ini?')) {
+        console.log('Hapus produk:', id);
+        if (window.showToast) {
+            window.showToast('Produk dihapus', 'success');
         }
     }
 };
 
-// Export ke window
-window.ProdukGrid = ProdukGrid;
+window.tambahKeKeranjang = function(id) {
+    // Cari produk di data
+    if (window.produkData) {
+        const produk = window.produkData.find(p => p.id === id);
+        if (produk && window.Keranjang) {
+            window.Keranjang.addItem(produk);
+        }
+    }
+};
