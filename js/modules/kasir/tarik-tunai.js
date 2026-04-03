@@ -63,24 +63,27 @@ function simpanTarik() {
         return;
     }
     
+    const diterima = tarikData.nominal - tarikData.fee;
+    
     // Buat objek untuk Keranjang module
     const produkTarik = {
         id: 'tarik_' + Date.now(),
         nama: 'Tarik Tunai',
-        harga_jual: tarikData.total, // Yang masuk ke kasir
+        harga_jual: diterima, // Yang masuk ke kasir (fee)
         harga_modal: tarikData.nominal, // Modal keluar
         stok: 9999
     };
     
     const customData = {
-        nama: `Tarik Tunai - ${typeof formatRupiah === 'function' ? formatRupiah(tarikData.nominal) : 'Rp ' + tarikData.nominal}`,
-        harga_jual: tarikData.total,
+        nama: `Tarik Tunai - ${formatRupiah(tarikData.nominal)}`,
+        harga_jual: diterima,
         harga_modal: tarikData.nominal,
         qty: 1,
-        keterangan: `Nominal: ${tarikData.nominal}, Fee: ${tarikData.fee}, Diterima: ${tarikData.total}`,
+        keterangan: `Nominal: ${tarikData.nominal}, Fee: ${tarikData.fee}, Diterima: ${diterima}`,
         jenis: 'tarik',
         nominal: tarikData.nominal,
-        fee: tarikData.fee
+        fee: tarikData.fee,
+        subtotal: diterima // Yang masuk ke kas
     };
     
     // Gunakan Keranjang module
