@@ -9,7 +9,7 @@
     <!-- CSS THEME DASHBOARD -->
     <link rel="stylesheet" href="../css/dashboard-theme.css">
     
-    <!-- CSS SPESIFIK KASIR -->
+    <!-- CSS SPESIFIK KASIR - MODERN -->
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -157,148 +157,175 @@
             </div>
         </header>
 
-        <!-- CONTENT KASIR -->
-        <div class="content-wrapper">
-            <div class="kasir-container">
-                <!-- Left: Produk Section -->
-                <div class="produk-section">
-<div class="search-filter-container">
-    <!-- Search Box -->
-    <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="search-produk" placeholder="Cari produk (Ctrl+K)...">
-    </div>
-    
-    <!-- Kategori + Manual Button -->
-    <div class="kategori-wrapper">
-        <div class="kategori-scroll-wrapper">
-            <div class="kategori-scroll" id="kategori-scroll">
-                <button class="kategori-pill active" data-kategori="">Semua</button>
-                <!-- Kategori lain di-load dari Firebase -->
-            </div>
-        </div>
-        
-    <!-- Manual Button -->
-    <button class="btn-manual" id="btn-transaksi-manual">
-        <i class="fas fa-plus"></i> Manual
-    </button>
-</div>
-
-                    <div class="view-toggle">
-                        <button class="view-btn active" data-view="grid" title="Tampilan Grid">
-                            <i class="fas fa-th-large"></i>
-                        </button>
-                        <button class="view-btn" data-view="list" title="Tampilan List">
-                            <i class="fas fa-list"></i>
-                        </button>
-                    </div>
-
-                    <div class="produk-container grid-view" id="produk-container">
-                        <div class="loading-produk">
-                            <div class="spinner"></div>
-                            <p>Memuat produk...</p>
+        <!-- ============================================ -->
+        <!-- KASIR CONTAINER - TAMPILAN MODERN -->
+        <!-- ============================================ -->
+        <div class="kasir-container">
+            
+            <!-- PRODUK SECTION -->
+            <div class="produk-section">
+                
+                <!-- Sticky Search Header -->
+                <div class="search-sticky-header">
+                    <!-- Modern Search Box -->
+                    <div class="search-box-modern">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-produk" placeholder="Cari produk...">
+                        <div class="search-shortcuts">
+                            <span class="kbd">Ctrl</span>
+                            <span class="kbd">K</span>
                         </div>
                     </div>
-                </div>
-
-                <!-- Right: Keranjang Section -->
-                <div class="keranjang-section" id="keranjang-section">
-                    <div class="keranjang-header">
-                        <h3><i class="fas fa-shopping-cart"></i> Keranjang</h3>
-                        <button class="btn-clear" id="btn-clear-keranjang" title="Kosongkan">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-
-                    <div class="jenis-transaksi">
-                        <button class="jenis-btn active" data-jenis="penjualan">
-                            <i class="fas fa-shopping-bag"></i> Penjualan
-                        </button>
-                        <button class="jenis-btn" data-jenis="topup">
-                            <i class="fas fa-mobile-alt"></i> Top Up
-                        </button>
-                        <button class="jenis-btn" data-jenis="tarik">
-                            <i class="fas fa-money-bill-wave"></i> Tarik Tunai
-                        </button>
-                    </div>
-
-                    <div class="keranjang-items" id="keranjang-items">
-                        <div class="empty-keranjang">
-                            <i class="fas fa-cart-plus"></i>
-                            <p>Keranjang kosong</p>
-                            <small>Tambahkan produk dari daftar</small>
-                        </div>
-                    </div>
-
-                    <div class="keranjang-summary">
-                        <div class="summary-row">
-                            <span>Subtotal</span>
-                            <span id="subtotal">Rp 0</span>
-                        </div>
-                        <div class="summary-row" id="row-diskon" style="display: none;">
-                            <span>Diskon</span>
-                            <span id="diskon">-Rp 0</span>
-                        </div>
-                        <div class="summary-row total">
-                            <span>Total</span>
-                            <span id="total-bayar">Rp 0</span>
-                        </div>
-                    </div>
-
-                    <div class="pembayaran-section">
-                        <div class="form-group">
-                            <label>Metode Pembayaran</label>
-                            <select id="metode-pembayaran" class="form-control">
-                                <option value="tunai">Tunai</option>
-                                <option value="transfer">Transfer Bank</option>
-                                <option value="qris">QRIS</option>
-                                <option value="hutang">Hutang/Piutang</option>
-                            </select>
+                    
+                    <!-- Kategori Chips -->
+                    <div class="kategori-chips-container">
+                        <div class="kategori-scroll-modern" id="kategori-scroll">
+                            <button class="kategori-chip active" data-kategori="">
+                                <span>Semua</span>
+                            </button>
+                            <!-- Kategori lain di-load dari Firebase -->
                         </div>
                         
-                        <div class="form-group" id="group-bayar">
-                            <label>Jumlah Bayar</label>
-                            <div class="input-bayar">
-                                <span class="prefix">Rp</span>
-                                <input type="text" id="jumlah-bayar" class="form-control" placeholder="0">
-                            </div>
-                            <button class="btn-uang-pas" id="btn-uang-pas">Uang Pas</button>
-                        </div>
-
-                        <div class="form-group" id="group-kembalian">
-                            <label>Kembalian</label>
-                            <div class="kembalian-display" id="kembalian">Rp 0</div>
-                        </div>
-
-                        <div class="form-group" id="group-pelanggan" style="display: none;">
-                            <label>Pelanggan</label>
-                            <select id="select-pelanggan" class="form-control">
-                                <option value="">Pilih Pelanggan</option>
-                            </select>
-                            <button class="btn btn-sm btn-secondary" id="btn-tambah-pelanggan">
-                                <i class="fas fa-plus"></i> Baru
-                            </button>
-                        </div>
-
-                        <button class="btn btn-success btn-block btn-bayar" id="btn-bayar">
-                            <i class="fas fa-check-circle"></i> Proses Pembayaran
+                        <!-- Floating Manual Button -->
+                        <button class="btn-floating-manual" id="btn-transaksi-manual">
+                            <i class="fas fa-plus"></i>
+                            <span>Manual</span>
                         </button>
                     </div>
                 </div>
+                
+                <!-- View Toggle -->
+                <div class="view-toggle-modern">
+                    <button class="view-btn-modern active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-btn-modern" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                
+                <!-- Produk Container -->
+                <div class="produk-container-modern grid-view" id="produk-container">
+                    <div class="loading-produk">
+                        <div class="spinner"></div>
+                        <p>Memuat produk...</p>
+                    </div>
+                </div>
+                
             </div>
+            
+            <!-- KERANJANG SECTION -->
+            <div class="keranjang-section-modern" id="keranjang-section">
+                
+                <!-- Header -->
+                <div class="keranjang-header-modern">
+                    <div class="keranjang-title">
+                        <i class="fas fa-shopping-basket"></i>
+                        Keranjang
+                    </div>
+                    <span class="badge-count" id="cart-count">0</span>
+                </div>
+                
+                <!-- Transaction Type -->
+                <div class="transaksi-type-modern">
+                    <button class="type-btn active" data-jenis="penjualan">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Penjualan</span>
+                    </button>
+                    <button class="type-btn" data-jenis="topup">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Top Up</span>
+                    </button>
+                    <button class="type-btn" data-jenis="tarik">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Tarik Tunai</span>
+                    </button>
+                </div>
+                
+                <!-- Cart Items -->
+                <div class="keranjang-items-modern" id="keranjang-items">
+                    <div class="empty-cart-modern">
+                        <i class="fas fa-shopping-basket"></i>
+                        <p>Keranjang Kosong</p>
+                        <span>Tambahkan produk untuk memulai</span>
+                    </div>
+                </div>
+                
+                <!-- Summary -->
+                <div class="summary-modern">
+                    <div class="summary-row-modern">
+                        <span class="summary-label">Subtotal</span>
+                        <span class="summary-value" id="subtotal">Rp 0</span>
+                    </div>
+                    <div class="summary-row-modern" id="row-diskon" style="display: none;">
+                        <span class="summary-label">Diskon</span>
+                        <span class="summary-value" id="diskon">Rp 0</span>
+                    </div>
+                    <div class="summary-row-modern total">
+                        <span class="summary-label">TOTAL</span>
+                        <span class="summary-value" id="total-bayar">Rp 0</span>
+                    </div>
+                </div>
+                
+                <!-- Payment -->
+                <div class="payment-section-modern">
+                    <div class="payment-method">
+                        <label>Metode Pembayaran</label>
+                        <select class="select-modern" id="metode-pembayaran">
+                            <option value="tunai">💵 Tunai</option>
+                            <option value="qris">📱 QRIS</option>
+                            <option value="transfer">🏦 Transfer</option>
+                            <option value="hutang">📝 Hutang</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-amount-modern" id="group-bayar">
+                        <span class="prefix">Rp</span>
+                        <input type="text" id="jumlah-bayar" placeholder="0">
+                        <div class="quick-amounts">
+                            <button class="quick-btn" data-amount="50000">50K</button>
+                            <button class="quick-btn" data-amount="100000">100K</button>
+                            <button class="quick-btn" data-amount="200000">200K</button>
+                            <button class="quick-btn uang-pas" id="btn-uang-pas">Uang Pas</button>
+                        </div>
+                    </div>
+                    
+                    <div class="change-display-modern" id="group-kembalian" style="display: none;">
+                        <div class="change-label">Kembalian</div>
+                        <div class="change-amount" id="kembalian">Rp 0</div>
+                    </div>
 
-            <footer class="page-footer">
-                <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
-            </footer>
+                    <div class="payment-method" id="group-pelanggan" style="display: none;">
+                        <label>Pelanggan</label>
+                        <select class="select-modern" id="select-pelanggan">
+                            <option value="">Pilih Pelanggan</option>
+                        </select>
+                        <button class="btn btn-sm btn-secondary" id="btn-tambah-pelanggan" style="margin-top: 8px;">
+                            <i class="fas fa-plus"></i> Pelanggan Baru
+                        </button>
+                    </div>
+                    
+                    <button class="btn-pay-modern" id="btn-bayar">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Bayar Sekarang</span>
+                    </button>
+                </div>
+                
+            </div>
+            
         </div>
+
+        <footer class="page-footer">
+            <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
+        </footer>
     </main>
 
     <!-- ========================================== -->
-    <!-- TOMBOL KERANJANG MOBILE - POSISI DISINI -->
+    <!-- MOBILE CART BUTTON -->
     <!-- ========================================== -->
-    <button class="btn-keranjang-mobile" id="btn-keranjang-mobile" onclick="toggleKeranjangMobile()">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="badge" id="mobile-count">0</span>
+    <button class="btn-cart-mobile" id="btn-cart-mobile" onclick="toggleKeranjangMobile()">
+        <i class="fas fa-shopping-basket"></i>
+        <span class="badge-float" id="mobile-count">0</span>
     </button>
 
     <!-- MODALS -->
@@ -525,7 +552,7 @@
         }
         
         // ==========================================
-        // FUNGSI KERANJANG MOBILE - TAMBAHAN BARU
+        // FUNGSI KERANJANG MOBILE
         // ==========================================
         function toggleKeranjangMobile() {
             document.getElementById('keranjang-section').classList.toggle('open');
