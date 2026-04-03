@@ -6,87 +6,33 @@
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Kasir</title>
     
-    <!-- CSS DASHBOARD -->
+    <!-- CSS DASHBOARD (untuk tema sidebar/header) -->
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/responsive.css">
+    
+    <!-- CSS KASIR (konten tetap sama) -->
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- OVERRIDE: Gradient sama dashboard -->
+    <!-- OVERRIDE: Gradient sidebar -->
     <style>
-        :root {
-            --sidebar-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
-            --accent-indigo: #6366f1;
-            --accent-purple: #8b5cf6;
-            --accent-purple-light: #a78bfa;
-        }
-        
-        /* Sidebar header gradient */
+        /* Sidebar header gradient ungu */
         .sidebar-header {
-            background: var(--sidebar-gradient) !important;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar-header .logo {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: white;
-            backdrop-filter: blur(10px);
-        }
-        
-        .sidebar-header h3 {
-            font-size: 20px;
-            font-weight: 700;
-            color: white;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
         }
         
         /* Active menu */
         .menu-link.active {
             background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)) !important;
-            border-left: 3px solid var(--accent-purple) !important;
-            color: #fff !important;
+            border-left: 3px solid #8b5cf6 !important;
         }
         
-        .menu-link.active i {
-            color: var(--accent-purple-light);
-        }
-        
-        /* Dropdown section */
+        /* Dropdown section active */
         .has-dropdown.active > .dropdown-toggle {
             background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)) !important;
-        }
-        
-        .dropdown-menu {
-            background: rgba(15, 23, 42, 0.5);
-        }
-        
-        .dropdown-menu .menu-link:hover {
-            background: rgba(99,102,241,0.1);
-        }
-        
-        /* Section icons */
-        .dropdown-toggle i:first-child {
-            color: var(--accent-purple-light);
-        }
-        
-        /* Dark mode toggle */
-        #btn-darkmode {
-            background: rgba(99,102,241,0.1);
-            border: 1px solid rgba(99,102,241,0.2);
-        }
-        
-        #btn-darkmode:hover {
-            background: var(--accent-indigo);
         }
     </style>
     
@@ -98,7 +44,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR - SAMA PERSIS DASHBOARD -->
+        <!-- SIDEBAR DENGAN DROPDOWN -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -117,7 +63,6 @@
                 </div>
             </div>
             
-            <!-- NAV DENGAN SECTION DROPDOWN -->
             <nav class="sidebar-nav">
                 <ul id="menu-list">
                     <!-- UTAMA - DROPDOWN (EXPANDED) -->
@@ -199,7 +144,7 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER - SAMA DASHBOARD + DARK MODE -->
+            <!-- HEADER DENGAN DARK MODE -->
             <header class="main-header">
                 <div class="header-left">
                     <button class="mobile-menu-toggle" id="mobile-menu-toggle">
@@ -243,7 +188,7 @@
                 </div>
             </header>
 
-            <!-- KASIR CONTENT -->
+            <!-- KASIR CONTENT - TETAP SAMA SEPERTI YANG ANDA SUKA -->
             <div class="kasir-container">
                 <div class="produk-section">
                     <div class="produk-toolbar">
@@ -370,9 +315,7 @@
         <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h3>Transaksi Manual</h3>
-                <button class="btn-close" onclick="closeModal('modal-transaksi-manual')">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="btn-close" onclick="closeModal('modal-transaksi-manual')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -413,9 +356,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Top Up</h3>
-                <button class="btn-close" onclick="closeModal('modal-topup')">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="btn-close" onclick="closeModal('modal-topup')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -424,8 +365,7 @@
                 </div>
                 <div class="form-group">
                     <label>Admin Fee</label>
-                    <input type="number" id="topup-fee-input" class="form-control" placeholder="0" value="0">
-                    <small class="form-text">Fee akan ditambahkan ke total</small>
+                    <input type="number" id="topup-fee-input" class="form-control" value="0">
                 </div>
                 <div class="form-group">
                     <label>Total</label>
@@ -453,9 +393,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Tarik Tunai</h3>
-                <button class="btn-close" onclick="closeModal('modal-tarik')">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="btn-close" onclick="closeModal('modal-tarik')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -464,8 +402,7 @@
                 </div>
                 <div class="form-group">
                     <label>Admin Fee</label>
-                    <input type="number" id="tarik-fee-input" class="form-control" placeholder="0" value="0">
-                    <small class="form-text">Fee akan dikurangi dari total</small>
+                    <input type="number" id="tarik-fee-input" class="form-control" value="0">
                 </div>
                 <div class="form-group">
                     <label>Total Diterima</label>
@@ -483,9 +420,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Harga</h3>
-                <button class="btn-close" onclick="closeModal('modal-edit-harga')">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="btn-close" onclick="closeModal('modal-edit-harga')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-index">
@@ -505,7 +440,7 @@
         </div>
     </div>
 
-    <!-- SCRIPTS - STRUKTUR TETAP SAMA -->
+    <!-- SCRIPTS - STRUKTUR TETAP -->
     <script src="../js/firebase-config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
