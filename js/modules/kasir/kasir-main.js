@@ -1,34 +1,32 @@
 /**
  * Kasir Main Controller
- * Controller utama untuk modul kasir
+ * File: js/modules/kasir/kasir-main.js
+ * 
+ * Controller utama untuk koordinasi antar modul
  */
 
-// Variable global untuk user (tambahan untuk fix auth timing)
-let currentUser = null;
-
 // State global
-let keranjang = [];
 let currentView = 'grid';
 let currentJenis = 'penjualan';
 let produkData = [];
 let pelangganData = [];
 
-// Tunggu auth siap sebelum init (tambahan)
-auth.onAuthStateChanged(function(user) {
-    if (user) {
-        currentUser = user;
-        console.log('Auth ready:', user.email);
-    } else {
-        // Redirect ke login jika belum login
-        if (!window.location.pathname.includes('login.html')) {
-            window.location.replace('../login.html');
-        }
-    }
-});
-
 // Inisialisasi saat DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-    initKasir();
+    // Tunggu auth siap
+    if (typeof auth !== 'undefined') {
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                initKasir();
+            } else {
+                if (!window.location.pathname.includes('login.html')) {
+                    window.location.replace('../login.html');
+                }
+            }
+        });
+    } else {
+        initKasir();
+    }
 });
 
 /**
@@ -42,8 +40,6 @@ function initKasir() {
     
     // Setup event listeners
     setupEventListeners();
-    
-    // Setup keyboard shortcuts
     setupKeyboardShortcuts();
     
     // Update datetime
@@ -52,9 +48,6 @@ function initKasir() {
     
     // Cek status kasir
     checkKasirStatus();
-    
-    // Load draft keranjang jika ada
-    setTimeout(loadKeranjangFromStorage, 500);
 }
 
 /**
@@ -85,12 +78,6 @@ function setupEventListeners() {
         });
     }
     
-    // Tombol clear keranjang
-    const btnClear = document.getElementById('btn-clear-keranjang');
-    if (btnClear) {
-        btnClear.addEventListener('click', clearKeranjang);
-    }
-    
     // Metode pembayaran
     const metodeSelect = document.getElementById('metode-pembayaran');
     if (metodeSelect) {
@@ -107,22 +94,6 @@ function setupEventListeners() {
     const btnBayar = document.getElementById('btn-bayar');
     if (btnBayar) {
         btnBayar.addEventListener('click', prosesPembayaran);
-    }
-    
-    // Toggle sidebar
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-        });
-    }
-    
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('active');
-            createOverlay();
-        });
     }
 }
 
@@ -151,11 +122,6 @@ function setupKeyboardShortcuts() {
             openModal('modal-transaksi-manual');
         }
         
-        // Enter untuk bayar (jika di input bayar)
-        if (e.key === 'Enter' && document.activeElement?.id === 'jumlah-bayar') {
-            prosesPembayaran();
-        }
-        
         // Escape untuk tutup modal
         if (e.key === 'Escape') {
             closeAllModals();
@@ -178,6 +144,10 @@ async function loadProduk() {
             `;
         }
         
+        if (typeof database === 'undefined') {
+            throw new Error('Database not initialized');
+        }
+        
         const snapshot = await database.ref('products').orderByChild('status').equalTo('aktif').once('value');
         produkData = [];
         
@@ -196,7 +166,7 @@ async function loadProduk() {
         if (container) {
             container.innerHTML = `
                 <div class="loading-produk" style="grid-column: 1/-1;">
-                    <i class="fas fa-exclamation-circle" style="font-size: 48px; color: var(--danger-color); margin-bottom: 15px;"></i>
+                    <i class="fas fa-exclamation-circle" style="font-size: 48px; color: var(--accent-rose); margin-bottom: 15px;"></i>
                     <p>Gagal memuat produk</p>
                     <button class="btn btn-primary" onclick="loadProduk()" style="margin-top: 15px;">
                         <i class="fas fa-sync"></i> Coba Lagi
@@ -289,235 +259,41 @@ function switchJenisTransaksi(jenis) {
     const activeBtn = document.querySelector(`[data-jenis="${jenis}"]`);
     if (activeBtn) activeBtn.classList.add('active');
     
-    // Sesuaikan UI berdasarkan jenis
-    const groupBayar = document.getElementById('group-bayar');
-    const groupKembalian = document.getElementById('group-kembalian');
-    
+    // Buka modal untuk topup/tarik
     if (jenis === 'topup') {
         openModal('modal-topup');
     } else if (jenis === 'tarik') {
         openModal('modal-tarik');
-    } else {
-        // Penjualan normal
-        if (groupBayar) groupBayar.style.display = 'block';
-        if (groupKembalian) groupKembalian.style.display = 'block';
     }
 }
 
 /**
- * Tambah produk ke keranjang
- * @param {Object} produk 
- * @param {Object} customData 
+ * Handle perubahan metode pembayaran
  */
-function tambahKeKeranjang(produk, customData = null) {
-    // Cek stok
-    if (!customData && produk.stok <= 0) {
-        showToast('Stok produk habis', 'warning');
-        return;
+function handleMetodeChange() {
+    const metode = document.getElementById('metode-pembayaran')?.value;
+    const groupPelanggan = document.getElementById('group-pelanggan');
+    const groupBayar = document.getElementById('group-bayar');
+    const groupKembalian = document.getElementById('group-kembalian');
+    
+    if (groupPelanggan) {
+        groupPelanggan.style.display = metode === 'hutang' ? 'block' : 'none';
     }
     
-    const existingIndex = keranjang.findIndex(item => 
-        item.id === produk.id && item.jenis === currentJenis && !customData
-    );
-    
-    if (existingIndex >= 0 && !customData) {
-        // Update qty jika sudah ada
-        if (keranjang[existingIndex].qty >= produk.stok) {
-            showToast('Stok tidak mencukupi', 'warning');
-            return;
-        }
-        keranjang[existingIndex].qty += 1;
-        keranjang[existingIndex].subtotal = keranjang[existingIndex].qty * keranjang[existingIndex].harga;
-    } else {
-        // Tambah item baru
-        const item = {
-            id: produk.id || 'manual_' + Date.now(),
-            nama: customData ? customData.nama : produk.nama,
-            harga: customData ? customData.harga_jual : produk.harga_jual,
-            harga_modal: customData ? customData.harga_modal : (produk.harga_modal || 0),
-            qty: customData ? customData.qty : 1,
-            jenis: currentJenis,
-            subtotal: customData ? (customData.harga_jual * customData.qty) : produk.harga_jual,
-            keterangan: customData ? customData.keterangan : '',
-            stok_tersedia: produk.stok || 0,
-            kategori: produk.kategori || ''
-        };
-        keranjang.push(item);
+    // Untuk hutang, sembunyikan input bayar dan kembalian
+    if (groupBayar) {
+        groupBayar.style.display = metode === 'hutang' ? 'none' : 'block';
     }
-    
-    renderKeranjang();
-    saveKeranjangToStorage();
-    showToast('Produk ditambahkan ke keranjang', 'success');
-}
-
-/**
- * Render keranjang belanja
- */
-function renderKeranjang() {
-    const container = document.getElementById('keranjang-items');
-    if (!container) return;
-    
-    if (keranjang.length === 0) {
-        container.innerHTML = `
-            <div class="empty-keranjang">
-                <i class="fas fa-cart-plus"></i>
-                <p>Keranjang kosong</p>
-                <small>Tambahkan produk dari daftar</small>
-            </div>
-        `;
-    } else {
-        container.innerHTML = '';
-        keranjang.forEach((item, index) => {
-            const el = createKeranjangItem(item, index);
-            container.appendChild(el);
-        });
+    if (groupKembalian) {
+        groupKembalian.style.display = metode === 'hutang' ? 'none' : 'block';
     }
-    
-    hitungTotal();
-}
-
-/**
- * Buat elemen item keranjang
- * @param {Object} item 
- * @param {Number} index 
- * @returns {HTMLElement}
- */
-function createKeranjangItem(item, index) {
-    const div = document.createElement('div');
-    div.className = 'keranjang-item';
-    
-    const jenisIcon = {
-        'penjualan': 'fa-shopping-bag',
-        'topup': 'fa-mobile-alt',
-        'tarik': 'fa-money-bill-wave',
-        'manual': 'fa-edit'
-    };
-    
-    const jenisLabel = {
-        'penjualan': 'Jual',
-        'topup': 'Top Up',
-        'tarik': 'Tarik',
-        'manual': 'Manual'
-    };
-    
-    div.innerHTML = `
-        <div class="keranjang-item-header">
-            <div class="keranjang-item-nama">
-                <i class="fas ${jenisIcon[item.jenis] || 'fa-box'}" title="${jenisLabel[item.jenis] || item.jenis}"></i> 
-                ${item.nama}
-                ${item.keterangan ? `<small style="display: block; color: var(--text-secondary);">${item.keterangan}</small>` : ''}
-            </div>
-            <div class="keranjang-item-actions">
-                <button class="btn-item-action" onclick="editItem(${index})" title="Edit harga/qty">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-item-action delete" onclick="hapusItem(${index})" title="Hapus">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-        <div class="keranjang-item-detail">
-            <div class="item-qty-control">
-                <button class="btn-qty" onclick="updateQty(${index}, -1)">-</button>
-                <span class="item-qty">${item.qty}</span>
-                <button class="btn-qty" onclick="updateQty(${index}, 1)">+</button>
-            </div>
-            <div style="color: var(--text-secondary); font-size: var(--font-small);">
-                ${formatRupiah(item.harga)} x ${item.qty}
-            </div>
-            <div style="font-weight: 700; color: var(--primary-color);">
-                ${formatRupiah(item.subtotal)}
-            </div>
-        </div>
-    `;
-    
-    return div;
-}
-
-/**
- * Update quantity item
- * @param {Number} index 
- * @param {Number} delta 
- */
-function updateQty(index, delta) {
-    const item = keranjang[index];
-    const newQty = item.qty + delta;
-    
-    if (newQty <= 0) {
-        hapusItem(index);
-        return;
-    }
-    
-    // Cek stok untuk penjualan
-    if (item.jenis === 'penjualan' && newQty > item.stok_tersedia) {
-        showToast('Stok tidak mencukupi', 'warning');
-        return;
-    }
-    
-    item.qty = newQty;
-    item.subtotal = item.qty * item.harga;
-    renderKeranjang();
-    saveKeranjangToStorage();
-}
-
-/**
- * Edit item keranjang
- * @param {Number} index 
- */
-function editItem(index) {
-    const item = keranjang[index];
-    
-    document.getElementById('edit-index').value = index;
-    document.getElementById('edit-harga-baru').value = item.harga;
-    document.getElementById('edit-jumlah-baru').value = item.qty;
-    
-    openModal('modal-edit-harga');
-}
-
-/**
- * Hapus item dari keranjang
- * @param {Number} index 
- */
-function hapusItem(index) {
-    if (confirm('Hapus item ini dari keranjang?')) {
-        keranjang.splice(index, 1);
-        renderKeranjang();
-        saveKeranjangToStorage();
-    }
-}
-
-/**
- * Kosongkan keranjang
- */
-function clearKeranjang() {
-    if (keranjang.length === 0) return;
-    
-    if (confirm('Kosongkan semua item di keranjang?')) {
-        keranjang = [];
-        renderKeranjang();
-        saveKeranjangToStorage();
-    }
-}
-
-/**
- * Hitung total belanja
- */
-function hitungTotal() {
-    const subtotal = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
-    
-    const subtotalEl = document.getElementById('subtotal');
-    const totalEl = document.getElementById('total-bayar');
-    
-    if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
-    if (totalEl) totalEl.textContent = formatRupiah(subtotal);
-    
-    hitungKembalian();
 }
 
 /**
  * Hitung kembalian
  */
 function hitungKembalian() {
+    const keranjang = window.Keranjang ? window.Keranjang.getItems() : [];
     const total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
     const bayarInput = document.getElementById('jumlah-bayar');
     const bayar = bayarInput ? (parseRupiah(bayarInput.value) || 0) : 0;
@@ -529,22 +305,10 @@ function hitungKembalian() {
     kembalianEl.textContent = formatRupiah(Math.abs(kembalian));
     
     if (kembalian < 0) {
-        kembalianEl.classList.add('negative');
+        kembalianEl.style.color = 'var(--accent-rose)';
         kembalianEl.textContent = '-' + kembalianEl.textContent;
     } else {
-        kembalianEl.classList.remove('negative');
-    }
-}
-
-/**
- * Handle perubahan metode pembayaran
- */
-function handleMetodeChange() {
-    const metode = document.getElementById('metode-pembayaran')?.value;
-    const groupPelanggan = document.getElementById('group-pelanggan');
-    
-    if (groupPelanggan) {
-        groupPelanggan.style.display = metode === 'hutang' ? 'block' : 'none';
+        kembalianEl.style.color = 'var(--accent-indigo)';
     }
 }
 
@@ -552,15 +316,7 @@ function handleMetodeChange() {
  * Proses pembayaran
  */
 async function prosesPembayaran() {
-    // ✅ Cek auth dulu
-    const user = currentUser || auth.currentUser;
-    if (!user) {
-        showToast('Sesi habis, silakan login ulang', 'error');
-        setTimeout(() => {
-            window.location.replace('../login.html');
-        }, 2000);
-        return;
-    }
+    const keranjang = window.Keranjang ? window.Keranjang.getItems() : [];
     
     // Cek keranjang
     if (keranjang.length === 0) {
@@ -573,9 +329,9 @@ async function prosesPembayaran() {
     const metode = metodeSelect ? metodeSelect.value : 'tunai';
     const bayar = parseRupiah(document.getElementById('jumlah-bayar')?.value) || 0;
     
-    // Validasi
+    // Validasi untuk tunai
     if (metode === 'tunai' && bayar < total) {
-        showToast('Jumlah bayar kurang dari total', 'danger');
+        showToast('Jumlah bayar kurang dari total', 'error');
         return;
     }
     
@@ -595,10 +351,9 @@ async function prosesPembayaran() {
     }
     
     try {
-        // ✅ PERBAIKAN: Ambil session dengan aman
-        let sessionData = localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session');
+        // Ambil session
         let session = null;
-        
+        const sessionData = localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session');
         if (sessionData) {
             try {
                 session = JSON.parse(sessionData);
@@ -607,21 +362,20 @@ async function prosesPembayaran() {
             }
         }
         
-        // ✅ PERBAIKAN: Cek session valid, kalau tidak ada buat dari auth
+        // Fallback session
         if (!session || !session.uid) {
+            const user = auth?.currentUser;
+            if (!user) throw new Error('Sesi habis, silakan login ulang');
+            
             session = {
                 uid: user.uid,
-                nama: user.displayName || user.email.split('@')[0],
+                nama: user.displayName || user.email?.split('@')[0] || 'Kasir',
                 role: 'kasir',
                 shift: 'shift-1'
             };
-            // Simpan ke storage untuk penggunaan berikutnya
-            localStorage.setItem('webpos_session', JSON.stringify(session));
-            console.log('Session created from auth:', session);
         }
         
         const today = getToday();
-        const shift = session.shift || 'shift-1';
         const kodeTransaksi = generateKodeTransaksi();
         
         // Data transaksi
@@ -630,79 +384,76 @@ async function prosesPembayaran() {
             tanggal: today,
             waktu: new Date().toISOString(),
             kasir_id: session.uid,
-            kasir_nama: session.nama || user.email,
-            shift: shift,
+            kasir_nama: session.nama,
+            shift: session.shift || 'shift-1',
             items: keranjang.map(item => ({
                 ...item,
-                laba: (item.harga - (item.harga_modal || 0)) * item.qty
+                laba: (item.harga_jual - (item.harga_modal || 0)) * item.qty
             })),
             subtotal: total,
             diskon: 0,
             total: total,
             metode_pembayaran: metode,
-            bayar: bayar,
+            bayar: metode === 'hutang' ? 0 : bayar,
             kembalian: metode === 'tunai' ? (bayar - total) : 0,
             pelanggan_id: metode === 'hutang' ? document.getElementById('select-pelanggan').value : null,
             status: 'selesai',
-            created_at: firebase.database.ServerValue.TIMESTAMP
+            created_at: firebase.database.ServerValue?.TIMESTAMP || Date.now()
         };
         
         // Simpan transaksi
-        await database.ref(`transaksi/${today}/${kodeTransaksi}`).set(transaksiData);
-        
-        // Update stok produk
-        for (const item of keranjang) {
-            if (item.jenis === 'penjualan' && item.id && !item.id.startsWith('manual_')) {
-                const produkRef = database.ref(`products/${item.id}`);
-                const snapshot = await produkRef.once('value');
-                const produk = snapshot.val();
-                
-                if (produk) {
-                    const newStok = Math.max(0, (produk.stok || 0) - item.qty);
-                    await produkRef.update({
-                        stok: newStok,
-                        terjual: (produk.terjual || 0) + item.qty
-                    });
+        if (typeof database !== 'undefined') {
+            await database.ref(`transaksi/${today}/${kodeTransaksi}`).set(transaksiData);
+            
+            // Update stok produk
+            for (const item of keranjang) {
+                if (item.jenis === 'penjualan' && item.id && !item.id.startsWith('manual_')) {
+                    const produkRef = database.ref(`products/${item.id}`);
+                    const snapshot = await produkRef.once('value');
+                    const produk = snapshot.val();
                     
-                    // Update UI jika produk ditampilkan
-                    if (currentView === 'grid' && typeof ProdukGrid !== 'undefined') {
-                        ProdukGrid.updateCard(item.id, newStok);
-                    } else if (currentView === 'list' && typeof ProdukList !== 'undefined') {
-                        ProdukList.updateRow(item.id, newStok);
+                    if (produk) {
+                        const newStok = Math.max(0, (produk.stok || 0) - item.qty);
+                        await produkRef.update({
+                            stok: newStok,
+                            terjual: (produk.terjual || 0) + item.qty
+                        });
+                        
+                        // Update UI
+                        if (currentView === 'grid' && typeof ProdukGrid !== 'undefined') {
+                            ProdukGrid.updateCard(item.id, newStok);
+                        } else if (currentView === 'list' && typeof ProdukList !== 'undefined') {
+                            ProdukList.updateRow(item.id, newStok);
+                        }
                     }
                 }
             }
+            
+            // Update daily data
+            await updateDailyData(session.uid, keranjang, total);
+            
+            // Jika hutang, catat
+            if (metode === 'hutang') {
+                await catatHutang(transaksiData);
+            }
         }
         
-        // Update daily data
-        await updateDailyData(session.uid, session.role, keranjang, total);
-        
-        // Jika hutang, catat ke hutang piutang
-        if (metode === 'hutang') {
-            await catatHutang(transaksiData);
-        }
-        
-        // Cetak struk (placeholder)
-        console.log('Cetak struk:', kodeTransaksi);
-        
-        // Reset keranjang
-        keranjang = [];
-        renderKeranjang();
-        clearKeranjangStorage();
+        // Reset
+        window.Keranjang.clear();
+        window.Keranjang.clearDraft();
         
         const jumlahBayarInput = document.getElementById('jumlah-bayar');
         if (jumlahBayarInput) jumlahBayarInput.value = '';
         
         showToast(`Transaksi ${kodeTransaksi} berhasil`, 'success');
         
-        // Reload produk untuk update stok
+        // Reload produk
         setTimeout(loadProduk, 500);
         
     } catch (error) {
         console.error('Error proses pembayaran:', error);
-        showToast('Gagal memproses pembayaran: ' + error.message, 'danger');
+        showToast('Gagal memproses pembayaran: ' + error.message, 'error');
     } finally {
-        // Enable tombol bayar
         if (btnBayar) {
             btnBayar.disabled = false;
             btnBayar.innerHTML = '<i class="fas fa-check-circle"></i> Proses Pembayaran';
@@ -713,67 +464,45 @@ async function prosesPembayaran() {
 /**
  * Update data harian
  */
-async function updateDailyData(uid, role, items, total) {
+async function updateDailyData(uid, items, total) {
+    if (typeof database === 'undefined') return;
+    
     const today = getToday();
     const dailyRef = database.ref(`daily_data/${uid}/${today}`);
     
     const snapshot = await dailyRef.once('value');
     const current = snapshot.val() || {};
     
-    let updates = {};
-    let penjualan = 0, topup = 0, tarik = 0, laba = 0, topupFee = 0, tarikFee = 0;
+    let penjualan = 0, topup = 0, tarik = 0, laba = 0;
     
     items.forEach(item => {
         if (item.jenis === 'penjualan') {
             penjualan += item.subtotal;
-            laba += ((item.harga - (item.harga_modal || 0)) * item.qty);
+            laba += ((item.harga_jual - (item.harga_modal || 0)) * item.qty);
         } else if (item.jenis === 'topup') {
             topup += item.subtotal;
-            topupFee += (item.fee || 0);
         } else if (item.jenis === 'tarik') {
             tarik += item.nominal || item.subtotal;
-            tarikFee += (item.fee || 0);
         }
     });
     
-    updates.total_penjualan = (current.total_penjualan || 0) + penjualan;
-    updates.total_topup = (current.total_topup || 0) + topup;
-    updates.total_tarik = (current.total_tarik || 0) + tarik;
-    updates.topup_fee = (current.topup_fee || 0) + topupFee;
-    updates.tarik_fee = (current.tarik_fee || 0) + tarikFee;
-    updates.laba = (current.laba || 0) + laba;
-    updates.total_transaksi = (current.total_transaksi || 0) + 1;
-    updates.last_update = firebase.database.ServerValue.TIMESTAMP;
-    
-    await dailyRef.update(updates);
-    
-    // Update summary untuk owner
-    if (role === 'kasir') {
-        const summaryRef = database.ref(`daily_summary/${today}`);
-        const sumSnapshot = await summaryRef.once('value');
-        const sumData = sumSnapshot.val() || {};
-        
-        await summaryRef.update({
-            total_penjualan: (sumData.total_penjualan || 0) + penjualan,
-            total_topup: (sumData.total_topup || 0) + topup,
-            total_tarik: (sumData.total_tarik || 0) + tarik,
-            topup_fee: (sumData.topup_fee || 0) + topupFee,
-            tarik_fee: (sumData.tarik_fee || 0) + tarikFee,
-            laba: (sumData.laba || 0) + laba,
-            total_transaksi: (sumData.total_transaksi || 0) + 1,
-            last_update: firebase.database.ServerValue.TIMESTAMP
-        });
-    }
+    await dailyRef.update({
+        total_penjualan: (current.total_penjualan || 0) + penjualan,
+        total_topup: (current.total_topup || 0) + topup,
+        total_tarik: (current.total_tarik || 0) + tarik,
+        laba: (current.laba || 0) + laba,
+        total_transaksi: (current.total_transaksi || 0) + 1,
+        last_update: firebase.database.ServerValue?.TIMESTAMP || Date.now()
+    });
 }
 
 /**
  * Catat hutang
  */
 async function catatHutang(transaksi) {
-    const pelangganId = transaksi.pelanggan_id;
-    if (!pelangganId) return;
+    if (!transaksi.pelanggan_id || typeof database === 'undefined') return;
     
-    const hutangRef = database.ref(`hutang/${pelangganId}`).push();
+    const hutangRef = database.ref(`hutang/${transaksi.pelanggan_id}`).push();
     
     await hutangRef.set({
         transaksi_id: transaksi.kode,
@@ -782,11 +511,11 @@ async function catatHutang(transaksi) {
         sisa: transaksi.total,
         status: 'belum_lunas',
         items: transaksi.items,
-        created_at: firebase.database.ServerValue.TIMESTAMP
+        created_at: firebase.database.ServerValue?.TIMESTAMP || Date.now()
     });
     
     // Update total hutang pelanggan
-    const pelangganRef = database.ref(`pelanggan/${pelangganId}`);
+    const pelangganRef = database.ref(`pelanggan/${transaksi.pelanggan_id}`);
     const snapshot = await pelangganRef.once('value');
     const pelanggan = snapshot.val() || {};
     
@@ -800,6 +529,8 @@ async function catatHutang(transaksi) {
  */
 async function loadPelanggan() {
     try {
+        if (typeof database === 'undefined') return;
+        
         const snapshot = await database.ref('pelanggan').orderByChild('nama').once('value');
         const select = document.getElementById('select-pelanggan');
         if (!select) return;
@@ -826,6 +557,8 @@ async function loadPelanggan() {
  */
 async function loadKategori() {
     try {
+        if (typeof database === 'undefined') return;
+        
         const snapshot = await database.ref('kategori').orderByChild('nama').once('value');
         const select = document.getElementById('filter-kategori');
         if (!select) return;
@@ -851,21 +584,42 @@ async function loadKategori() {
  * Cek status kasir
  */
 async function checkKasirStatus() {
-    const session = JSON.parse(localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session'));
-    if (!session || session.role !== 'kasir') return;
-    
-    const today = getToday();
-    const snapshot = await database.ref(`daily_data/${session.uid}/${today}`).once('value');
-    const data = snapshot.val();
-    
-    if (!data || data.status === 'closed') {
-        // Auto buka kasir
-        await database.ref(`daily_data/${session.uid}/${today}`).update({
-            status: 'open',
-            opened_at: firebase.database.ServerValue.TIMESTAMP
-        });
+    try {
+        const session = JSON.parse(localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session') || '{}');
+        if (!session || session.role !== 'kasir' || typeof database === 'undefined') return;
         
-        showToast('Kasir berhasil dibuka', 'success');
+        const today = getToday();
+        const snapshot = await database.ref(`daily_data/${session.uid}/${today}`).once('value');
+        const data = snapshot.val();
+        
+        if (!data || data.status === 'closed') {
+            await database.ref(`daily_data/${session.uid}/${today}`).update({
+                status: 'open',
+                opened_at: firebase.database.ServerValue?.TIMESTAMP || Date.now()
+            });
+            showToast('Kasir berhasil dibuka', 'success');
+        }
+    } catch (error) {
+        console.error('Error checking kasir status:', error);
+    }
+}
+
+/**
+ * Update datetime display
+ */
+function updateDateTime() {
+    const timeEl = document.getElementById('current-time');
+    const dateEl = document.getElementById('current-date');
+    
+    const now = new Date();
+    
+    if (timeEl) {
+        timeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    if (dateEl) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('id-ID', options);
     }
 }
 
@@ -889,101 +643,69 @@ function closeAllModals() {
 }
 
 /**
- * Update datetime display
+ * Helper functions
  */
-function updateDateTime() {
-    const timeEl = document.getElementById('current-time');
-    const dateEl = document.getElementById('current-date');
-    
+function getToday() {
     const now = new Date();
-    
-    if (timeEl) {
-        timeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    }
-    
-    if (dateEl) {
-        dateEl.textContent = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
-/**
- * Create overlay untuk mobile
- */
-function createOverlay() {
-    const existing = document.querySelector('.sidebar-overlay');
-    if (existing) {
-        existing.remove();
-        return;
-    }
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay active';
-    overlay.addEventListener('click', () => {
-        document.getElementById('sidebar')?.classList.remove('active');
-        overlay.remove();
-    });
-    
-    document.body.appendChild(overlay);
+function generateKodeTransaksi() {
+    const now = new Date();
+    const date = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `TRX${date}${random}`;
 }
 
-/**
- * Simpan keranjang ke storage (draft)
- */
-function saveKeranjangToStorage() {
-    if (keranjang.length > 0) {
-        localStorage.setItem('keranjang_draft', JSON.stringify({
-            items: keranjang,
-            timestamp: new Date().toISOString()
-        }));
-    } else {
-        localStorage.removeItem('keranjang_draft');
-    }
+function formatRupiah(angka) {
+    if (typeof angka !== 'number') angka = parseInt(angka) || 0;
+    return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
-/**
- * Load keranjang dari storage
- */
-function loadKeranjangFromStorage() {
-    const draft = localStorage.getItem('keranjang_draft');
-    if (!draft) return;
+function parseRupiah(str) {
+    if (!str) return 0;
+    return parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
+}
+
+function showToast(message, type = 'info') {
+    // Implementasi toast sederhana
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#6366f1'};
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
     
-    try {
-        const data = JSON.parse(draft);
-        const draftTime = new Date(data.timestamp);
-        const now = new Date();
-        const diffMinutes = (now - draftTime) / (1000 * 60);
-        
-        // Hanya recovery jika kurang dari 2 jam
-        if (diffMinutes < 120 && confirm('Ada transaksi yang belum selesai. Muat kembali?')) {
-            keranjang = data.items || [];
-            renderKeranjang();
-        } else {
-            localStorage.removeItem('keranjang_draft');
-        }
-    } catch (e) {
-        console.error('Error loading draft:', e);
-        localStorage.removeItem('keranjang_draft');
-    }
-}
-
-/**
- * Clear keranjang storage
- */
-function clearKeranjangStorage() {
-    localStorage.removeItem('keranjang_draft');
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // Export fungsi ke global scope
-window.keranjang = keranjang;
+window.currentView = currentView;
 window.currentJenis = currentJenis;
-window.tambahKeKeranjang = tambahKeKeranjang;
-window.updateQty = updateQty;
-window.editItem = editItem;
-window.hapusItem = hapusItem;
-window.renderKeranjang = renderKeranjang;
+window.produkData = produkData;
+window.toggleView = toggleView;
+window.switchJenisTransaksi = switchJenisTransaksi;
+window.loadProduk = loadProduk;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.closeAllModals = closeAllModals;
-window.loadProduk = loadProduk;
+window.formatRupiah = formatRupiah;
+window.parseRupiah = parseRupiah;
+window.showToast = showToast;
+window.getToday = getToday;
+window.generateKodeTransaksi = generateKodeTransaksi;
+window.hitungKembalian = hitungKembalian;
 
 console.log('Kasir Main Module Loaded');
