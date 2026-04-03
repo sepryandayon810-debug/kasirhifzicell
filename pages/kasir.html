@@ -195,7 +195,7 @@
                 </div>
 
                 <!-- Right: Keranjang Section -->
-                <div class="keranjang-section">
+                <div class="keranjang-section" id="keranjang-section">
                     <div class="keranjang-header">
                         <h3><i class="fas fa-shopping-cart"></i> Keranjang</h3>
                         <button class="btn-clear" id="btn-clear-keranjang" title="Kosongkan">
@@ -285,6 +285,14 @@
             </footer>
         </div>
     </main>
+
+    <!-- ========================================== -->
+    <!-- TOMBOL KERANJANG MOBILE - POSISI DISINI -->
+    <!-- ========================================== -->
+    <button class="btn-keranjang-mobile" id="btn-keranjang-mobile" onclick="toggleKeranjangMobile()">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="badge" id="mobile-count">0</span>
+    </button>
 
     <!-- MODALS -->
     <div class="modal" id="modal-transaksi-manual">
@@ -443,7 +451,6 @@
     
     <!-- Inline Functions -->
     <script>
-        // Wrapper functions untuk onclick HTML
         function toggleDropdown(section) {
             if (window.Sidebar?.toggleDropdown) {
                 window.Sidebar.toggleDropdown(section);
@@ -508,6 +515,21 @@
         
         function closeModal(modalId) {
             document.getElementById(modalId)?.classList.remove('active');
+        }
+        
+        // ==========================================
+        // FUNGSI KERANJANG MOBILE - TAMBAHAN BARU
+        // ==========================================
+        function toggleKeranjangMobile() {
+            document.getElementById('keranjang-section').classList.toggle('open');
+        }
+
+        function updateMobileCount(count) {
+            const badge = document.getElementById('mobile-count');
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
         }
         
         // Init
