@@ -2,521 +2,487 @@
  * Pembelian Main Controller
  */
 
-let pembelianKeranjang = [];
-let pembelianData = [];
-let selectedProduk = null;
-
-document.addEventListener('DOMContentLoaded', function() {
-    initPembelian();
-});
-
-function initPembelian() {
-    // Load suppliers
-    loadSuppliers();
+(function() {
+    'use strict';
     
-    // Setup event listeners
-    setupEventListeners();
+    // State
+    const state = {
+        keranjang: [],
+        supplier: null,
+        subtotal: 0,
+        diskon: 0,
+        pajak: 0,
+        total: 0,
+        metodeBayar: 'tunai',
+        produkList: []
+    };
     
-    // Load riwayat
-    loadRiwayatPembelian();
+    // DOM Elements
+    const elements = {};
     
-    // Update datetime
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
-    
-    // Update counters
-    updateCounters();
-}
-
-function setupEventListeners() {
-    // Toggle sidebar
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-        });
-    }
-    
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-    }
-    
-    // Search produk
-    const searchInput = document.getElementById('cari-produk-pembelian');
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(cariProdukPembelian, 300));
-        searchInput.addEventListener('focus', () => {
-            if (searchInput.value.length >= 2) {
-                document.getElementById('search-results').classList.add('active');
-            }
-        });
-    }
-    
-    // Click outside to close search results
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-box-pembelian')) {
-            document.getElementById('search-results')?.classList.remove('active');
+    // ==========================================
+    // INIT
+    // ==========================================
+    function init() {
+        console.log('[PembelianMain] Initializing...');
+        
+        cacheElements();
+        setupEvents();
+        loadProduk();
+        
+        // Set default tanggal jatuh tempo
+        const jatuhTempo = document.getElementById('jatuh-tempo');
+        if (jatuhTempo) {
+            const today = new Date();
+            today.setDate(today.getDate() + 30);
+            jatuhTempo.value = today.toISOString().split('T')[0];
         }
-    });
-    
-    // Tambah item
-    const btnTambah = document.getElementById('btn-tambah-item');
-    if (btnTambah) {
-        btnTambah.addEventListener('click', tambahKeKeranjang);
+        
+        console.log('[PembelianMain] Initialized');
     }
     
-    // Metode pembayaran change
-    const metodeSelect = document.getElementById('metode-pembayaran');
-    if (metodeSelect) {
-        metodeSelect.addEventListener('change', function() {
-            const jatuhTempoGroup = document.getElementById('jatuh-tempo-group');
-            if (this.value === 'hutang') {
-                jatuhTempoGroup.style.display = 'block';
-                // Set default jatuh tempo 30 hari dari sekarang
-                const date = new Date();
-                date.setDate(date.getDate() + 30);
-                document.getElementById('jatuh-tempo').value = date.toISOString().split('T')[0];
-            } else {
-                jatuhTempoGroup.style.display = 'none';
+    function cacheElements() {
+        // Supplier
+        elements.supplierInfo = document.getElementById('supplier-info');
+        elements.btnPilihSupplier = document.getElementById('btn-pilih-supplier');
+        
+        // Produk
+        elements.cariProduk = document.getElementById('cari-produk-pembelian');
+        elements.hasilPencarian = document.getElementById('hasil-pencarian');
+        
+        // Keranjang
+        elements.keranjangList = document.getElementById('keranjang-list');
+        elements.btnClearKeranjang = document.getElementById('btn-clear-keranjang');
+        
+        // Ringkasan
+        elements.subtotal = document.getElementById('subtotal-pembelian');
+        elements.diskon = document.getElementById('diskon-pembelian');
+        elements.pajak = document.getElementById('pajak-pembelian');
+        elements.total = document.getElementById('total-pembelian');
+        
+        // Pembayaran
+        elements.metodeBayar = document.getElementById('metode-bayar');
+        elements.jumlahBayar = document.getElementById('jumlah-bayar');
+        elements.kembalian = document.getElementById('kembalian-pembelian');
+        elements.btnProses = document.getElementById('btn-proses-pembelian');
+        elements.btnUangPas = document.getElementById('btn-uang-pas-pembelian');
+    }
+    
+    // ==========================================
+    // EVENTS
+    // ==========================================
+    function setupEvents() {
+        // Pilih supplier
+        elements.btnPilihSupplier?.addEventListener('click', () => {
+            openModal('modal-pilih-supplier');
+            loadSupplierList();
+        });
+        
+        // Cari produk
+        elements.cariProduk?.addEventListener('input', debounce(cariProduk, 300));
+        
+        // Clear keranjang
+        elements.btnClearKeranjang?.addEventListener('click', () => {
+            if (state.keranjang.length === 0) return;
+            if (confirm('Kosongkan keranjang?')) {
+                state.keranjang = [];
+                renderKeranjang();
+                hitungTotal();
             }
         });
-    }
-    
-    // Simpan pembelian
-    const btnSimpan = document.getElementById('btn-simpan-pembelian');
-    if (btnSimpan) {
-        btnSimpan.addEventListener('click', simpanPembelian);
-    }
-    
-    // Tambah supplier
-    const btnTambahSupplier = document.getElementById('btn-tambah-supplier');
-    if (btnTambahSupplier) {
-        btnTambahSupplier.addEventListener('click', () => {
-            openModal('modal-supplier');
-        });
-    }
-    
-    // Filter tanggal
-    const btnFilter = document.getElementById('btn-filter');
-    if (btnFilter) {
-        btnFilter.addEventListener('click', loadRiwayatPembelian);
-    }
-    
-    // Diskon dan pajak
-    const diskonInput = document.getElementById('diskon-pembelian');
-    const pajakInput = document.getElementById('pajak-pembelian');
-    
-    if (diskonInput) {
-        diskonInput.addEventListener('input', hitungTotalPembelian);
-    }
-    if (pajakInput) {
-        pajakInput.addEventListener('input', hitungTotalPembelian);
-    }
-}
-
-async function cariProdukPembelian() {
-    const query = document.getElementById('cari-produk-pembelian').value.toLowerCase().trim();
-    const resultsContainer = document.getElementById('search-results');
-    
-    if (query.length < 2) {
-        resultsContainer.classList.remove('active');
-        return;
-    }
-    
-    try {
-        // Cari di produkData (sudah load saat init)
-        const snapshot = await database.ref('products')
-            .orderByChild('nama')
-            .startAt(query)
-            .endAt(query + '\uf8ff')
-            .limitToFirst(10)
-            .once('value');
         
-        const results = [];
-        snapshot.forEach(child => {
-            const produk = child.val();
-            results.push({
-                id: child.key,
-                ...produk
-            });
+        // Diskon & pajak
+        elements.diskon?.addEventListener('input', hitungTotal);
+        elements.pajak?.addEventListener('input', hitungTotal);
+        
+        // Jumlah bayar
+        elements.jumlahBayar?.addEventListener('input', hitungKembalian);
+        
+        // Uang pas
+        elements.btnUangPas?.addEventListener('click', () => {
+            elements.jumlahBayar.value = state.total;
+            hitungKembalian();
         });
         
-        // Also search by kode
-        const snapshotKode = await database.ref('products')
-            .orderByChild('kode')
-            .startAt(query.toUpperCase())
-            .endAt(query.toUpperCase() + '\uf8ff')
-            .limitToFirst(5)
-            .once('value');
+        // Proses pembelian
+        elements.btnProses?.addEventListener('click', prosesPembelian);
+    }
+    
+    // ==========================================
+    // SUPPLIER
+    // ==========================================
+    function loadSupplierList() {
+        const container = document.getElementById('supplier-list-modal');
+        if (!container) return;
         
-        snapshotKode.forEach(child => {
-            const produk = child.val();
-            const exists = results.find(r => r.id === child.key);
-            if (!exists) {
-                results.push({
-                    id: child.key,
-                    ...produk
+        container.innerHTML = '<p style="text-align: center; padding: 40px;">Memuat...</p>';
+        
+        firebase.database().ref('supplier').once('value')
+            .then(snapshot => {
+                const suppliers = [];
+                snapshot.forEach(child => {
+                    suppliers.push({ id: child.key, ...child.val() });
                 });
-            }
-        });
-        
-        renderSearchResults(results);
-        
-    } catch (error) {
-        console.error('Error cari produk:', error);
-    }
-}
-
-function renderSearchResults(results) {
-    const container = document.getElementById('search-results');
-    
-    if (results.length === 0) {
-        container.innerHTML = '<div class="search-result-item">Tidak ada produk ditemukan</div>';
-    } else {
-        container.innerHTML = results.map(p => `
-            <div class="search-result-item" onclick="pilihProduk('${p.id}')">
-                <div class="nama">${p.nama}</div>
-                <div class="info">${p.kode} | Stok: ${p.stok || 0} | ${formatRupiah(p.harga_modal || 0)}</div>
-            </div>
-        `).join('');
+                
+                renderSupplierList(suppliers);
+            });
     }
     
-    container.classList.add('active');
-}
-
-function pilihProduk(produkId) {
-    database.ref(`products/${produkId}`).once('value').then(snapshot => {
-        const produk = snapshot.val();
-        if (produk) {
-            selectedProduk = {
-                id: produkId,
-                ...produk
-            };
-            
-            // Isi harga beli dengan harga modal
-            document.getElementById('harga-beli-input').value = produk.harga_modal || 0;
-            document.getElementById('cari-produk-pembelian').value = produk.nama;
-            document.getElementById('search-results').classList.remove('active');
-            
-            // Focus ke jumlah
-            document.getElementById('jumlah-input').focus();
-            document.getElementById('jumlah-input').select();
+    function renderSupplierList(suppliers) {
+        const container = document.getElementById('supplier-list-modal');
+        if (!container) return;
+        
+        if (suppliers.length === 0) {
+            container.innerHTML = `
+                <div class="empty-supplier">
+                    <i class="fas fa-truck"></i>
+                    <p>Belum ada supplier</p>
+                </div>
+            `;
+            return;
         }
-    });
-}
-
-function tambahKeKeranjang() {
-    if (!selectedProduk) {
-        alert('Pilih produk terlebih dahulu');
-        return;
-    }
-    
-    const hargaBeli = parseInt(document.getElementById('harga-beli-input').value) || 0;
-    const jumlah = parseInt(document.getElementById('jumlah-input').value) || 1;
-    
-    if (hargaBeli <= 0) {
-        alert('Harga beli harus lebih dari 0');
-        return;
-    }
-    
-    // Cek apakah produk sudah ada di keranjang
-    const existingIndex = pembelianKeranjang.findIndex(item => item.id === selectedProduk.id);
-    
-    if (existingIndex >= 0) {
-        // Update existing
-        pembelianKeranjang[existingIndex].jumlah += jumlah;
-        pembelianKeranjang[existingIndex].harga_beli = hargaBeli;
-    } else {
-        // Add new
-        pembelianKeranjang.push({
-            id: selectedProduk.id,
-            nama: selectedProduk.nama,
-            kode: selectedProduk.kode,
-            harga_beli: hargaBeli,
-            jumlah: jumlah,
-            satuan: selectedProduk.satuan || 'pcs'
+        
+        let html = '';
+        suppliers.forEach(s => {
+            html += `
+                <div class="supplier-list-item" onclick="pilihSupplier('${s.id}', '${s.nama}', '${s.telepon || ''}')">
+                    <div class="avatar"><i class="fas fa-truck"></i></div>
+                    <div class="info">
+                        <h4>${s.nama}</h4>
+                        <p>${s.telepon || '-'} • ${s.alamat || '-'}</p>
+                    </div>
+                </div>
+            `;
         });
+        
+        container.innerHTML = html;
     }
     
-    // Reset input
-    selectedProduk = null;
-    document.getElementById('cari-produk-pembelian').value = '';
-    document.getElementById('harga-beli-input').value = '';
-    document.getElementById('jumlah-input').value = '1';
-    document.getElementById('cari-produk-pembelian').focus();
-    
-    // Render keranjang
-    renderKeranjang();
-    hitungTotalPembelian();
-}
-
-function renderKeranjang() {
-    const container = document.getElementById('keranjang-list');
-    
-    if (pembelianKeranjang.length === 0) {
-        container.innerHTML = `
-            <div class="keranjang-empty">
-                <i class="fas fa-shopping-basket"></i>
-                <p>Keranjang masih kosong</p>
+    window.pilihSupplier = function(id, nama, telepon) {
+        state.supplier = { id, nama, telepon };
+        
+        elements.supplierInfo.innerHTML = `
+            <div class="supplier-selected">
+                <div class="supplier-avatar"><i class="fas fa-truck"></i></div>
+                <div class="supplier-details">
+                    <h4>${nama}</h4>
+                    <p><i class="fas fa-phone"></i> ${telepon || '-'}</p>
+                    <button class="btn btn-sm btn-secondary" onclick="document.getElementById('btn-pilih-supplier').click()">
+                        Ganti Supplier
+                    </button>
+                </div>
             </div>
         `;
-        return;
-    }
-    
-    container.innerHTML = pembelianKeranjang.map((item, index) => `
-        <div class="keranjang-item">
-            <div class="item-info">
-                <div class="item-nama">${item.nama}</div>
-                <div class="item-harga">${formatRupiah(item.harga_beli)} / ${item.satuan}</div>
-            </div>
-            <div class="item-qty">
-                <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
-                <span class="qty-value">${item.jumlah}</span>
-                <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
-            </div>
-            <div class="item-subtotal">${formatRupiah(item.harga_beli * item.jumlah)}</div>
-            <button class="btn-remove" onclick="hapusDariKeranjang(${index})">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `).join('');
-}
-
-function updateQty(index, change) {
-    const newQty = pembelianKeranjang[index].jumlah + change;
-    
-    if (newQty <= 0) {
-        hapusDariKeranjang(index);
-        return;
-    }
-    
-    pembelianKeranjang[index].jumlah = newQty;
-    renderKeranjang();
-    hitungTotalPembelian();
-}
-
-function hapusDariKeranjang(index) {
-    pembelianKeranjang.splice(index, 1);
-    renderKeranjang();
-    hitungTotalPembelian();
-}
-
-function hitungTotalPembelian() {
-    const subtotal = pembelianKeranjang.reduce((sum, item) => sum + (item.harga_beli * item.jumlah), 0);
-    const diskon = parseInt(document.getElementById('diskon-pembelian')?.value) || 0;
-    const pajakPersen = parseInt(document.getElementById('pajak-pembelian')?.value) || 0;
-    
-    const setelahDiskon = subtotal - diskon;
-    const pajak = Math.round(setelahDiskon * (pajakPersen / 100));
-    const total = setelahDiskon + pajak;
-    
-    document.getElementById('subtotal-pembelian').textContent = formatRupiah(subtotal);
-    document.getElementById('total-pembelian').textContent = formatRupiah(total);
-    
-    return total;
-}
-
-async function simpanPembelian() {
-    if (pembelianKeranjang.length === 0) {
-        alert('Keranjang masih kosong');
-        return;
-    }
-    
-    const supplierId = document.getElementById('select-supplier').value;
-    if (!supplierId) {
-        alert('Pilih supplier terlebih dahulu');
-        return;
-    }
-    
-    const metode = document.getElementById('metode-pembayaran').value;
-    const total = hitungTotalPembelian();
-    
-    const btnSimpan = document.getElementById('btn-simpan-pembelian');
-    btnSimpan.disabled = true;
-    btnSimpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-    
-    try {
-        // Generate kode pembelian
-        const today = new Date();
-        const kodePrefix = 'BL' + today.getFullYear().toString().slice(-2) + 
-                          String(today.getMonth() + 1).padStart(2, '0') + 
-                          String(today.getDate()).padStart(2, '0');
         
-        // Get last number
-        const lastSnapshot = await database.ref('pembelian')
-            .orderByKey()
-            .limitToLast(1)
-            .once('value');
-        
-        let lastNumber = 0;
-        lastSnapshot.forEach(child => {
-            const kode = child.val().kode || '';
-            const match = kode.match(/-(\d+)$/);
-            if (match) {
-                lastNumber = parseInt(match[1]);
-            }
-        });
-        
-        const kodePembelian = `${kodePrefix}-${String(lastNumber + 1).padStart(4, '0')}`;
-        
-        // Data pembelian
-        const pembelianData = {
-            kode: kodePembelian,
-            supplier_id: supplierId,
-            items: {},
-            subtotal: parseInt(document.getElementById('subtotal-pembelian').textContent.replace(/\D/g, '')),
-            diskon: parseInt(document.getElementById('diskon-pembelian').value) || 0,
-            pajak_persen: parseInt(document.getElementById('pajak-pembelian').value) || 0,
-            total: total,
-            metode_pembayaran: metode,
-            status: metode === 'hutang' ? 'hutang' : 'lunas',
-            catatan: document.getElementById('catatan-pembelian').value,
-            created_at: firebase.database.ServerValue.TIMESTAMP,
-            created_by: auth.currentUser?.uid || 'unknown'
-        };
-        
-        if (metode === 'hutang') {
-            pembelianData.jatuh_tempo = document.getElementById('jatuh-tempo').value;
-        }
-        
-        // Add items
-        pembelianKeranjang.forEach(item => {
-            pembelianData.items[item.id] = {
-                nama: item.nama,
-                kode: item.kode,
-                harga_beli: item.harga_beli,
-                jumlah: item.jumlah,
-                satuan: item.satuan,
-                subtotal: item.harga_beli * item.jumlah
-            };
-        });
-        
-        // Save pembelian
-        const pembelianRef = database.ref('pembelian').push();
-        await pembelianRef.set(pembelianData);
-        
-        // Update stok produk dan harga modal
-        const updates = {};
-        pembelianKeranjang.forEach(item => {
-            // Update stok
-            updates[`products/${item.id}/stok`] = firebase.database.ServerValue.increment(item.jumlah);
-            // Update harga modal (rata-rata bergerak bisa ditambahkan di sini)
-            updates[`products/${item.id}/harga_modal`] = item.harga_beli;
-            updates[`products/${item.id}/updated_at`] = firebase.database.ServerValue.TIMESTAMP;
-        });
-        
-        await database.ref().update(updates);
-        
-        // Jika hutang, catat di hutang
-        if (metode === 'hutang') {
-            const hutangData = {
-                tipe: 'hutang',
-                pembelian_id: pembelianRef.key,
-                supplier_id: supplierId,
-                jumlah: total,
-                jumlah_bayar: 0,
-                sisa: total,
-                jatuh_tempo: document.getElementById('jatuh-tempo').value,
-                status: 'belum_lunas',
-                created_at: firebase.database.ServerValue.TIMESTAMP
-            };
-            await database.ref('hutang_piutang').push(hutangData);
-        }
-        
-        // Catat di kas jika tunai/transfer
-        if (metode !== 'hutang') {
-            const kasData = {
-                tipe: 'keluar',
-                kategori: 'pembelian',
-                jumlah: total,
-                keterangan: `Pembelian: ${kodePembelian}`,
-                referensi_id: pembelianRef.key,
-                created_at: firebase.database.ServerValue.TIMESTAMP,
-                created_by: auth.currentUser?.uid || 'unknown'
-            };
-            await database.ref('kas').push(kasData);
-        }
-        
-        showToast('Pembelian berhasil disimpan', 'success');
-        
-        // Reset form
-        resetPembelianForm();
-        
-        // Refresh riwayat
-        loadRiwayatPembelian();
-        updateCounters();
-        
-    } catch (error) {
-        console.error('Error simpan pembelian:', error);
-        alert('Gagal menyimpan pembelian: ' + error.message);
-    } finally {
-        btnSimpan.disabled = false;
-        btnSimpan.innerHTML = '<i class="fas fa-save"></i> Simpan Pembelian';
-    }
-}
-
-function resetPembelianForm() {
-    pembelianKeranjang = [];
-    selectedProduk = null;
-    
-    document.getElementById('select-supplier').value = '';
-    document.getElementById('cari-produk-pembelian').value = '';
-    document.getElementById('harga-beli-input').value = '';
-    document.getElementById('jumlah-input').value = '1';
-    document.getElementById('diskon-pembelian').value = '0';
-    document.getElementById('pajak-pembelian').value = '0';
-    document.getElementById('catatan-pembelian').value = '';
-    document.getElementById('metode-pembayaran').value = 'tunai';
-    document.getElementById('jatuh-tempo-group').style.display = 'none';
-    
-    renderKeranjang();
-    hitungTotalPembelian();
-}
-
-function updateDateTime() {
-    const timeEl = document.getElementById('current-time');
-    const dateEl = document.getElementById('current-date');
-    const now = new Date();
-    
-    if (timeEl) timeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    if (dateEl) dateEl.textContent = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        closeModal('modal-pilih-supplier');
     };
-}
-
-// Modal functions
-function openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('active');
-}
-
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
-}
-
-// Export globals
-window.pembelianKeranjang = pembelianKeranjang;
-window.selectedProduk = selectedProduk;
-window.cariProdukPembelian = cariProdukPembelian;
-window.pilihProduk = pilihProduk;
-window.tambahKeKeranjang = tambahKeKeranjang;
-window.updateQty = updateQty;
-window.hapusDariKeranjang = hapusDariKeranjang;
-window.simpanPembelian = simpanPembelian;
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.resetPembelianForm = resetPembelianForm;
+    
+    // ==========================================
+    // PRODUK
+    // ==========================================
+    function loadProduk() {
+        firebase.database().ref('produk').once('value')
+            .then(snapshot => {
+                state.produkList = [];
+                snapshot.forEach(child => {
+                    state.produkList.push({ id: child.key, ...child.val() });
+                });
+            });
+    }
+    
+    function cariProduk() {
+        const query = elements.cariProduk.value.trim().toLowerCase();
+        
+        if (!query) {
+            elements.hasilPencarian.innerHTML = '';
+            return;
+        }
+        
+        const hasil = state.produkList.filter(p => 
+            p.nama?.toLowerCase().includes(query) ||
+            p.kode?.toLowerCase().includes(query) ||
+            p.barcode?.includes(query)
+        ).slice(0, 5);
+        
+        renderHasilPencarian(hasil);
+    }
+    
+    function renderHasilPencarian(hasil) {
+        if (hasil.length === 0) {
+            elements.hasilPencarian.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    <p>Produk tidak ditemukan</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        hasil.forEach(p => {
+            html += `
+                <div class="hasil-item" onclick="tambahKeKeranjang('${p.id}')">
+                    <div class="item-icon"><i class="fas fa-box"></i></div>
+                    <div class="item-info">
+                        <h4>${p.nama}</h4>
+                        <p>${p.kode || '-'} • Stok: ${p.stok || 0}</p>
+                    </div>
+                    <div class="item-harga">Rp ${formatNumber(p.hargaModal || 0)}</div>
+                </div>
+            `;
+        });
+        
+        elements.hasilPencarian.innerHTML = html;
+    }
+    
+    window.tambahKeKeranjang = function(produkId) {
+        const produk = state.produkList.find(p => p.id === produkId);
+        if (!produk) return;
+        
+        const existing = state.keranjang.find(item => item.id === produkId);
+        
+        if (existing) {
+            existing.qty++;
+            existing.subtotal = existing.qty * existing.harga;
+        } else {
+            state.keranjang.push({
+                id: produkId,
+                nama: produk.nama,
+                kode: produk.kode,
+                harga: produk.hargaModal || 0,
+                qty: 1,
+                subtotal: produk.hargaModal || 0
+            });
+        }
+        
+        elements.cariProduk.value = '';
+        elements.hasilPencarian.innerHTML = '';
+        renderKeranjang();
+        hitungTotal();
+    };
+    
+    // ==========================================
+    // KERANJANG
+    // ==========================================
+    function renderKeranjang() {
+        if (state.keranjang.length === 0) {
+            elements.keranjangList.innerHTML = `
+                <div class="empty-keranjang">
+                    <i class="fas fa-cart-plus"></i>
+                    <p>Keranjang masih kosong</p>
+                    <small>Scan atau cari produk untuk menambahkan</small>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        state.keranjang.forEach((item, index) => {
+            html += `
+                <div class="keranjang-item">
+                    <div class="item-img"><i class="fas fa-box"></i></div>
+                    <div class="item-info">
+                        <h4>${item.nama}</h4>
+                        <p>${item.kode || '-'} • Rp ${formatNumber(item.harga)}</p>
+                    </div>
+                    <div class="item-qty">
+                        <button onclick="ubahQty(${index}, -1)"><i class="fas fa-minus"></i></button>
+                        <input type="number" value="${item.qty}" onchange="setQty(${index}, this.value)">
+                        <button onclick="ubahQty(${index}, 1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="item-harga">Rp ${formatNumber(item.subtotal)}</div>
+                    <button class="item-delete" onclick="hapusDariKeranjang(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+        });
+        
+        elements.keranjangList.innerHTML = html;
+    }
+    
+    window.ubahQty = function(index, delta) {
+        const item = state.keranjang[index];
+        item.qty = Math.max(1, item.qty + delta);
+        item.subtotal = item.qty * item.harga;
+        renderKeranjang();
+        hitungTotal();
+    };
+    
+    window.setQty = function(index, value) {
+        const qty = parseInt(value) || 1;
+        const item = state.keranjang[index];
+        item.qty = Math.max(1, qty);
+        item.subtotal = item.qty * item.harga;
+        renderKeranjang();
+        hitungTotal();
+    };
+    
+    window.hapusDariKeranjang = function(index) {
+        state.keranjang.splice(index, 1);
+        renderKeranjang();
+        hitungTotal();
+    };
+    
+    // ==========================================
+    // PERHITUNGAN
+    // ==========================================
+    function hitungTotal() {
+        state.subtotal = state.keranjang.reduce((sum, item) => sum + item.subtotal, 0);
+        
+        const diskonPersen = parseFloat(elements.diskon?.value) || 0;
+        const pajakPersen = parseFloat(elements.pajak?.value) || 0;
+        
+        const diskonNominal = state.subtotal * (diskonPersen / 100);
+        const setelahDiskon = state.subtotal - diskonNominal;
+        const pajakNominal = setelahDiskon * (pajakPersen / 100);
+        
+        state.total = setelahDiskon + pajakNominal;
+        state.diskon = diskonNominal;
+        state.pajak = pajakNominal;
+        
+        // Update UI
+        elements.subtotal.textContent = 'Rp ' + formatNumber(state.subtotal);
+        elements.total.textContent = 'Rp ' + formatNumber(state.total);
+        
+        hitungKembalian();
+    }
+    
+    function hitungKembalian() {
+        const bayar = parseFloat(elements.jumlahBayar?.value.replace(/\./g, '')) || 0;
+        const selisih = bayar - state.total;
+        
+        elements.kembalian.textContent = 'Rp ' + formatNumber(Math.abs(selisih));
+        elements.kembalian.className = 'kembalian-display ' + (selisih >= 0 ? 'lebih' : 'kurang');
+    }
+    
+    // ==========================================
+    // PROSES PEMBELIAN
+    // ==========================================
+    function prosesPembelian() {
+        // Validasi
+        if (!state.supplier) {
+            alert('Pilih supplier terlebih dahulu!');
+            return;
+        }
+        
+        if (state.keranjang.length === 0) {
+            alert('Keranjang masih kosong!');
+            return;
+        }
+        
+        const jumlahBayar = parseFloat(elements.jumlahBayar?.value.replace(/\./g, '')) || 0;
+        
+        if (jumlahBayar < state.total && elements.metodeBayar?.value !== 'hutang') {
+            alert('Jumlah bayar kurang dari total!');
+            return;
+        }
+        
+        // Generate invoice number
+        const invoice = 'PB-' + Date.now();
+        
+        // Data transaksi
+        const transaksi = {
+            invoice: invoice,
+            tanggal: new Date().toISOString(),
+            supplier: state.supplier,
+            items: state.keranjang,
+            subtotal: state.subtotal,
+            diskon: state.diskon,
+            pajak: state.pajak,
+            total: state.total,
+            metodeBayar: elements.metodeBayar?.value || 'tunai',
+            jumlahBayar: jumlahBayar,
+            kembalian: jumlahBayar - state.total,
+            catatan: document.getElementById('catatan-pembelian')?.value || '',
+            status: elements.metodeBayar?.value === 'hutang' ? 'hutang' : 'lunas'
+        };
+        
+        if (elements.metodeBayar?.value === 'hutang') {
+            transaksi.jatuhTempo = document.getElementById('jatuh-tempo')?.value;
+        }
+        
+        // Simpan ke Firebase
+        const db = firebase.database();
+        
+        Promise.all([
+            // Simpan transaksi
+            db.ref('pembelian/' + invoice).set(transaksi),
+            
+            // Update stok produk
+            ...state.keranjang.map(item => {
+                return db.ref('produk/' + item.id + '/stok').transaction(stok => {
+                    return (stok || 0) + item.qty;
+                });
+            })
+        ])
+        .then(() => {
+            alert('Pembelian berhasil disimpan!\nInvoice: ' + invoice);
+            
+            // Reset
+            state.keranjang = [];
+            state.supplier = null;
+            elements.jumlahBayar.value = '';
+            document.getElementById('catatan-pembelian').value = '';
+            
+            renderKeranjang();
+            hitungTotal();
+            
+            elements.supplierInfo.innerHTML = `
+                <div class="empty-supplier">
+                    <i class="fas fa-user-tie"></i>
+                    <p>Belum memilih supplier</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('btn-pilih-supplier').click()">
+                        Pilih Supplier
+                    </button>
+                </div>
+            `;
+        })
+        .catch(err => {
+            alert('Error: ' + err.message);
+        });
+    }
+    
+    // ==========================================
+    // UTILITY
+    // ==========================================
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, arguments), wait);
+        };
+    }
+    
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+    
+    function openModal(id) {
+        document.getElementById(id)?.classList.add('active');
+    }
+    
+    function closeModal(id) {
+        document.getElementById(id)?.classList.remove('active');
+    }
+    
+    // ==========================================
+    // PUBLIC API
+    // ==========================================
+    window.PembelianMain = {
+        init: init,
+        refresh: () => {
+            loadProduk();
+            state.keranjang = [];
+            renderKeranjang();
+            hitungTotal();
+        }
+    };
+    
+    // Auto init
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+})();
