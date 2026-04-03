@@ -1333,3 +1333,227 @@
         justify-content: center;
     }
 }
+
+/* ============================================
+   MOBILE FIX - MODAL & LAYOUT
+   ============================================ */
+
+/* ===== MODAL MOBILE FIX ===== */
+@media (max-width: 768px) {
+    .modal {
+        padding: 0;
+        align-items: flex-end;
+        z-index: 99999;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 85vh;
+        border-radius: 20px 20px 0 0;
+        margin: 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .modal.active .modal-content {
+        transform: translateY(0);
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .modal-body {
+        padding: 20px;
+        max-height: 55vh;
+    }
+    
+    .modal-footer {
+        padding: 12px 20px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px;
+    }
+    
+    /* Overlay lebih gelap */
+    .modal::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: -1;
+    }
+}
+
+/* ===== KASIR CONTAINER MOBILE FIX ===== */
+@media (max-width: 768px) {
+    .kasir-container {
+        transform: none;
+        padding: 0 12px;
+        gap: 16px;
+    }
+    
+    .produk-section {
+        padding: 16px;
+        border-radius: 20px;
+    }
+    
+    .search-sticky-header {
+        margin: -16px -16px 12px -16px;
+        padding: 12px;
+    }
+    
+    .search-box-modern {
+        padding: 10px 14px;
+    }
+    
+    .search-shortcuts {
+        display: none;
+    }
+    
+    .kategori-chips-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .kategori-scroll-modern {
+        order: 2;
+    }
+    
+    .btn-floating-manual {
+        width: 100%;
+        order: 1;
+        justify-content: center;
+        padding: 12px;
+    }
+    
+    .produk-container-modern.grid-view {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .produk-card-modern {
+        padding: 12px;
+    }
+    
+    .produk-img-container {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .produk-img-modern {
+        font-size: 24px;
+        border-radius: 16px;
+    }
+    
+    .produk-nama-modern {
+        font-size: 12px;
+    }
+    
+    .produk-harga-modern {
+        font-size: 14px;
+    }
+    
+    /* Keranjang mobile */
+    .keranjang-section-modern {
+        position: fixed;
+        bottom: 70px;
+        left: 12px;
+        right: 12px;
+        top: auto;
+        max-height: 75vh;
+        z-index: 9999;
+        display: none;
+        border-radius: 20px 20px 0 0;
+        padding: 16px;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .keranjang-section-modern.open {
+        display: flex;
+        animation: slideUpMobile 0.3s ease;
+    }
+    
+    @keyframes slideUpMobile {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+    
+    .keranjang-header-modern {
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .transaksi-type-modern {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .type-btn {
+        padding: 12px 4px;
+        font-size: 10px;
+    }
+    
+    .type-btn i {
+        font-size: 18px;
+    }
+    
+    .cart-item-modern {
+        padding: 10px;
+        grid-template-columns: 40px 1fr auto;
+    }
+    
+    .cart-item-total {
+        display: none;
+    }
+    
+    .summary-modern {
+        padding: 14px;
+    }
+    
+    .summary-row-modern.total .summary-value {
+        font-size: 18px;
+    }
+    
+    .btn-pay-modern {
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    /* Mobile cart button */
+    .btn-cart-mobile {
+        display: flex;
+        bottom: 80px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+    }
+}
+
+/* ===== SMALL MOBILE FIX ===== */
+@media (max-width: 380px) {
+    .produk-container-modern.grid-view {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .produk-card-modern {
+        padding: 10px;
+    }
+    
+    .produk-img-container {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .produk-img-modern {
+        font-size: 20px;
+    }
+}
