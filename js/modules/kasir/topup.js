@@ -1,22 +1,17 @@
 /**
- * Top Up Module - FIXED
- * File: js/modules/kasir/topup.js
+ * Top Up Module - MOBILE FIXED
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Input listeners
     const nominalInput = document.getElementById('topup-nominal');
     const feeInput = document.getElementById('topup-fee-input');
-    
-    if (nominalInput) {
-        nominalInput.addEventListener('input', hitungTotalTopup);
-    }
-    if (feeInput) {
-        feeInput.addEventListener('input', hitungTotalTopup);
-    }
-    
-    // Tombol simpan
     const btnSimpan = document.getElementById('btn-simpan-topup');
+    const btnBatal = document.querySelector('#modal-topup .btn-secondary');
+    const modal = document.getElementById('modal-topup');
+    
+    if (nominalInput) nominalInput.addEventListener('input', hitungTotalTopup);
+    if (feeInput) feeInput.addEventListener('input', hitungTotalTopup);
+    
     if (btnSimpan) {
         btnSimpan.addEventListener('click', function(e) {
             e.preventDefault();
@@ -25,12 +20,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Tombol batal
-    const btnBatal = document.querySelector('#modal-topup .btn-secondary');
     if (btnBatal) {
         btnBatal.addEventListener('click', function(e) {
             e.preventDefault();
             closeModal('modal-topup');
+        });
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal('modal-topup');
+            }
         });
     }
 });
@@ -78,22 +79,19 @@ function simpanTopup() {
     if (typeof window.Keranjang !== 'undefined') {
         window.Keranjang.tambahItem(itemTopup, customData);
     } else {
-        console.error('Keranjang module not loaded');
+        console.error('Keranjang not loaded');
         return;
     }
     
-    // Reset dan tutup
     resetFormTopup();
     closeModal('modal-topup');
     
-    // Reset jenis transaksi
     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    const btnPenjualan = document.querySelector('.type-btn[data-jenis="penjualan"]');
-    if (btnPenjualan) btnPenjualan.classList.add('active');
+    document.querySelector('.type-btn[data-jenis="penjualan"]')?.classList.add('active');
     
-    showToast('Top up ditambahkan ke keranjang', 'success');
+    showToast('Top up ditambahkan', 'success');
 }
 
 function resetFormTopup() {
@@ -108,7 +106,6 @@ function resetFormTopup() {
     if (total) total.textContent = 'Rp 0';
 }
 
-// Export
 window.hitungTotalTopup = hitungTotalTopup;
 window.simpanTopup = simpanTopup;
 window.resetFormTopup = resetFormTopup;
