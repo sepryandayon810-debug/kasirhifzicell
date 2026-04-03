@@ -1,22 +1,17 @@
 /**
- * Tarik Tunai Module - FIXED
- * File: js/modules/kasir/tarik-tunai.js
+ * Tarik Tunai Module - MOBILE FIXED
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Input listeners
     const nominalInput = document.getElementById('tarik-nominal');
     const feeInput = document.getElementById('tarik-fee-input');
-    
-    if (nominalInput) {
-        nominalInput.addEventListener('input', hitungTotalTarik);
-    }
-    if (feeInput) {
-        feeInput.addEventListener('input', hitungTotalTarik);
-    }
-    
-    // Tombol simpan
     const btnSimpan = document.getElementById('btn-simpan-tarik');
+    const btnBatal = document.querySelector('#modal-tarik .btn-secondary');
+    const modal = document.getElementById('modal-tarik');
+    
+    if (nominalInput) nominalInput.addEventListener('input', hitungTotalTarik);
+    if (feeInput) feeInput.addEventListener('input', hitungTotalTarik);
+    
     if (btnSimpan) {
         btnSimpan.addEventListener('click', function(e) {
             e.preventDefault();
@@ -25,12 +20,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Tombol batal
-    const btnBatal = document.querySelector('#modal-tarik .btn-secondary');
     if (btnBatal) {
         btnBatal.addEventListener('click', function(e) {
             e.preventDefault();
             closeModal('modal-tarik');
+        });
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal('modal-tarik');
+            }
         });
     }
 });
@@ -81,22 +82,19 @@ function simpanTarik() {
     if (typeof window.Keranjang !== 'undefined') {
         window.Keranjang.tambahItem(itemTarik, customData);
     } else {
-        console.error('Keranjang module not loaded');
+        console.error('Keranjang not loaded');
         return;
     }
     
-    // Reset dan tutup
     resetFormTarik();
     closeModal('modal-tarik');
     
-    // Reset jenis transaksi
     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    const btnPenjualan = document.querySelector('.type-btn[data-jenis="penjualan"]');
-    if (btnPenjualan) btnPenjualan.classList.add('active');
+    document.querySelector('.type-btn[data-jenis="penjualan"]')?.classList.add('active');
     
-    showToast('Tarik tunai ditambahkan ke keranjang', 'success');
+    showToast('Tarik tunai ditambahkan', 'success');
 }
 
 function resetFormTarik() {
@@ -109,7 +107,6 @@ function resetFormTarik() {
     if (total) total.textContent = 'Rp 0';
 }
 
-// Export
 window.hitungTotalTarik = hitungTotalTarik;
 window.simpanTarik = simpanTarik;
 window.resetFormTarik = resetFormTarik;
