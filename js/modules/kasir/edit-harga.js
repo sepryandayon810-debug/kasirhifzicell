@@ -1,12 +1,26 @@
 /**
- * Edit Harga Module
+ * Edit Harga Module - FIXED
  * File: js/modules/kasir/edit-harga.js
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Tombol simpan
     const btnSimpan = document.getElementById('btn-simpan-edit');
     if (btnSimpan) {
-        btnSimpan.addEventListener('click', simpanEditHarga);
+        btnSimpan.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            simpanEditHarga();
+        });
+    }
+    
+    // Tombol batal
+    const btnBatal = document.querySelector('#modal-edit-harga .btn-secondary');
+    if (btnBatal) {
+        btnBatal.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal('modal-edit-harga');
+        });
     }
 });
 
@@ -16,17 +30,19 @@ function simpanEditHarga() {
     const jumlahBaru = parseInt(document.getElementById('edit-jumlah-baru')?.value) || 1;
     
     if (isNaN(index)) {
-        alert('Item tidak valid');
+        showToast('Item tidak valid', 'error');
         return;
     }
     
     if (hargaBaru <= 0) {
-        alert('Harga harus lebih dari 0');
+        showToast('Harga harus lebih dari 0', 'warning');
+        document.getElementById('edit-harga-baru')?.focus();
         return;
     }
     
     if (jumlahBaru <= 0) {
-        alert('Jumlah harus lebih dari 0');
+        showToast('Jumlah harus lebih dari 0', 'warning');
+        document.getElementById('edit-jumlah-baru')?.focus();
         return;
     }
     
@@ -34,54 +50,55 @@ function simpanEditHarga() {
     if (typeof window.Keranjang !== 'undefined') {
         const items = window.Keranjang.getItems();
         if (index < 0 || index >= items.length) {
-            alert('Item tidak ditemukan');
+            showToast('Item tidak ditemukan', 'error');
             return;
         }
         
-        const item = items[index];
+        // Update item langsung
+        items[index].harga_jual = hargaBaru;
+        items[index].qty = jumlahBaru;
+        items[index].subtotal = hargaBaru * jumlahBaru;
         
-        // Cek stok untuk penjualan
-        if (item.jenis === 'penjualan' && jumlahBaru > item.stok_tersedia) {
-            alert('Stok tidak mencukupi');
-            return;
-        }
+        // Save dan render ulang
+        window.Keranjang.saveToStorage();
+        window.Keranjang.render();
         
-        window.Keranjang.editItem(index, {
-            harga: hargaBaru,
-            qty: jumlahBaru
-        });
     } else {
         console.error('Keranjang module not loaded');
         return;
     }
     
     // Tutup modal
-    if (typeof closeModal === 'function') {
-        closeModal('modal-edit-harga');
-    }
-    
-    if (typeof showToast === 'function') {
-        showToast('Item berhasil diupdate', 'success');
-    }
+    closeModal('modal-edit-harga');
+    showToast('Item berhasil diupdate', 'success');
 }
 
-// Fungsi untuk membuka modal edit dari kasir-main
+// Fungsi untuk membuka modal edit
 function openEditModal(index) {
-    if (typeof window.Keranjang === 'undefined') return;
+    if (typeof window.Keranjang === 'undefined') {
+        console.error('Keranjang not loaded');
+        return;
+    }
     
     const items = window.Keranjang.getItems();
-    if (index < 0 || index >= items.length) return;
+    if (index < 0 || index >= items.length) {
+        console.error('Invalid index');
+        return;
+    }
     
     const item = items[index];
     
-    document.getElementById('edit-index').value = index;
-    document.getElementById('edit-harga-baru').value = item.harga_jual;
-    document.getElementById('edit-jumlah-baru').value = item.qty;
+    const inputIndex = document.getElementById('edit-index');
+    const inputHarga = document.getElementById('edit-harga-baru');
+    const inputJumlah = document.getElementById('edit-jumlah-baru');
     
-    if (typeof openModal === 'function') {
-        openModal('modal-edit-harga');
-    }
+    if (inputIndex) inputIndex.value = index;
+    if (inputHarga) inputHarga.value = item.harga_jual;
+    if (inputJumlah) inputJumlah.value = item.qty;
+    
+    openModal('modal-edit-harga');
 }
 
 // Export ke global
 window.openEditModal = openEditModal;
+window.simpanEditHarga = simpanEditHarga;
