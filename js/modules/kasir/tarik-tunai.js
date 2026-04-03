@@ -1,118 +1,115 @@
 /**
- * Tarik Tunai Module
+ * Tarik Tunai Module - FIXED
  * File: js/modules/kasir/tarik-tunai.js
  */
 
-let tarikData = {
-    nominal: 0,
-    fee: 0,
-    total: 0
-};
-
 document.addEventListener('DOMContentLoaded', function() {
+    // Input listeners
     const nominalInput = document.getElementById('tarik-nominal');
     const feeInput = document.getElementById('tarik-fee-input');
-    const btnSimpan = document.getElementById('btn-simpan-tarik');
     
     if (nominalInput) {
-        nominalInput.addEventListener('input', calculateTarik);
+        nominalInput.addEventListener('input', hitungTotalTarik);
     }
-    
     if (feeInput) {
-        feeInput.addEventListener('input', calculateTarik);
+        feeInput.addEventListener('input', hitungTotalTarik);
     }
     
+    // Tombol simpan
+    const btnSimpan = document.getElementById('btn-simpan-tarik');
     if (btnSimpan) {
-        btnSimpan.addEventListener('click', simpanTarik);
+        btnSimpan.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            simpanTarik();
+        });
+    }
+    
+    // Tombol batal
+    const btnBatal = document.querySelector('#modal-tarik .btn-secondary');
+    if (btnBatal) {
+        btnBatal.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal('modal-tarik');
+        });
     }
 });
 
-function calculateTarik() {
+function hitungTotalTarik() {
     const nominal = parseInt(document.getElementById('tarik-nominal')?.value) || 0;
     const fee = parseInt(document.getElementById('tarik-fee-input')?.value) || 0;
-    
-    tarikData = {
-        nominal: nominal,
-        fee: fee,
-        total: nominal - fee // Yang diterima customer
-    };
+    const total = nominal - fee;
     
     const totalEl = document.getElementById('tarik-total');
     if (totalEl) {
-        totalEl.textContent = typeof formatRupiah === 'function' 
-            ? formatRupiah(tarikData.total) 
-            : 'Rp ' + tarikData.total.toLocaleString('id-ID');
-        
-        // Warning jika fee > nominal
-        if (fee > nominal) {
-            totalEl.style.color = 'var(--accent-rose)';
-        } else {
-            totalEl.style.color = 'var(--accent-indigo)';
-        }
+        totalEl.textContent = formatRupiah(total);
     }
 }
 
 function simpanTarik() {
-    if (tarikData.nominal <= 0) {
-        alert('Nominal tarik harus lebih dari 0');
+    const nominal = parseInt(document.getElementById('tarik-nominal')?.value) || 0;
+    const fee = parseInt(document.getElementById('tarik-fee-input')?.value) || 0;
+    
+    if (nominal <= 0) {
+        showToast('Nominal tarik harus lebih dari 0', 'warning');
         return;
     }
     
-    if (tarikData.fee > tarikData.nominal) {
-        alert('Fee tidak boleh lebih besar dari nominal');
+    if (fee >= nominal) {
+        showToast('Fee tidak boleh lebih besar dari nominal', 'warning');
         return;
     }
     
-    const diterima = tarikData.nominal - tarikData.fee;
-    
-    // Buat objek untuk Keranjang module
-    const produkTarik = {
+    const itemTarik = {
         id: 'tarik_' + Date.now(),
-        nama: 'Tarik Tunai',
-        harga_jual: diterima, // Fee yang masuk ke kasir
-        harga_modal: tarikData.nominal, // Modal keluar
+        nama: `Tarik Tunai`,
+        harga_modal: nominal,
+        harga_jual: nominal - fee,
         stok: 9999
     };
     
     const customData = {
-        nama: `Tarik Tunai - ${formatRupiah(tarikData.nominal)}`,
-        harga_jual: diterima,
-        harga_modal: tarikData.nominal,
+        nama: `Tarik Tunai`,
+        harga_modal: nominal,
+        harga_jual: nominal - fee,
         qty: 1,
-        keterangan: `Nominal: ${tarikData.nominal}, Fee: ${tarikData.fee}, Diterima: ${diterima}`,
-        jenis: 'tarik',
-        nominal: tarikData.nominal,
-        fee: tarikData.fee,
-        subtotal: diterima // ✅ Pastikan subtotal ada
+        nominal: nominal,
+        fee: fee,
+        jenis: 'tarik'
     };
     
-    // Gunakan Keranjang module
     if (typeof window.Keranjang !== 'undefined') {
-        window.Keranjang.tambahItem(produkTarik, customData);
+        window.Keranjang.tambahItem(itemTarik, customData);
     } else {
         console.error('Keranjang module not loaded');
         return;
     }
     
-    // Reset form
-    document.getElementById('tarik-nominal').value = '';
-    document.getElementById('tarik-fee-input').value = '0';
-    document.getElementById('tarik-total').textContent = 'Rp 0';
-    tarikData = { nominal: 0, fee: 0, total: 0 };
+    // Reset dan tutup
+    resetFormTarik();
+    closeModal('modal-tarik');
     
-    // Tutup modal
-    if (typeof closeModal === 'function') {
-        closeModal('modal-tarik');
-    }
-    
-    // Reset jenis transaksi ke penjualan
-    document.querySelectorAll('.jenis-btn').forEach(btn => {
+    // Reset jenis transaksi
+    document.querySelectorAll('.type-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    const btnPenjualan = document.querySelector('[data-jenis="penjualan"]');
+    const btnPenjualan = document.querySelector('.type-btn[data-jenis="penjualan"]');
     if (btnPenjualan) btnPenjualan.classList.add('active');
     
-    if (typeof showToast === 'function') {
-        showToast('Tarik tunai ditambahkan ke keranjang', 'success');
-    }
+    showToast('Tarik tunai ditambahkan ke keranjang', 'success');
 }
+
+function resetFormTarik() {
+    const nominal = document.getElementById('tarik-nominal');
+    const fee = document.getElementById('tarik-fee-input');
+    const total = document.getElementById('tarik-total');
+    
+    if (nominal) nominal.value = '';
+    if (fee) fee.value = '0';
+    if (total) total.textContent = 'Rp 0';
+}
+
+// Export
+window.hitungTotalTarik = hitungTotalTarik;
+window.simpanTarik = simpanTarik;
+window.resetFormTarik = resetFormTarik;
