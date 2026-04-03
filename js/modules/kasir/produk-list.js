@@ -1,32 +1,46 @@
-// Produk List View Module
-// Menangani tampilan produk dalam bentuk list/row
+/**
+ * Produk List View Module
+ * File: js/modules/kasir/produk-list.js
+ * 
+ * Menangani tampilan produk dalam bentuk list/row
+ */
 
 const ProdukList = {
-    // Render produk dalam format list
+    /**
+     * Render produk dalam format list
+     * @param {Array} produkList - Array data produk
+     * @param {HTMLElement} container - Container untuk render
+     */
     render: function(produkList, container) {
+        if (!container) {
+            console.error('[ProdukList] Container tidak ditemukan');
+            return;
+        }
+        
         container.innerHTML = '';
         container.classList.remove('grid-view');
         container.classList.add('list-view');
         
-        if (produkList.length === 0) {
+        if (!produkList || produkList.length === 0) {
             this.renderEmpty(container);
             return;
         }
         
-        // Buat table header
+        // Buat table structure sesuai CSS yang ada
         const table = document.createElement('div');
         table.className = 'produk-table';
         
         // Header
-        table.innerHTML = `
-            <div class="produk-table-header">
-                <div class="col-produk">Produk</div>
-                <div class="col-kategori">Kategori</div>
-                <div class="col-harga">Harga</div>
-                <div class="col-stok">Stok</div>
-                <div class="col-aksi">Aksi</div>
-            </div>
+        const header = document.createElement('div');
+        header.className = 'produk-table-header';
+        header.innerHTML = `
+            <div class="col-produk">Produk</div>
+            <div class="col-kategori">Kategori</div>
+            <div class="col-harga">Harga</div>
+            <div class="col-stok">Stok</div>
+            <div class="col-aksi">Aksi</div>
         `;
+        table.appendChild(header);
         
         // Body
         const body = document.createElement('div');
@@ -41,21 +55,29 @@ const ProdukList = {
         container.appendChild(table);
     },
     
-    // Buat row produk
+    /**
+     * Buat row produk
+     * @param {Object} produk - Data produk
+     * @returns {HTMLElement} Row element
+     */
     createRow: function(produk) {
         const row = document.createElement('div');
         row.className = 'produk-table-row';
+        row.dataset.id = produk.id || produk.key;
         
+        // Stok styling
         if (produk.stok <= 0) {
             row.classList.add('stok-habis');
         } else if (produk.stok <= 5) {
             row.classList.add('stok-menipis');
         }
         
+        // Gambar
         const imageHtml = produk.gambar 
-            ? `<img src="${produk.gambar}" alt="${produk.nama}" class="row-image">`
+            ? `<img src="${produk.gambar}" alt="${produk.nama}" class="row-image" loading="lazy">`
             : `<div class="row-image-placeholder"><i class="fas fa-box"></i></div>`;
         
+        // Stok badge
         const stokClass = produk.stok <= 0 ? 'habis' : (produk.stok <= 5 ? 'menipis' : 'tersedia');
         
         row.innerHTML = `
@@ -70,7 +92,7 @@ const ProdukList = {
                 <span class="badge-kategori">${produk.kategori || 'Umum'}</span>
             </div>
             <div class="col-harga">
-                <span class="row-harga">${formatRupiah(produk.harga_jual)}</span>
+                <span class="row-harga">${this.formatRupiah(produk.harga_jual || produk.hargaJual || 0)}</span>
             </div>
             <div class="col-stok">
                 <span class="badge-stok ${stokClass}">${produk.stok}</span>
@@ -86,7 +108,7 @@ const ProdukList = {
         // Event click pada row (kecuali tombol)
         row.addEventListener('click', (e) => {
             if (!e.target.closest('.btn-tambah') && produk.stok > 0) {
-                window.tambahKeKeranjang(produk);
+                this.tambahKeKeranjang(produk);
             }
         });
         
@@ -95,14 +117,31 @@ const ProdukList = {
         if (btnTambah && produk.stok > 0) {
             btnTambah.addEventListener('click', (e) => {
                 e.stopPropagation();
-                window.tambahKeKeranjang(produk);
+                this.tambahKeKeranjang(produk);
             });
         }
         
         return row;
     },
     
-    // Tampilan kosong
+    /**
+     * Tambah produk ke keranjang
+     * @param {Object} produk 
+     */
+    tambahKeKeranjang: function(produk) {
+        if (typeof window.Keranjang !== 'undefined' && window.Keranjang.tambahItem) {
+            window.Keranjang.tambahItem(produk);
+        } else if (typeof window.tambahKeKeranjang === 'function') {
+            window.tambahKeKeranjang(produk);
+        } else {
+            console.error('[ProdukList] Keranjang tidak ditemukan');
+        }
+    },
+    
+    /**
+     * Tampilan kosong
+     * @param {HTMLElement} container 
+     */
     renderEmpty: function(container) {
         container.innerHTML = `
             <div class="loading-produk">
@@ -110,8 +149,48 @@ const ProdukList = {
                 <p>Tidak ada produk</p>
             </div>
         `;
+    },
+    
+    /**
+     * Update row secara realtime
+     * @param {string} produkId 
+     * @param {number} newStok 
+     */
+    updateRow: function(produkId, newStok) {
+        const row = document.querySelector(`.produk-table-row[data-id="${produkId}"]`);
+        if (!row) return;
+        
+        const stokEl = row.querySelector('.badge-stok');
+        const btnEl = row.querySelector('.btn-tambah');
+        
+        if (stokEl) {
+            stokEl.textContent = newStok;
+            stokEl.className = 'badge-stok ' + (newStok <= 0 ? 'habis' : (newStok <= 5 ? 'menipis' : 'tersedia'));
+        }
+        
+        if (btnEl) {
+            btnEl.disabled = newStok <= 0;
+            btnEl.classList.toggle('disabled', newStok <= 0);
+        }
+        
+        // Update class row
+        row.classList.remove('stok-habis', 'stok-menipis');
+        if (newStok <= 0) row.classList.add('stok-habis');
+        else if (newStok <= 5) row.classList.add('stok-menipis');
+    },
+    
+    /**
+     * Helper: Format rupiah
+     * @param {number} angka 
+     * @returns {string}
+     */
+    formatRupiah: function(angka) {
+        if (typeof formatRupiah === 'function') {
+            return formatRupiah(angka);
+        }
+        return 'Rp ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 };
 
-// Export
+// Export ke window
 window.ProdukList = ProdukList;
