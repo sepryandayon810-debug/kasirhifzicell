@@ -15,6 +15,7 @@ const Keranjang = {
         this.cacheDOM();
         this.bindEvents();
         this.render();
+        this.startAutoSave();
     },
     
     /**
@@ -23,11 +24,10 @@ const Keranjang = {
     cacheDOM: function() {
         this.container = document.getElementById('keranjang-items');
         this.emptyState = document.querySelector('.empty-keranjang');
-        this.summarySubtotal = document.getElementById('summary-subtotal');
-        this.summaryTotal = document.getElementById('summary-total');
-        this.badgeCount = document.querySelector('.btn-keranjang-mobile .badge');
-        this.btnClear = document.querySelector('.btn-clear');
-        this.jenisTransaksi = document.querySelectorAll('.jenis-btn');
+        this.subtotalEl = document.getElementById('subtotal');
+        this.totalEl = document.getElementById('total-bayar');
+        this.badgeCount = document.getElementById('mobile-count');
+        this.btnClear = document.getElementById('btn-clear-keranjang');
     },
     
     /**
@@ -57,22 +57,42 @@ const Keranjang = {
                 }
             });
         }
-        
-        // Jenis transaksi
-        this.jenisTransaksi.forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.jenisTransaksi.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
     },
     
     /**
      * Tambah item ke keranjang
      * @param {Object} produk 
+     * @param {Object} customData - Data tambahan untuk transaksi manual/topup/tarik
      */
-    tambahItem: function(produk) {
-        const existing = this.items.find(item => item.id === produk.id);
+    tambahItem: function(produk, customData = null) {
+        // Untuk transaksi dengan custom data (manual, topup, tarik)
+        if (customData) {
+            this.items.push({
+                id: produk.id || 'manual_' + Date.now(),
+                nama: customData.nama || produk.nama,
+                harga_jual: customData.harga_jual || customData.harga || produk.harga_jual,
+                harga_modal: customData.harga_modal || produk.harga_modal || 0,
+                qty: customData.qty || 1,
+                subtotal: (customData.harga_jual || customData.harga || produk.harga_jual) * (customData.qty || 1),
+                gambar: produk.gambar,
+                jenis: customData.jenis || 'penjualan',
+                keterangan: customData.keterangan || '',
+                stok_tersedia: produk.stok || 9999
+            });
+            
+            this.render();
+            this.saveToStorage();
+            this.showToast('Item ditambahkan ke keranjang', 'success');
+            return;
+        }
+        
+        // Cek stok untuk penjualan normal
+        if (produk.stok <= 0) {
+            this.showToast('Stok produk habis', 'warning');
+            return;
+        }
+        
+        const existing = this.items.find(item => item.id === produk.id && item.jenis === 'penjualan');
         
         if (existing) {
             if (existing.qty < produk.stok) {
@@ -87,9 +107,13 @@ const Keranjang = {
                 id: produk.id,
                 nama: produk.nama,
                 harga_jual: produk.harga_jual || produk.hargaJual || 0,
+                harga_modal: produk.harga_modal || 0,
                 qty: 1,
                 subtotal: produk.harga_jual || produk.hargaJual || 0,
-                gambar: produk.gambar
+                gambar: produk.gambar,
+                jenis: 'penjualan',
+                keterangan: '',
+                stok_tersedia: produk.stok || 0
             });
         }
         
@@ -114,6 +138,12 @@ const Keranjang = {
             return;
         }
         
+        // Cek stok untuk penjualan
+        if (item.jenis === 'penjualan' && newQty > item.stok_tersedia) {
+            this.showToast('Stok tidak mencukupi', 'warning');
+            return;
+        }
+        
         item.qty = newQty;
         item.subtotal = item.qty * item.harga_jual;
         
@@ -126,6 +156,8 @@ const Keranjang = {
      * @param {number} index 
      */
     hapusItem: function(index) {
+        if (!confirm('Hapus item ini dari keranjang?')) return;
+        
         this.items.splice(index, 1);
         this.render();
         this.saveToStorage();
@@ -136,7 +168,7 @@ const Keranjang = {
      */
     clear: function() {
         if (this.items.length === 0) return;
-        if (!confirm('Kosongkan keranjang?')) return;
+        if (!confirm('Kosongkan semua item di keranjang?')) return;
         
         this.items = [];
         this.render();
@@ -177,12 +209,23 @@ const Keranjang = {
                 ? `<img src="${item.gambar}" alt="${item.nama}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`
                 : `<i class="fas fa-box"></i>`;
             
+            // Icon berdasarkan jenis
+            const jenisIcon = {
+                'penjualan': 'fa-shopping-bag',
+                'topup': 'fa-mobile-alt',
+                'tarik': 'fa-money-bill-wave',
+                'manual': 'fa-edit'
+            };
+            
             html += `
                 <div class="keranjang-item" data-index="${index}">
-                    <div class="keranjang-item-img">${imageHtml}</div>
+                    <div class="keranjang-item-img">
+                        ${item.jenis !== 'penjualan' ? `<i class="fas ${jenisIcon[item.jenis] || 'fa-box'}"></i>` : imageHtml}
+                    </div>
                     <div class="keranjang-item-info">
                         <div class="keranjang-item-nama">${item.nama}</div>
                         <div class="keranjang-item-harga">${formatRupiah(item.harga_jual)} x ${item.qty}</div>
+                        ${item.keterangan ? `<small style="color: var(--text-muted);">${item.keterangan}</small>` : ''}
                     </div>
                     <div class="keranjang-item-qty">
                         <button class="qty-btn btn-minus"><i class="fas fa-minus"></i></button>
@@ -203,11 +246,16 @@ const Keranjang = {
      * @param {number} subtotal 
      */
     updateSummary: function(subtotal) {
-        if (this.summarySubtotal) {
-            this.summarySubtotal.textContent = formatRupiah(subtotal);
+        if (this.subtotalEl) {
+            this.subtotalEl.textContent = formatRupiah(subtotal);
         }
-        if (this.summaryTotal) {
-            this.summaryTotal.textContent = formatRupiah(subtotal);
+        if (this.totalEl) {
+            this.totalEl.textContent = formatRupiah(subtotal);
+        }
+        
+        // Trigger hitung kembalian di kasir-main
+        if (typeof hitungKembalian === 'function') {
+            hitungKembalian();
         }
     },
     
@@ -220,7 +268,31 @@ const Keranjang = {
     },
     
     /**
-     * Simpan ke localStorage
+     * Edit item (untuk edit harga/qty manual)
+     * @param {number} index 
+     * @param {Object} newData 
+     */
+    editItem: function(index, newData) {
+        const item = this.items[index];
+        if (!item) return;
+        
+        if (newData.harga !== undefined) item.harga_jual = newData.harga;
+        if (newData.qty !== undefined) {
+            // Cek stok
+            if (item.jenis === 'penjualan' && newData.qty > item.stok_tersedia) {
+                this.showToast('Stok tidak mencukupi', 'warning');
+                return;
+            }
+            item.qty = newData.qty;
+        }
+        
+        item.subtotal = item.qty * item.harga_jual;
+        this.render();
+        this.saveToStorage();
+    },
+    
+    /**
+     * Simpan ke localStorage (draft)
      */
     saveToStorage: function() {
         if (this.items.length > 0) {
@@ -238,18 +310,24 @@ const Keranjang = {
      */
     loadFromStorage: function() {
         const draft = localStorage.getItem('keranjang_draft');
-        if (draft) {
+        if (!draft) return;
+        
+        try {
             const data = JSON.parse(draft);
             const draftTime = new Date(data.timestamp);
             const now = new Date();
             const diffMinutes = (now - draftTime) / (1000 * 60);
             
-            if (diffMinutes < 30) {
-                this.items = data.items;
+            // Hanya recovery jika kurang dari 2 jam
+            if (diffMinutes < 120 && confirm('Ada transaksi yang belum selesai. Muat kembali?')) {
+                this.items = data.items || [];
                 this.render();
             } else {
                 localStorage.removeItem('keranjang_draft');
             }
+        } catch (e) {
+            console.error('Error loading draft:', e);
+            localStorage.removeItem('keranjang_draft');
         }
     },
     
@@ -258,6 +336,13 @@ const Keranjang = {
      */
     clearDraft: function() {
         localStorage.removeItem('keranjang_draft');
+    },
+    
+    /**
+     * Auto save setiap 5 detik
+     */
+    startAutoSave: function() {
+        setInterval(() => this.saveToStorage(), 5000);
     },
     
     /**
