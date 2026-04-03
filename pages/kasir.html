@@ -162,20 +162,27 @@
             <div class="kasir-container">
                 <!-- Left: Produk Section -->
                 <div class="produk-section">
-                    <div class="produk-toolbar">
-                        <div class="search-produk">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="search-produk" placeholder="Cari produk (Ctrl+K)...">
-                        </div>
-                        <div class="filter-kategori">
-                            <select id="filter-kategori">
-                                <option value="">Semua Kategori</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-primary" id="btn-transaksi-manual">
-                            <i class="fas fa-plus"></i> Manual
-                        </button>
-                    </div>
+                    <!-- INI YANG BARU - KATEGORI HORIZONTAL SCROLL -->
+<div class="search-filter-container">
+    <!-- Search Box -->
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search-produk" placeholder="Cari produk (Ctrl+K)...">
+    </div>
+    
+    <!-- KATEGORI HORIZONTAL SCROLL -->
+    <div class="kategori-scroll-wrapper">
+        <div class="kategori-scroll" id="kategori-scroll">
+            <button class="kategori-pill active" data-kategori="">Semua</button>
+            <!-- Kategori lain akan di-load dari Firebase -->
+        </div>
+    </div>
+    
+    <!-- Manual Button -->
+    <button class="btn-manual" id="btn-transaksi-manual">
+        <i class="fas fa-plus"></i> Manual
+    </button>
+</div>
 
                     <div class="view-toggle">
                         <button class="view-btn active" data-view="grid" title="Tampilan Grid">
