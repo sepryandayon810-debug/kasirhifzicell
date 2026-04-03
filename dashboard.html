@@ -1184,107 +1184,145 @@
         }
 
         // Load Dashboard Data
-        async function loadDashboardData() {
-            const today = new Date().toISOString().split('T')[0];
-            
-            try {
-                // Data Transaksi
-                const transaksiSnap = await database.ref(`transaksi/${today}`).once('value');
-                let penjualan = 0, transaksi = 0, laba = 0;
-                let uangMasuk = 0, uangKeluar = 0;
-                let topUp = 0, tarikTunai = 0;
-                let hutangMasuk = 0, hutangBayar = 0;
-
-                if (transaksiSnap.exists()) {
-                    transaksiSnap.forEach(child => {
-                        const t = child.val();
-                        transaksi++;
-                        
-                        if (t.jenis === 'penjualan' || !t.jenis) {
-                            penjualan += t.total || 0;
-                            if (t.items) {
-                                t.items.forEach(item => {
-                                    laba += ((item.harga || 0) - (item.harga_modal || 0)) * (item.qty || 1);
-                                });
-                            }
-                            if (t.metode_pembayaran === 'tunai') {
-                                uangMasuk += t.bayar || t.total || 0;
-                                uangMasuk -= t.kembalian || 0;
-                            }
-                        }
-                        
-                        if (t.jenis === 'topup') {
-                            topUp += t.total || 0;
-                            uangMasuk += t.total || 0;
-                        }
-                        
-                        if (t.jenis === 'tarik_tunai' || t.jenis === 'tarik') {
-                            tarikTunai += t.nominal || t.total || 0;
-                            uangKeluar += t.nominal || t.total || 0;
-                        }
-                    });
-                }
-
-                // Modal Harian
-                const modalSnap = await database.ref(`modal_harian/${today}`).once('value');
-                const modalAwal = modalSnap.val()?.jumlah || 0;
-
-                // Pembelian
-                const beliSnap = await database.ref(`pembelian/${today}`).once('value');
-                let pembelian = 0;
-                beliSnap.forEach(c => pembelian += c.val().total || 0);
-                uangKeluar += pembelian;
-
-                // Kas Management
-                const kasSnap = await database.ref(`kas_management/${today}`).once('value');
-                if (kasSnap.exists()) {
-                    kasSnap.forEach(child => {
-                        const k = child.val();
-                        if (k.jenis === 'masuk') {
-                            hutangMasuk += k.jumlah || 0;
-                            uangMasuk += k.jumlah || 0;
-                        } else if (k.jenis === 'keluar') {
-                            hutangBayar += k.jumlah || 0;
-                            uangKeluar += k.jumlah || 0;
-                        }
-                    });
-                }
-
-                // Perhitungan Kas
-                const sisaKas = modalAwal + uangMasuk - uangKeluar + topUp - tarikTunai + hutangMasuk - hutangBayar;
-
-                // Update UI
-                updateElement('total-penjualan', formatRupiah(penjualan));
-                updateElement('total-laba', formatRupiah(laba));
-                updateElement('total-transaksi', transaksi + ' Transaksi');
-
-                updateElement('modal-awal', formatRupiah(modalAwal));
-                updateElement('uang-masuk', formatRupiah(uangMasuk));
-                updateElement('uang-keluar', formatRupiah(uangKeluar));
-                updateElement('top-up', formatRupiah(topUp));
-                updateElement('tarik-tunai', formatRupiah(tarikTunai));
-                updateElement('hutang-masuk', formatRupiah(hutangMasuk));
-
-                updateElement('calc-modal', formatRupiah(modalAwal));
-                updateElement('calc-masuk', formatRupiah(uangMasuk));
-                updateElement('calc-keluar', formatRupiah(uangKeluar));
-                updateElement('calc-topup', formatRupiah(topUp));
-                updateElement('calc-tarik', formatRupiah(tarikTunai));
-                updateElement('calc-hutang-masuk', formatRupiah(hutangMasuk));
-                updateElement('calc-hutang-bayar', formatRupiah(hutangBayar));
-                updateElement('sisa-kas', formatRupiah(sisaKas));
-
-                const sisaKasEl = document.getElementById('sisa-kas');
-                if (sisaKas < modalAwal) sisaKasEl.style.color = 'var(--accent-rose)';
-                else if (sisaKas > modalAwal * 1.5) sisaKasEl.style.color = 'var(--accent-emerald)';
-                else sisaKasEl.style.color = 'var(--accent-indigo)';
-
-                updateElement('last-update', 'Terakhir update: ' + new Date().toLocaleTimeString('id-ID'));
-
-            } catch (err) {
-                console.error('Error:', err);
-            }
+        // Load Dashboard Data
+async function loadDashboardData() {
+    const today = new Date().toISOString().split('T')[0];
+    
+    try {
+        // Ambil data dari daily_data (yang diupdate oleh kasir-main.js)
+        const user = auth.currentUser;
+        let dailyData = {};
+        
+        if (user) {
+            const dailySnap = await database.ref(`daily_data/${user.uid}/${today}`).once('value');
+            dailyData = dailySnap.val() || {};
         }
+        
+        // Fallback: Hitung dari transaksi jika daily_data kosong
+        const transaksiSnap = await database.ref(`transaksi/${today}`).once('value');
+        let penjualanProduk = 0, laba = 0, transaksi = 0;
+        let uangMasuk = 0, uangKeluar = 0;
+        let topUp = 0, tarikTunai = 0;
+        let hutangMasuk = 0, hutangBayar = 0;
+
+        if (transaksiSnap.exists()) {
+            transaksiSnap.forEach(child => {
+                const t = child.val();
+                transaksi++;
+                
+                // Iterasi items untuk hitung per jenis
+                if (t.items && Array.isArray(t.items)) {
+                    t.items.forEach(item => {
+                        const jenis = item.jenis || 'penjualan';
+                        const nominal = item.nominal || 0;
+                        const fee = item.fee || 0;
+                        const subtotal = item.subtotal || 0;
+                        
+                        if (jenis === 'penjualan') {
+                            // Produk fisik
+                            penjualanProduk += subtotal;
+                            laba += ((item.harga_jual || 0) - (item.harga_modal || 0)) * (item.qty || 1);
+                            uangMasuk += subtotal;
+                            
+                        } else if (jenis === 'topup') {
+                            // Top Up: total = nominal + fee
+                            topUp += subtotal;           // 22k (20k + 2k)
+                            uangMasuk += subtotal;       // Masuk kas 22k
+                            laba += fee;                 // Laba dari fee 2k
+                            
+                        } else if (jenis === 'tarik') {
+                            // Tarik Tunai: modal keluar, fee masuk
+                            tarikTunai += nominal;       // 10k (modal keluar)
+                            uangKeluar += nominal;       // Keluar dari kas 10k
+                            uangMasuk += fee;            // Fee masuk kas 2k
+                            laba += fee;                 // Laba dari fee 2k
+                            
+                        } else if (jenis === 'manual') {
+                            // Transaksi manual = penjualan
+                            penjualanProduk += subtotal;
+                            laba += ((item.harga_jual || 0) - (item.harga_modal || 0)) * (item.qty || 1);
+                            uangMasuk += subtotal;
+                        }
+                    });
+                }
+            });
+        }
+
+        // Gunakan data dari daily_data jika ada (lebih akurat)
+        if (dailyData.penjualan_produk !== undefined) {
+            penjualanProduk = dailyData.penjualan_produk || 0;
+            laba = dailyData.laba || 0;
+            transaksi = dailyData.total_transaksi || transaksi;
+            uangMasuk = dailyData.uang_masuk || uangMasuk;
+            uangKeluar = dailyData.uang_keluar || uangKeluar;
+            topUp = dailyData.topup || topUp;
+            tarikTunai = dailyData.tarik_tunai || tarikTunai;
+        }
+
+        // Modal Harian
+        const modalSnap = await database.ref(`modal_harian/${today}`).once('value');
+        const modalAwal = modalSnap.val()?.jumlah || 0;
+
+        // Pembelian (uang keluar)
+        const beliSnap = await database.ref(`pembelian/${today}`).once('value');
+        let pembelian = 0;
+        beliSnap.forEach(c => pembelian += c.val().total || 0);
+        uangKeluar += pembelian;
+
+        // Kas Management (hutang masuk/bayar)
+        const kasSnap = await database.ref(`kas_management/${today}`).once('value');
+        if (kasSnap.exists()) {
+            kasSnap.forEach(child => {
+                const k = child.val();
+                if (k.jenis === 'masuk') {
+                    hutangMasuk += k.jumlah || 0;
+                    uangMasuk += k.jumlah || 0;
+                } else if (k.jenis === 'keluar') {
+                    hutangBayar += k.jumlah || 0;
+                    uangKeluar += k.jumlah || 0;
+                }
+            });
+        }
+
+        // Perhitungan Sisa Kas
+        // Rumus: Modal Awal + Uang Masuk - Uang Keluar + Top Up - Tarik Tunai + Hutang Masuk - Hutang Bayar
+        const sisaKas = modalAwal + uangMasuk - uangKeluar + hutangMasuk - hutangBayar;
+
+        // Update UI - Card Atas (Summary)
+        updateElement('total-penjualan', formatRupiah(penjualanProduk));
+        updateElement('total-laba', formatRupiah(laba));
+        updateElement('total-transaksi', transaksi + ' Transaksi');
+
+        // Update UI - Card Tengah (Statistik Kas)
+        updateElement('modal-awal', formatRupiah(modalAwal));
+        updateElement('uang-masuk', formatRupiah(uangMasuk));
+        updateElement('uang-keluar', formatRupiah(uangKeluar));
+        updateElement('top-up', formatRupiah(topUp));           // ✅ Total Top Up
+        updateElement('tarik-tunai', formatRupiah(tarikTunai)); // ✅ Nominal Tarik
+        updateElement('hutang-masuk', formatRupiah(hutangMasuk));
+
+        // Update UI - Perhitungan Kas (Dropdown)
+        updateElement('calc-modal', formatRupiah(modalAwal));
+        updateElement('calc-masuk', formatRupiah(uangMasuk));
+        updateElement('calc-keluar', formatRupiah(uangKeluar));
+        updateElement('calc-topup', formatRupiah(topUp));
+        updateElement('calc-tarik', formatRupiah(tarikTunai));
+        updateElement('calc-hutang-masuk', formatRupiah(hutangMasuk));
+        updateElement('calc-hutang-bayar', formatRupiah(hutangBayar));
+        updateElement('sisa-kas', formatRupiah(sisaKas));
+
+        // Warna Sisa Kas
+        const sisaKasEl = document.getElementById('sisa-kas');
+        if (sisaKas < modalAwal) sisaKasEl.style.color = 'var(--accent-rose)';
+        else if (sisaKas > modalAwal * 1.5) sisaKasEl.style.color = 'var(--accent-emerald)';
+        else sisaKasEl.style.color = 'var(--accent-indigo)';
+
+        updateElement('last-update', 'Terakhir update: ' + new Date().toLocaleTimeString('id-ID'));
+
+    } catch (err) {
+        console.error('Error:', err);
+    }
+}
 
         function setupRealtime() {
             const today = new Date().toISOString().split('T')[0];
