@@ -1,33 +1,21 @@
-// Transaksi Manual Module
+/**
+ * Transaksi Manual Module
+ * File: js/modules/kasir/transaksi-manual.js
+ */
 
 document.addEventListener('DOMContentLoaded', function() {
     const btnSimpan = document.getElementById('btn-simpan-manual');
     if (btnSimpan) {
         btnSimpan.addEventListener('click', simpanTransaksiManual);
     }
-    
-    // Auto calculate total
-    const inputs = ['manual-harga-jual', 'manual-jumlah'];
-    inputs.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', calculateTotalManual);
-        }
-    });
 });
 
-function calculateTotalManual() {
-    const harga = parseInt(document.getElementById('manual-harga-jual').value) || 0;
-    const jumlah = parseInt(document.getElementById('manual-jumlah').value) || 1;
-    // Total akan dihitung di keranjang
-}
-
 function simpanTransaksiManual() {
-    const nama = document.getElementById('manual-nama').value.trim();
-    const hargaModal = parseInt(document.getElementById('manual-harga-modal').value) || 0;
-    const hargaJual = parseInt(document.getElementById('manual-harga-jual').value) || 0;
-    const jumlah = parseInt(document.getElementById('manual-jumlah').value) || 1;
-    const keterangan = document.getElementById('manual-keterangan').value.trim();
+    const nama = document.getElementById('manual-nama')?.value.trim();
+    const hargaModal = parseInt(document.getElementById('manual-harga-modal')?.value) || 0;
+    const hargaJual = parseInt(document.getElementById('manual-harga-jual')?.value) || 0;
+    const jumlah = parseInt(document.getElementById('manual-jumlah')?.value) || 1;
+    const keterangan = document.getElementById('manual-keterangan')?.value.trim();
     
     // Validasi
     if (!nama) {
@@ -40,25 +28,31 @@ function simpanTransaksiManual() {
         return;
     }
     
-    // Buat objek produk manual
+    // Buat objek untuk Keranjang module
     const produkManual = {
         id: 'manual_' + Date.now(),
         nama: nama,
         harga_modal: hargaModal,
         harga_jual: hargaJual,
-        qty: jumlah,
-        keterangan: keterangan,
-        stok: 9999 // Unlimited untuk manual
+        stok: 9999
     };
     
-    // Tambah ke keranjang
-    tambahKeKeranjang(produkManual, {
+    const customData = {
         nama: nama,
         harga_modal: hargaModal,
         harga_jual: hargaJual,
         qty: jumlah,
-        keterangan: keterangan
-    });
+        keterangan: keterangan,
+        jenis: 'manual'
+    };
+    
+    // Gunakan Keranjang module
+    if (typeof window.Keranjang !== 'undefined') {
+        window.Keranjang.tambahItem(produkManual, customData);
+    } else {
+        console.error('Keranjang module not loaded');
+        return;
+    }
     
     // Reset form
     document.getElementById('manual-nama').value = '';
@@ -68,7 +62,18 @@ function simpanTransaksiManual() {
     document.getElementById('manual-keterangan').value = '';
     
     // Tutup modal
-    closeModal('modal-transaksi-manual');
+    if (typeof closeModal === 'function') {
+        closeModal('modal-transaksi-manual');
+    }
     
-    showToast('Item manual ditambahkan ke keranjang', 'success');
+    // Reset jenis transaksi ke penjualan
+    document.querySelectorAll('.jenis-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const btnPenjualan = document.querySelector('[data-jenis="penjualan"]');
+    if (btnPenjualan) btnPenjualan.classList.add('active');
+    
+    if (typeof showToast === 'function') {
+        showToast('Item manual ditambahkan ke keranjang', 'success');
+    }
 }
