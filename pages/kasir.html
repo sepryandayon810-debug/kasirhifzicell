@@ -162,7 +162,6 @@
             <div class="kasir-container">
                 <!-- Left: Produk Section -->
                 <div class="produk-section">
-                    <!-- INI YANG BARU - KATEGORI HORIZONTAL SCROLL -->
 <div class="search-filter-container">
     <!-- Search Box -->
     <div class="search-box">
@@ -170,14 +169,20 @@
         <input type="text" id="search-produk" placeholder="Cari produk (Ctrl+K)...">
     </div>
     
-    <!-- KATEGORI HORIZONTAL SCROLL -->
-    <div class="kategori-scroll-wrapper">
-        <div class="kategori-scroll" id="kategori-scroll">
-            <button class="kategori-pill active" data-kategori="">Semua</button>
-            <!-- Kategori lain akan di-load dari Firebase -->
+    <!-- Kategori + Manual Button -->
+    <div class="kategori-wrapper">
+        <div class="kategori-scroll-wrapper">
+            <div class="kategori-scroll" id="kategori-scroll">
+                <button class="kategori-pill active" data-kategori="">Semua</button>
+                <!-- Kategori lain di-load dari Firebase -->
+            </div>
         </div>
+        
+        <button class="btn-manual" id="btn-transaksi-manual">
+            <i class="fas fa-plus"></i> Manual
+        </button>
     </div>
-    
+</div>    
     <!-- Manual Button -->
     <button class="btn-manual" id="btn-transaksi-manual">
         <i class="fas fa-plus"></i> Manual
