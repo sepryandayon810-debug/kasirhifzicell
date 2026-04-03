@@ -1,185 +1,330 @@
 /* ============================================
-   PEMBELIAN MODULE STYLES
+   PEMBELIAN MODULE - Sesuai Tema Dashboard
    ============================================ */
 
+/* Tabs */
+.pembelian-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 14px 24px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    color: white;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pembelian Container */
 .pembelian-container {
     display: grid;
-    grid-template-columns: 400px 1fr;
-    gap: 25px;
-    height: calc(100vh - 140px);
+    grid-template-columns: 1fr 380px;
+    gap: 30px;
 }
 
-/* Input Panel */
-.pembelian-input-panel {
-    background-color: var(--bg-card);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
+/* Cards */
+.card-supplier,
+.card-cari-produk,
+.card-keranjang,
+.card-ringkasan,
+.card-pembayaran {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin-bottom: 24px;
     overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
-.panel-header {
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-dark);
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-hover);
 }
 
-.panel-header h3 {
-    margin: 0;
-    font-size: var(--font-large);
+.card-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.supplier-section {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
+.card-header h3 i {
+    color: var(--accent-indigo);
 }
 
-.produk-input-section {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
+/* Supplier Info */
+.supplier-info {
+    padding: 24px;
 }
 
-.search-box-pembelian {
-    position: relative;
-}
-
-.search-box-pembelian i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-}
-
-.search-box-pembelian input {
-    width: 100%;
-    padding: 10px 12px 10px 40px;
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-primary);
-}
-
-.search-box-pembelian input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-.search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100;
-    display: none;
-}
-
-.search-results.active {
-    display: block;
-}
-
-.search-result-item {
-    padding: 10px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s;
-}
-
-.search-result-item:hover {
-    background-color: var(--bg-dark);
-}
-
-.search-result-item:last-child {
-    border-bottom: none;
-}
-
-.search-result-item .nama {
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-
-.search-result-item .info {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.keranjang-pembelian {
-    flex: 1;
-    padding: 15px 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.keranjang-pembelian h4 {
-    margin: 0 0 15px 0;
-    font-size: var(--font-normal);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-secondary);
-}
-
-.keranjang-list {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.keranjang-empty {
+.empty-supplier {
     text-align: center;
     padding: 40px 20px;
-    color: var(--text-secondary);
+    color: var(--text-muted);
 }
 
-.keranjang-empty i {
-    font-size: 48px;
-    margin-bottom: 15px;
+.empty-supplier i {
+    font-size: 56px;
+    margin-bottom: 16px;
     opacity: 0.5;
 }
 
-.keranjang-item {
+.empty-supplier p {
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+.supplier-selected {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background-color: var(--bg-dark);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border-color);
+    gap: 16px;
 }
 
-.keranjang-item .item-info {
-    flex: 1;
-    min-width: 0;
+.supplier-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
 }
 
-.keranjang-item .item-nama {
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.supplier-details h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.supplier-details p {
+    font-size: 14px;
+    color: var(--text-muted);
     margin-bottom: 4px;
 }
 
-.keranjang-item .item-harga {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
+/* Search Produk */
+.search-produk-pembelian {
+    position: relative;
+    padding: 20px 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.search-produk-pembelian i {
+    position: absolute;
+    left: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+}
+
+.search-produk-pembelian input {
+    flex: 1;
+    padding: 16px 16px 16px 52px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text-primary);
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.search-produk-pembelian input:focus {
+    outline: none;
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.search-produk-pembelian button {
+    padding: 16px 20px;
+    background: var(--accent-emerald);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-produk-pembelian button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Hasil Pencarian */
+.hasil-pencarian {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0 24px 24px;
+}
+
+.hasil-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.hasil-item:hover {
+    border-color: var(--accent-indigo);
+    background: var(--bg-secondary);
+    transform: translateX(4px);
+}
+
+.hasil-item .item-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.hasil-item .item-info {
+    flex: 1;
+}
+
+.hasil-item .item-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.hasil-item .item-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.hasil-item .item-harga {
+    font-weight: 700;
+    color: var(--accent-indigo);
+    font-size: 16px;
+}
+
+/* Keranjang */
+.keranjang-list {
+    padding: 20px 24px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.empty-keranjang {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+}
+
+.empty-keranjang i {
+    font-size: 56px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-keranjang p {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.empty-keranjang small {
+    font-size: 13px;
+}
+
+.keranjang-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+}
+
+.keranjang-item .item-img {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.keranjang-item .item-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.keranjang-item .item-info p {
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .keranjang-item .item-qty {
@@ -188,293 +333,602 @@
     gap: 8px;
 }
 
-.keranjang-item .qty-btn {
-    width: 28px;
-    height: 28px;
-    border: none;
-    background-color: var(--bg-card);
+.keranjang-item .item-qty button {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     color: var(--text-primary);
-    border-radius: 6px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
-.keranjang-item .qty-btn:hover {
-    background-color: var(--primary-color);
+.keranjang-item .item-qty button:hover {
+    background: var(--accent-indigo);
+    color: white;
+    border-color: var(--accent-indigo);
+}
+
+.keranjang-item .item-qty input {
+    width: 50px;
+    text-align: center;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.keranjang-item .item-harga {
+    font-weight: 700;
+    color: var(--accent-indigo);
+    font-size: 16px;
+    text-align: right;
+}
+
+.keranjang-item .item-delete {
+    padding: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.keranjang-item .item-delete:hover {
+    background: var(--accent-red);
     color: white;
 }
 
-.keranjang-item .qty-value {
-    min-width: 30px;
+/* Ringkasan */
+.card-ringkasan {
+    padding: 24px;
+}
+
+.card-ringkasan h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-ringkasan h3 i {
+    color: var(--accent-indigo);
+}
+
+.ringkasan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+}
+
+.ringkasan-row span:first-child {
+    color: var(--text-secondary);
+}
+
+.ringkasan-row span:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ringkasan-row.total {
+    border-bottom: none;
+    padding-top: 24px;
+    margin-top: 8px;
+    border-top: 2px solid var(--accent-indigo);
+}
+
+.ringkasan-row.total span {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.ringkasan-row.total span:last-child {
+    color: var(--accent-indigo);
+    font-size: 22px;
+}
+
+.input-diskon,
+.input-pajak {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-diskon input,
+.input-pajak input {
+    width: 70px;
+    padding: 10px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
     text-align: center;
     font-weight: 600;
 }
 
-.keranjang-item .item-subtotal {
+.input-diskon span,
+.input-pajak span {
+    color: var(--text-muted);
     font-weight: 600;
-    color: var(--primary-color);
-    min-width: 80px;
-    text-align: right;
 }
 
-.keranjang-item .btn-remove {
-    width: 28px;
-    height: 28px;
-    border: none;
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--danger-color);
-    border-radius: 6px;
-    cursor: pointer;
+/* Pembayaran */
+.card-pembayaran {
+    padding: 24px;
+}
+
+.card-pembayaran h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    gap: 10px;
 }
 
-.keranjang-item .btn-remove:hover {
-    background-color: var(--danger-color);
-    color: white;
+.card-pembayaran h3 i {
+    color: var(--accent-emerald);
 }
 
-.keranjang-summary {
-    padding-top: 15px;
-    border-top: 2px solid var(--border-color);
-    margin-top: 15px;
+.form-group {
+    margin-bottom: 20px;
 }
 
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
     margin-bottom: 10px;
-    font-size: var(--font-normal);
 }
 
-.summary-row.total {
-    font-size: var(--font-large);
-    font-weight: 700;
-    color: var(--primary-color);
-    padding-top: 10px;
-    border-top: 1px solid var(--border-color);
-}
-
-.summary-row input {
-    width: 100px;
-    text-align: right;
-}
-
-.pembelian-actions {
-    padding: 15px 20px 20px;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--bg-dark);
-}
-
-/* History Panel */
-.pembelian-history-panel {
-    background-color: var(--bg-card);
+.form-control {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.input-bayar {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-bayar .prefix {
+    position: absolute;
+    left: 16px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.input-bayar input {
+    padding-left: 48px;
+}
+
+.btn-uang-pas {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--accent-indigo);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-uang-pas:hover {
+    background: var(--accent-indigo);
+    color: white;
+    border-color: var(--accent-indigo);
+}
+
+.kembalian-display {
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.kembalian-display.kurang {
+    color: var(--accent-red);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.kembalian-display.lebih {
+    color: var(--accent-emerald);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.btn-proses {
+    width: 100%;
+    padding: 18px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--accent-emerald), #059669);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Riwayat Tab */
+.riwayat-toolbar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filter-group span {
+    color: var(--text-muted);
+}
+
+.search-riwayat {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-riwayat i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.search-riwayat input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.riwayat-list {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    gap: 16px;
 }
 
-.pembelian-history-panel .panel-header {
-    display: flex;
-    justify-content: space-between;
+.riwayat-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 24px;
     align-items: center;
+    transition: all 0.3s ease;
 }
 
-.panel-actions {
+.riwayat-item:hover {
+    border-color: var(--accent-indigo);
+    box-shadow: var(--shadow);
+}
+
+.riwayat-item .invoice-badge {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    color: white;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.riwayat-item .invoice-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.riwayat-item .invoice-info p {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.riwayat-item .invoice-total {
+    text-align: right;
+}
+
+.riwayat-item .invoice-total .amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-indigo);
+}
+
+.riwayat-item .invoice-total .status {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-top: 8px;
+    display: inline-block;
+}
+
+.riwayat-item .invoice-total .status.lunas {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-emerald);
+}
+
+.riwayat-item .invoice-total .status.hutang {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-amber);
+}
+
+.riwayat-item .invoice-actions {
     display: flex;
     gap: 10px;
-    align-items: center;
 }
 
-.history-list {
+/* Supplier Tab */
+.supplier-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.search-supplier {
+    position: relative;
     flex: 1;
-    overflow-y: auto;
-    padding: 20px;
+    max-width: 300px;
 }
 
-.loading-history {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-secondary);
+.search-supplier i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
 }
 
-.pembelian-card {
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 15px;
-    cursor: pointer;
-    transition: all 0.3s;
+.search-supplier input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text-primary);
+    font-size: 14px;
 }
 
-.pembelian-card:hover {
-    border-color: var(--primary-color);
-    transform: translateX(5px);
-}
-
-.pembelian-card .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-}
-
-.pembelian-card .kode-pembelian {
-    font-weight: 600;
-    color: var(--primary-color);
-    font-size: var(--font-normal);
-}
-
-.pembelian-card .tanggal {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
-}
-
-.pembelian-card .supplier-info {
-    margin-bottom: 12px;
-}
-
-.pembelian-card .supplier-nama {
-    font-weight: 500;
-    margin-bottom: 4px;
-}
-
-.pembelian-card .supplier-detail {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
-}
-
-.pembelian-card .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 12px;
-    border-top: 1px solid var(--border-color);
-}
-
-.pembelian-card .total-belanja {
-    font-weight: 700;
-    font-size: var(--font-large);
-    color: var(--primary-color);
-}
-
-.pembelian-card .status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.pembelian-card .status-lunas {
-    background-color: rgba(16, 185, 129, 0.2);
-    color: var(--success-color);
-}
-
-.pembelian-card .status-hutang {
-    background-color: rgba(245, 158, 11, 0.2);
-    color: var(--warning-color);
-}
-
-.pembelian-card .status-dibatalkan {
-    background-color: rgba(239, 68, 68, 0.2);
-    color: var(--danger-color);
-}
-
-/* Detail Modal */
-.detail-info {
+.supplier-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
 }
 
-.detail-info-item {
+.supplier-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.supplier-card:hover {
+    border-color: var(--accent-indigo);
+    box-shadow: var(--shadow);
+    transform: translateY(-4px);
+}
+
+.supplier-card .supplier-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.supplier-card .supplier-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+}
+
+.supplier-card .supplier-title h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.supplier-card .supplier-title p {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.supplier-card .supplier-info {
     display: flex;
     flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.detail-info-item label {
-    font-size: var(--font-small);
+.supplier-card .supplier-info p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
     color: var(--text-secondary);
+}
+
+.supplier-card .supplier-info i {
+    color: var(--accent-indigo);
+    width: 20px;
+}
+
+.supplier-card .supplier-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Modal Supplier */
+.search-supplier-modal {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-supplier-modal i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.search-supplier-modal input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.supplier-list-modal {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.supplier-list-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.supplier-list-item:hover,
+.supplier-list-item.selected {
+    border-color: var(--accent-indigo);
+    background: var(--bg-secondary);
+}
+
+.supplier-list-item .avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.supplier-list-item .info {
+    flex: 1;
+}
+
+.supplier-list-item .info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
-.detail-info-item value {
-    font-weight: 600;
-    font-size: var(--font-normal);
-}
-
-.table-detail {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table-detail th,
-.table-detail td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.table-detail th {
-    background-color: var(--bg-dark);
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.table-detail td {
-    color: var(--text-primary);
-}
-
-.table-detail .text-right {
-    text-align: right;
+.supplier-list-item .info p {
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     .pembelian-container {
         grid-template-columns: 1fr;
-        height: auto;
     }
     
-    .pembelian-input-panel {
-        max-height: none;
-    }
-    
-    .pembelian-history-panel {
-        min-height: 400px;
+    .pembelian-right {
+        order: -1;
     }
 }
 
 @media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .detail-info {
-        grid-template-columns: 1fr;
-    }
-    
-    .pembelian-card .card-header {
+    .pembelian-tabs {
         flex-direction: column;
-        gap: 5px;
     }
     
-    .pembelian-card .card-footer {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
+    .tab-btn {
+        justify-content: flex-start;
+    }
+    
+    .riwayat-item {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .riwayat-item .invoice-total {
+        text-align: left;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-group input {
+        flex: 1;
     }
 }
