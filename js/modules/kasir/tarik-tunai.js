@@ -1,4 +1,7 @@
-// Tarik Tunai Module
+/**
+ * Tarik Tunai Module
+ * File: js/modules/kasir/tarik-tunai.js
+ */
 
 let tarikData = {
     nominal: 0,
@@ -25,23 +28,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function calculateTarik() {
-    const nominal = parseInt(document.getElementById('tarik-nominal').value) || 0;
-    const fee = parseInt(document.getElementById('tarik-fee-input').value) || 0;
+    const nominal = parseInt(document.getElementById('tarik-nominal')?.value) || 0;
+    const fee = parseInt(document.getElementById('tarik-fee-input')?.value) || 0;
     
     tarikData = {
         nominal: nominal,
         fee: fee,
-        total: nominal - fee // Yang diterima customer = nominal - fee
+        total: nominal - fee // Yang diterima customer
     };
     
     const totalEl = document.getElementById('tarik-total');
-    totalEl.textContent = formatRupiah(tarikData.total);
-    
-    // Warning jika fee > nominal
-    if (fee > nominal) {
-        totalEl.style.color = 'var(--danger-color)';
-    } else {
-        totalEl.style.color = 'white';
+    if (totalEl) {
+        totalEl.textContent = typeof formatRupiah === 'function' 
+            ? formatRupiah(tarikData.total) 
+            : 'Rp ' + tarikData.total.toLocaleString('id-ID');
+        
+        // Warning jika fee > nominal
+        if (fee > nominal) {
+            totalEl.style.color = 'var(--accent-rose)';
+        } else {
+            totalEl.style.color = 'var(--accent-indigo)';
+        }
     }
 }
 
@@ -56,22 +63,33 @@ function simpanTarik() {
         return;
     }
     
-    // Buat item tarik
-    const itemTarik = {
+    // Buat objek untuk Keranjang module
+    const produkTarik = {
         id: 'tarik_' + Date.now(),
-        nama: `Tarik Tunai - ${formatRupiah(tarikData.nominal)}`,
-        harga: tarikData.total, // Yang masuk ke kasir
-        harga_modal: tarikData.nominal, // Modal keluar = nominal
+        nama: 'Tarik Tunai',
+        harga_jual: tarikData.total, // Yang masuk ke kasir
+        harga_modal: tarikData.nominal, // Modal keluar
+        stok: 9999
+    };
+    
+    const customData = {
+        nama: `Tarik Tunai - ${typeof formatRupiah === 'function' ? formatRupiah(tarikData.nominal) : 'Rp ' + tarikData.nominal}`,
+        harga_jual: tarikData.total,
+        harga_modal: tarikData.nominal,
         qty: 1,
-        jenis: 'tarik',
         keterangan: `Nominal: ${tarikData.nominal}, Fee: ${tarikData.fee}, Diterima: ${tarikData.total}`,
+        jenis: 'tarik',
         nominal: tarikData.nominal,
         fee: tarikData.fee
     };
     
-    // Tambah ke keranjang global
-    keranjang.push(itemTarik);
-    renderKeranjang();
+    // Gunakan Keranjang module
+    if (typeof window.Keranjang !== 'undefined') {
+        window.Keranjang.tambahItem(produkTarik, customData);
+    } else {
+        console.error('Keranjang module not loaded');
+        return;
+    }
     
     // Reset form
     document.getElementById('tarik-nominal').value = '';
@@ -80,14 +98,18 @@ function simpanTarik() {
     tarikData = { nominal: 0, fee: 0, total: 0 };
     
     // Tutup modal
-    closeModal('modal-tarik');
+    if (typeof closeModal === 'function') {
+        closeModal('modal-tarik');
+    }
     
     // Reset jenis transaksi ke penjualan
     document.querySelectorAll('.jenis-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector('[data-jenis="penjualan"]').classList.add('active');
-    currentJenis = 'penjualan';
+    const btnPenjualan = document.querySelector('[data-jenis="penjualan"]');
+    if (btnPenjualan) btnPenjualan.classList.add('active');
     
-    showToast('Tarik tunai ditambahkan ke keranjang', 'success');
+    if (typeof showToast === 'function') {
+        showToast('Tarik tunai ditambahkan ke keranjang', 'success');
+    }
 }
