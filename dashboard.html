@@ -911,32 +911,35 @@
             
             <!-- RINGKASAN HARI INI -->
             <section class="summary-section">
-                <div class="summary-grid">
-                    <div class="summary-card penjualan">
-                        <div class="summary-header">
-                            <div class="summary-icon-large"><i class="fas fa-shopping-bag"></i></div>
-                            <div class="summary-label-large">Penjualan Produk</div>
-                        </div>
-                        <div class="summary-value-large" id="total-penjualan">-</div>
-                    </div>
-                    
-                    <div class="summary-card laba">
-                        <div class="summary-header">
-                            <div class="summary-icon-large"><i class="fas fa-chart-line"></i></div>
-                            <div class="summary-label-large">Laba Bersih</div>
-                        </div>
-                        <div class="summary-value-large" id="total-laba">-</div>
-                    </div>
-                    
-                    <div class="summary-card transaksi">
-                        <div class="summary-header">
-                            <div class="summary-icon-large"><i class="fas fa-receipt"></i></div>
-                            <div class="summary-label-large">Jumlah Transaksi</div>
-                        </div>
-                        <div class="summary-value-large" id="total-transaksi">-</div>
-                    </div>
-                </div>
-            </section>
+    <div class="summary-grid">
+        <!-- Card 1: Summary Kas (ganti dari Penjualan Produk) -->
+        <div class="summary-card summary-kas">
+            <div class="summary-header">
+                <div class="summary-icon-large"><i class="fas fa-wallet"></i></div>
+                <div class="summary-label-large">Summary Kas</div>
+            </div>
+            <div class="summary-value-large" id="summary-kas">-</div>
+        </div>
+        
+        <!-- Card 2: Laba Bersih -->
+        <div class="summary-card laba">
+            <div class="summary-header">
+                <div class="summary-icon-large"><i class="fas fa-chart-line"></i></div>
+                <div class="summary-label-large">Laba Bersih</div>
+            </div>
+            <div class="summary-value-large" id="total-laba">-</div>
+        </div>
+        
+        <!-- Card 3: Jumlah Transaksi -->
+        <div class="summary-card transaksi">
+            <div class="summary-header">
+                <div class="summary-icon-large"><i class="fas fa-receipt"></i></div>
+                <div class="summary-label-large">Jumlah Transaksi</div>
+            </div>
+            <div class="summary-value-large" id="total-transaksi">-</div>
+        </div>
+    </div>
+</section>
 
             <!-- STATISTIK KAS -->
             <section class="statistik-section">
