@@ -1,8 +1,5 @@
-// Produk Grid View Module
-// Menangani tampilan produk dalam bentuk grid/card
-
+// Produk Grid View Module - Updated
 const ProdukGrid = {
-    // Render produk dalam format grid
     render: function(produkList, container) {
         container.innerHTML = '';
         container.classList.remove('list-view');
@@ -13,16 +10,22 @@ const ProdukGrid = {
             return;
         }
         
+        // Wrapper untuk grid
+        const gridWrapper = document.createElement('div');
+        gridWrapper.className = 'produk-grid-wrapper';
+        
         produkList.forEach(produk => {
             const card = this.createCard(produk);
-            container.appendChild(card);
+            gridWrapper.appendChild(card);
         });
+        
+        container.appendChild(gridWrapper);
     },
     
-    // Buat elemen card produk
     createCard: function(produk) {
         const card = document.createElement('div');
-        card.className = 'produk-card';
+        card.className = 'produk-card-kasir';
+        card.dataset.id = produk.id; // Penting untuk update realtime
         
         // Styling berdasarkan stok
         if (produk.stok <= 0) {
@@ -33,20 +36,22 @@ const ProdukGrid = {
         
         // Gambar produk
         const imageHtml = produk.gambar 
-            ? `<img src="${produk.gambar}" alt="${produk.nama}" class="produk-image" loading="lazy">`
-            : `<div class="produk-image-placeholder"><i class="fas fa-box"></i></div>`;
+            ? `<img src="${produk.gambar}" alt="${produk.nama}" loading="lazy">`
+            : `<i class="fas fa-box"></i>`;
         
         // Status stok
-        const stokClass = produk.stok <= 0 ? 'habis' : (produk.stok <= 5 ? 'menipis' : '');
-        const stokText = produk.stok <= 0 ? 'Stok Habis' : `Stok: ${produk.stok}`;
+        const stokClass = produk.stok <= 0 ? 'habis' : (produk.stok <= 5 ? 'menipis' : 'tersedia');
+        const stokText = produk.stok <= 0 ? 'Habis' : `${produk.stok}`;
         
         card.innerHTML = `
-            ${imageHtml}
-            <div class="produk-info">
-                <div class="produk-nama" title="${produk.nama}">${produk.nama}</div>
-                <div class="produk-harga">${formatRupiah(produk.harga_jual)}</div>
-                <div class="produk-stok ${stokClass}">${stokText}</div>
-                ${produk.kategori ? `<div class="produk-kategori"><small>${produk.kategori}</small></div>` : ''}
+            <div class="card-image-kasir">${imageHtml}</div>
+            <div class="card-body-kasir">
+                <h4 class="card-nama-kasir">${produk.nama}</h4>
+                <p class="card-harga-kasir">${formatRupiah(produk.harga_jual)}</p>
+                <div class="card-meta-kasir">
+                    <span class="badge-stok-kasir ${stokClass}">${stokText}</span>
+                    ${produk.kategori ? `<span class="badge-kategori-kasir">${produk.kategori}</span>` : ''}
+                </div>
             </div>
         `;
         
@@ -59,37 +64,36 @@ const ProdukGrid = {
             }
         });
         
-        // Animasi
-        card.style.animation = 'fadeIn 0.3s ease';
-        
         return card;
     },
     
-    // Tampilan kosong
     renderEmpty: function(container) {
         container.innerHTML = `
-            <div class="loading-produk" style="grid-column: 1/-1;">
-                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+            <div class="empty-state-kasir">
+                <i class="fas fa-box-open"></i>
                 <p>Tidak ada produk</p>
             </div>
         `;
     },
     
-    // Update single card (untuk realtime update stok)
     updateCard: function(produkId, newStok) {
-        const cards = document.querySelectorAll('.produk-card');
-        cards.forEach(card => {
-            // Cari card berdasarkan data attribute (perlu ditambahkan saat create)
-            if (card.dataset.id === produkId) {
-                const stokEl = card.querySelector('.produk-stok');
-                if (stokEl) {
-                    stokEl.textContent = `Stok: ${newStok}`;
-                    stokEl.className = 'produk-stok ' + (newStok <= 5 ? 'menipis' : '');
-                }
-            }
-        });
+        const card = document.querySelector(`.produk-card-kasir[data-id="${produkId}"]`);
+        if (!card) return;
+        
+        const stokEl = card.querySelector('.badge-stok-kasir');
+        if (stokEl) {
+            stokEl.textContent = newStok <= 0 ? 'Habis' : `${newStok}`;
+            stokEl.className = 'badge-stok-kasir ' + (newStok <= 0 ? 'habis' : (newStok <= 5 ? 'menipis' : 'tersedia'));
+        }
+        
+        // Update class card
+        card.classList.remove('stok-habis', 'stok-menipis');
+        if (newStok <= 0) {
+            card.classList.add('stok-habis');
+        } else if (newStok <= 5) {
+            card.classList.add('stok-menipis');
+        }
     }
 };
 
-// Export
 window.ProdukGrid = ProdukGrid;
