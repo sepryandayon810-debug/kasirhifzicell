@@ -69,7 +69,7 @@ function simpanTarik() {
     const produkTarik = {
         id: 'tarik_' + Date.now(),
         nama: 'Tarik Tunai',
-        harga_jual: diterima, // Yang masuk ke kasir (fee)
+        harga_jual: diterima, // Fee yang masuk ke kasir
         harga_modal: tarikData.nominal, // Modal keluar
         stok: 9999
     };
@@ -83,7 +83,7 @@ function simpanTarik() {
         jenis: 'tarik',
         nominal: tarikData.nominal,
         fee: tarikData.fee,
-        subtotal: diterima // Yang masuk ke kas
+        subtotal: diterima // ✅ Pastikan subtotal ada
     };
     
     // Gunakan Keranjang module
