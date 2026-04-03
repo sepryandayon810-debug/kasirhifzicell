@@ -1,10 +1,10 @@
 /**
- * Transaksi Manual Module - FIXED
+ * Transaksi Manual Module - MOBILE FIXED
  * File: js/modules/kasir/transaksi-manual.js
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // FIX: Gunakan event delegation dan cek elemen ada
+    // Tombol simpan - tambah prevent default
     const btnSimpan = document.getElementById('btn-simpan-manual');
     if (btnSimpan) {
         btnSimpan.addEventListener('click', function(e) {
@@ -14,13 +14,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // FIX: Tambah listener untuk tombol batal di modal
+    // Tombol batal
     const btnBatal = document.querySelector('#modal-transaksi-manual .btn-secondary');
     if (btnBatal) {
         btnBatal.addEventListener('click', function(e) {
             e.preventDefault();
             closeModal('modal-transaksi-manual');
         });
+    }
+    
+    // Close saat klik overlay
+    const modal = document.getElementById('modal-transaksi-manual');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal('modal-transaksi-manual');
+            }
+        });
+    }
+    
+    // Auto focus nama saat modal dibuka
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.target.classList.contains('active')) {
+                setTimeout(() => {
+                    document.getElementById('manual-nama')?.focus();
+                }, 100);
+            }
+        });
+    });
+    
+    if (modal) {
+        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
     }
 });
 
@@ -44,7 +69,7 @@ function simpanTransaksiManual() {
         return;
     }
     
-    // Buat objek untuk Keranjang module
+    // Buat objek untuk Keranjang
     const produkManual = {
         id: 'manual_' + Date.now(),
         nama: nama,
@@ -62,7 +87,7 @@ function simpanTransaksiManual() {
         jenis: 'manual'
     };
     
-    // Gunakan Keranjang module
+    // Tambah ke keranjang
     if (typeof window.Keranjang !== 'undefined') {
         window.Keranjang.tambahItem(produkManual, customData);
     } else {
@@ -73,17 +98,27 @@ function simpanTransaksiManual() {
     // Reset form
     resetFormManual();
     
-    // Tutup modal - FIX: Pastikan modal tertutup
-    closeModal('modal-transaksi-manual');
+    // Tutup modal - FIX: force close
+    const modal = document.getElementById('modal-transaksi-manual');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
     
-    // Reset jenis transaksi ke penjualan - FIX: Gunakan class modern
+    // Hide overlay
+    const overlay = document.getElementById('overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+    
+    // Reset jenis transaksi
     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     const btnPenjualan = document.querySelector('.type-btn[data-jenis="penjualan"]');
     if (btnPenjualan) btnPenjualan.classList.add('active');
     
-    showToast('Item manual ditambahkan ke keranjang', 'success');
+    showToast('Item manual ditambahkan', 'success');
 }
 
 function resetFormManual() {
@@ -100,6 +135,6 @@ function resetFormManual() {
     if (keterangan) keterangan.value = '';
 }
 
-// Export ke global
+// Export
 window.simpanTransaksiManual = simpanTransaksiManual;
 window.resetFormManual = resetFormManual;
