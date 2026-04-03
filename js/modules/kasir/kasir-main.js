@@ -313,6 +313,44 @@ function hitungKembalian() {
 }
 
 /**
+ * Bersihkan item untuk disimpan ke Firebase (hapus undefined/null)
+ * @param {Array} items 
+ * @returns {Array}
+ */
+function cleanItemsForFirebase(items) {
+    return items.map(item => {
+        const cleanItem = {
+            id: item.id || '',
+            nama: item.nama || '',
+            harga_jual: item.harga_jual || 0,
+            harga_modal: item.harga_modal || 0,
+            qty: item.qty || 1,
+            subtotal: item.subtotal || 0,
+            jenis: item.jenis || 'penjualan',
+            keterangan: item.keterangan || '',
+            laba: ((item.harga_jual || 0) - (item.harga_modal || 0)) * (item.qty || 1)
+        };
+        
+        // Hanya tambahkan gambar jika ada
+        if (item.gambar && item.gambar !== undefined && item.gambar !== null) {
+            cleanItem.gambar = item.gambar;
+        }
+        
+        // Tambahkan field khusus untuk topup/tarik
+        if (item.jenis === 'topup') {
+            cleanItem.provider = item.provider || '';
+            cleanItem.nominal = item.nominal || 0;
+            cleanItem.fee = item.fee || 0;
+        } else if (item.jenis === 'tarik') {
+            cleanItem.nominal = item.nominal || 0;
+            cleanItem.fee = item.fee || 0;
+        }
+        
+        return cleanItem;
+    });
+}
+
+/**
  * Proses pembayaran
  */
 async function prosesPembayaran() {
@@ -378,6 +416,9 @@ async function prosesPembayaran() {
         const today = getToday();
         const kodeTransaksi = generateKodeTransaksi();
         
+        // Bersihkan items sebelum disimpan
+        const cleanItems = cleanItemsForFirebase(keranjang);
+        
         // Data transaksi
         const transaksiData = {
             kode: kodeTransaksi,
@@ -386,10 +427,7 @@ async function prosesPembayaran() {
             kasir_id: session.uid,
             kasir_nama: session.nama,
             shift: session.shift || 'shift-1',
-            items: keranjang.map(item => ({
-                ...item,
-                laba: (item.harga_jual - (item.harga_modal || 0)) * item.qty
-            })),
+            items: cleanItems,
             subtotal: total,
             diskon: 0,
             total: total,
@@ -668,7 +706,6 @@ function parseRupiah(str) {
 }
 
 function showToast(message, type = 'info') {
-    // Implementasi toast sederhana
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: fixed;
@@ -707,5 +744,6 @@ window.showToast = showToast;
 window.getToday = getToday;
 window.generateKodeTransaksi = generateKodeTransaksi;
 window.hitungKembalian = hitungKembalian;
+window.cleanItemsForFirebase = cleanItemsForFirebase;
 
 console.log('Kasir Main Module Loaded');
