@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Produk</title>
     
@@ -126,8 +126,9 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- MAIN CONTENT -->
     <main class="main-content">
+        <!-- HEADER -->
         <header class="main-header">
             <div class="header-left">
                 <button class="menu-toggle" onclick="toggleSidebar()">
@@ -150,9 +151,10 @@
             </div>
         </header>
 
+        <!-- CONTENT -->
         <div class="content-wrapper">
             
-            <!-- TOOLBAR PRODUK -->
+            <!-- TOOLBAR -->
             <div class="produk-toolbar">
                 <div class="toolbar-left">
                     <button class="btn btn-primary" id="btn-tambah-produk">
@@ -164,10 +166,13 @@
                     <button class="btn btn-secondary" id="btn-export-excel">
                         <i class="fas fa-download"></i> Export
                     </button>
+                    <button class="btn btn-secondary" id="btn-stok-masal">
+                        <i class="fas fa-boxes"></i> Stok Masal
+                    </button>
                 </div>
                 
                 <div class="toolbar-right">
-                    <div class="search-box">
+                    <div class="search-box-produk">
                         <i class="fas fa-search"></i>
                         <input type="text" id="search-produk" placeholder="Cari produk...">
                     </div>
@@ -175,10 +180,10 @@
                         <i class="fas fa-tags"></i> Kategori
                     </button>
                     <div class="view-toggle" id="view-toggle">
-                        <button class="view-btn active" data-view="grid" title="Grid View">
+                        <button class="view-btn active" data-view="grid">
                             <i class="fas fa-th-large"></i>
                         </button>
-                        <button class="view-btn" data-view="list" title="List View">
+                        <button class="view-btn" data-view="list">
                             <i class="fas fa-list"></i>
                         </button>
                     </div>
@@ -186,30 +191,21 @@
             </div>
 
             <!-- KONTEN PRODUK -->
-            <div class="produk-content" id="produk-content">
-                <!-- Grid View -->
-                <div class="produk-grid" id="produk-grid">
-                    <!-- Diisi oleh produk-grid.js -->
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <p>Memuat produk...</p>
-                    </div>
-                </div>
-                
-                <!-- List View (hidden default) -->
-                <div class="produk-list hidden" id="produk-list">
-                    <!-- Diisi oleh produk-list.js -->
-                </div>
+            <div class="produk-main-container grid-view" id="produk-main-container">
+                <!-- Diisi oleh JS -->
             </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination-container" id="pagination-container"></div>
             
             <footer class="page-footer">
-                <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
+                <p>WebPOS v2.0 • <span id="last-update">-</span></p>
             </footer>
         </div>
     </main>
 
     <!-- MODALS -->
-    
+
     <!-- Modal Tambah Produk -->
     <div class="modal" id="modal-tambah-produk">
         <div class="modal-content modal-lg">
@@ -220,41 +216,47 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-row">
+                <div class="row">
                     <div class="form-group">
-                        <label>Nama Produk</label>
+                        <label>Nama Produk <span class="required">*</span></label>
                         <input type="text" id="tambah-nama" class="form-control" placeholder="Masukkan nama produk">
                     </div>
                     <div class="form-group">
-                        <label>Kategori</label>
+                        <label>Kode Produk</label>
+                        <input type="text" id="tambah-kode" class="form-control" placeholder="Auto-generate">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Kategori <span class="required">*</span></label>
                         <select id="tambah-kategori" class="form-control">
                             <option value="">Pilih Kategori</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
-                        <label>Harga Modal</label>
+                        <label>Barcode</label>
+                        <input type="text" id="tambah-barcode" class="form-control" placeholder="Scan barcode">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Harga Modal <span class="required">*</span></label>
                         <input type="number" id="tambah-harga-modal" class="form-control" placeholder="0">
                     </div>
                     <div class="form-group">
-                        <label>Harga Jual</label>
+                        <label>Harga Jual <span class="required">*</span></label>
                         <input type="number" id="tambah-harga-jual" class="form-control" placeholder="0">
                     </div>
                 </div>
-                <div class="form-row">
+                <div class="row">
                     <div class="form-group">
-                        <label>Stok</label>
+                        <label>Stok Awal</label>
                         <input type="number" id="tambah-stok" class="form-control" placeholder="0">
                     </div>
                     <div class="form-group">
                         <label>Stok Minimum</label>
-                        <input type="number" id="tambah-stok-min" class="form-control" placeholder="0">
+                        <input type="number" id="tambah-stok-min" class="form-control" placeholder="5">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Gambar Produk</label>
-                    <input type="file" id="tambah-gambar" class="form-control" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -275,36 +277,36 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-id">
-                <div class="form-row">
+                <div class="row">
                     <div class="form-group">
-                        <label>Nama Produk</label>
+                        <label>Nama Produk <span class="required">*</span></label>
                         <input type="text" id="edit-nama" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Kategori</label>
+                        <label>Kode Produk</label>
+                        <input type="text" id="edit-kode" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Kategori <span class="required">*</span></label>
                         <select id="edit-kategori" class="form-control">
                             <option value="">Pilih Kategori</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
-                        <label>Harga Modal</label>
+                        <label>Barcode</label>
+                        <input type="text" id="edit-barcode" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Harga Modal <span class="required">*</span></label>
                         <input type="number" id="edit-harga-modal" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Harga Jual</label>
+                        <label>Harga Jual <span class="required">*</span></label>
                         <input type="number" id="edit-harga-jual" class="form-control">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Stok</label>
-                        <input type="number" id="edit-stok" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Stok Minimum</label>
-                        <input type="number" id="edit-stok-min" class="form-control">
                     </div>
                 </div>
             </div>
@@ -329,12 +331,12 @@
                     <label>Tambah Kategori Baru</label>
                     <div class="input-group">
                         <input type="text" id="nama-kategori-baru" class="form-control" placeholder="Nama kategori">
-                        <button class="btn btn-primary" id="btn-tambah-kategori">Tambah</button>
+                        <button class="btn btn-primary" id="btn-tambah-kategori">
+                            <i class="fas fa-plus"></i> Tambah
+                        </button>
                     </div>
                 </div>
-                <div class="kategori-list" id="kategori-list">
-                    <!-- Diisi oleh kategori-manager.js -->
-                </div>
+                <div class="kategori-list" id="kategori-list"></div>
             </div>
         </div>
     </div>
@@ -349,8 +351,22 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="stok-masal-list" id="stok-masal-list">
-                    <!-- Diisi oleh stok-masal.js -->
+                <div class="stok-masal-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Masukkan nilai positif untuk menambah, negatif untuk mengurangi stok</span>
+                </div>
+                <div class="stok-masal-table-container">
+                    <table class="table-stok-masal">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Stok Saat Ini</th>
+                                <th>Perubahan</th>
+                                <th>Stok Akhir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stok-masal-list"></tbody>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer">
@@ -371,13 +387,13 @@
     <script src="../js/modules/produk/produk-main.js"></script>
     <script src="../js/modules/produk/produk-grid.js"></script>
     <script src="../js/modules/produk/produk-list.js"></script>
+    <script src="../js/modules/produk/toggle-view.js"></script>
     <script src="../js/modules/produk/tambah-produk.js"></script>
     <script src="../js/modules/produk/edit-produk.js"></script>
     <script src="../js/modules/produk/kategori-manager.js"></script>
     <script src="../js/modules/produk/stok-masal.js"></script>
     <script src="../js/modules/produk/import-excel.js"></script>
     <script src="../js/modules/produk/export-excel.js"></script>
-    <script src="../js/modules/produk/toggle-view.js"></script>
     
     <script>
         // Toggle dropdown
@@ -424,7 +440,7 @@
             const btn = document.querySelector('.btn-icon i.fa-sync-alt');
             if (btn) btn.classList.add('fa-spin');
             
-            if (window.ProdukMain?.refresh) {
+            if (window.ProdukMain && window.ProdukMain.refresh) {
                 window.ProdukMain.refresh();
             }
             
