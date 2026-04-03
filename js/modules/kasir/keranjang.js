@@ -65,33 +65,35 @@ const Keranjang = {
      * @param {Object} customData - Data tambahan untuk transaksi manual/topup/tarik
      */
     tambahItem: function(produk, customData = null) {
-    // Untuk transaksi dengan custom data (manual, topup, tarik)
-    if (customData) {
-        // Hitung subtotal jika belum ada
-        const subtotal = customData.subtotal || (customData.harga_jual * customData.qty);
+        // Untuk transaksi dengan custom data (manual, topup, tarik)
+        if (customData) {
+            // Hitung subtotal jika belum ada
+            const subtotal = customData.subtotal || (customData.harga_jual * customData.qty);
+            
+            this.items.push({
+                id: produk.id || 'manual_' + Date.now(),
+                nama: customData.nama || produk.nama,
+                harga_jual: customData.harga_jual || customData.harga || produk.harga_jual,
+                harga_modal: customData.harga_modal || produk.harga_modal || 0,
+                qty: customData.qty || 1,
+                subtotal: subtotal,
+                gambar: produk.gambar,
+                jenis: customData.jenis || 'penjualan',
+                keterangan: customData.keterangan || '',
+                stok_tersedia: produk.stok || 9999,
+                // Data tambahan untuk topup/tarik
+                nominal: customData.nominal || 0,
+                fee: customData.fee || 0,
+                provider: customData.provider || ''
+            });
+            
+            this.render();
+            this.saveToStorage();
+            this.showToast('Item ditambahkan ke keranjang', 'success');
+            return; // ✅ RETURN di sini untuk customData
+        }
         
-        this.items.push({
-            id: produk.id || 'manual_' + Date.now(),
-            nama: customData.nama || produk.nama,
-            harga_jual: customData.harga_jual || customData.harga || produk.harga_jual,
-            harga_modal: customData.harga_modal || produk.harga_modal || 0,
-            qty: customData.qty || 1,
-            subtotal: subtotal,
-            gambar: produk.gambar,
-            jenis: customData.jenis || 'penjualan',
-            keterangan: customData.keterangan || '',
-            stok_tersedia: produk.stok || 9999,
-            // Data tambahan untuk topup/tarik
-            nominal: customData.nominal || 0,
-            fee: customData.fee || 0,
-            provider: customData.provider || ''
-        });
-        
-        this.render();
-        this.saveToStorage();
-        this.showToast('Item ditambahkan ke keranjang', 'success');
-        return;
-        
+        // ✅ Kode di bawah ini untuk penjualan normal (tanpa customData)
         // Cek stok untuk penjualan normal
         if (produk.stok <= 0) {
             this.showToast('Stok produk habis', 'warning');
@@ -363,13 +365,19 @@ const Keranjang = {
     }
 };
 
-// Export ke window
+// ✅ Export ke window SEBELUM event listener
 window.Keranjang = Keranjang;
 
 // Auto init saat DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    Keranjang.init();
-    
-    // Load draft setelah 1 detik
-    setTimeout(() => Keranjang.loadFromStorage(), 1000);
+    if (window.Keranjang) {
+        window.Keranjang.init();
+        
+        // Load draft setelah 1 detik
+        setTimeout(() => {
+            if (window.Keranjang.loadFromStorage) {
+                window.Keranjang.loadFromStorage();
+            }
+        }, 1000);
+    }
 });
