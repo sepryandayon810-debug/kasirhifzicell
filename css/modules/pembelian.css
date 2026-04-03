@@ -1,22 +1,34 @@
 /* ============================================
-   PEMBELIAN MODULE - Sesuai Tema Dashboard
+   PEMBELIAN MODULE - Mobile First Responsive
    ============================================ */
 
-/* Tabs */
+/* ==========================================
+   MOBILE FIRST BASE STYLES
+   ========================================== */
+
+/* Tabs - Mobile Optimized */
 .pembelian-tabs {
     display: flex;
-    gap: 12px;
-    margin-bottom: 30px;
-    padding: 8px;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 6px;
     background: var(--bg-secondary);
     border-radius: 16px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.pembelian-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .tab-btn {
     flex: 1;
-    padding: 14px 24px;
+    min-width: 100px;
+    padding: 12px 16px;
     background: transparent;
     border: none;
     color: var(--text-muted);
@@ -26,14 +38,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    font-size: 14px;
+    gap: 8px;
+    font-size: 13px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
-.tab-btn:hover {
-    color: var(--text-primary);
-    background: var(--bg-hover);
+.tab-btn i {
+    font-size: 14px;
 }
 
 .tab-btn.active {
@@ -57,14 +69,26 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Pembelian Container */
+/* ==========================================
+   PEMBELIAN CONTAINER - MOBILE STACK
+   ========================================== */
 .pembelian-container {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* Cards */
+.pembelian-left {
+    order: 2;
+}
+
+.pembelian-right {
+    order: 1;
+}
+
+/* ==========================================
+   CARDS - MOBILE STYLES
+   ========================================== */
 .card-supplier,
 .card-cari-produk,
 .card-keranjang,
@@ -72,8 +96,8 @@
 .card-pembayaran {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    margin-bottom: 24px;
+    border-radius: 16px;
+    margin-bottom: 16px;
     overflow: hidden;
     box-shadow: var(--shadow);
 }
@@ -82,153 +106,277 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 24px;
+    padding: 16px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-hover);
+    gap: 12px;
 }
 
 .card-header h3 {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    margin: 0;
 }
 
 .card-header h3 i {
     color: var(--accent-indigo);
+    font-size: 16px;
 }
 
-/* Supplier Info */
+.card-header .btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* Supplier Info - Mobile */
 .supplier-info {
-    padding: 24px;
+    padding: 16px;
 }
 
 .empty-supplier {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 16px;
     color: var(--text-muted);
 }
 
 .empty-supplier i {
-    font-size: 56px;
-    margin-bottom: 16px;
+    font-size: 48px;
+    margin-bottom: 12px;
     opacity: 0.5;
 }
 
 .empty-supplier p {
-    margin-bottom: 20px;
-    font-size: 15px;
+    margin-bottom: 16px;
+    font-size: 14px;
 }
 
 .supplier-selected {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 12px;
 }
 
 .supplier-avatar {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
     background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
-    border-radius: 16px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 28px;
+    font-size: 24px;
+}
+
+.supplier-details {
+    flex: 1;
+    min-width: 0;
 }
 
 .supplier-details h4 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .supplier-details p {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-muted);
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-/* Search Produk */
+.supplier-details p i {
+    font-size: 12px;
+    width: 16px;
+}
+
+.supplier-details .btn {
+    margin-top: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+}
+
+/* ==========================================
+   SEARCH PRODUK - MOBILE
+   ========================================== */
 .search-produk-pembelian {
     position: relative;
-    padding: 20px 24px;
+    padding: 16px;
     display: flex;
-    gap: 12px;
+    gap: 10px;
 }
 
 .search-produk-pembelian i {
     position: absolute;
-    left: 40px;
+    left: 28px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .search-produk-pembelian input {
     flex: 1;
-    padding: 16px 16px 16px 52px;
+    padding: 14px 14px 14px 44px;
     background: var(--bg-hover);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--text-primary);
-    font-size: 15px;
+    font-size: 14px;
     transition: all 0.3s ease;
+    min-width: 0;
 }
 
 .search-produk-pembelian input:focus {
     outline: none;
     border-color: var(--accent-indigo);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-produk-pembelian input::placeholder {
+    font-size: 13px;
 }
 
 .search-produk-pembelian button {
-    padding: 16px 20px;
+    padding: 14px 16px;
     background: var(--accent-emerald);
     color: white;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.search-produk-pembelian button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-/* Hasil Pencarian */
+/* Hasil Pencarian - Mobile */
 .hasil-pencarian {
-    max-height: 300px;
+    max-height: 250px;
     overflow-y: auto;
-    padding: 0 24px 24px;
+    padding: 0 16px 16px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .hasil-item {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
+    gap: 12px;
+    padding: 14px;
     background: var(--bg-hover);
-    border-radius: 14px;
-    margin-bottom: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid transparent;
 }
 
-.hasil-item:hover {
+.hasil-item:active {
+    transform: scale(0.98);
     border-color: var(--accent-indigo);
-    background: var(--bg-secondary);
-    transform: translateX(4px);
 }
 
 .hasil-item .item-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.hasil-item .item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.hasil-item .item-info h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hasil-item .item-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.hasil-item .item-harga {
+    font-weight: 700;
+    color: var(--accent-indigo);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* ==========================================
+   KERANJANG - MOBILE OPTIMIZED
+   ========================================== */
+.keranjang-list {
+    padding: 16px;
+    max-height: 350px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.empty-keranjang {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+}
+
+.empty-keranjang i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-keranjang p {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.empty-keranjang small {
+    font-size: 12px;
+}
+
+/* Keranjang Item - Mobile */
+.keranjang-item {
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg-hover);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    align-items: center;
+}
+
+.keranjang-item .item-img {
     width: 50px;
     height: 50px;
     background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
@@ -237,100 +385,37 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 24px;
+    font-size: 22px;
+    grid-row: span 2;
 }
 
-.hasil-item .item-info {
-    flex: 1;
-}
-
-.hasil-item .item-info h4 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-}
-
-.hasil-item .item-info p {
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.hasil-item .item-harga {
-    font-weight: 700;
-    color: var(--accent-indigo);
-    font-size: 16px;
-}
-
-/* Keranjang */
-.keranjang-list {
-    padding: 20px 24px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.empty-keranjang {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--text-muted);
-}
-
-.empty-keranjang i {
-    font-size: 56px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-.empty-keranjang p {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.empty-keranjang small {
-    font-size: 13px;
-}
-
-.keranjang-item {
-    display: grid;
-    grid-template-columns: 60px 1fr auto auto auto;
-    gap: 16px;
-    align-items: center;
-    padding: 16px;
-    background: var(--bg-hover);
-    border-radius: 14px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border);
-}
-
-.keranjang-item .item-img {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 24px;
+.keranjang-item .item-info {
+    min-width: 0;
+    grid-column: 2;
 }
 
 .keranjang-item .item-info h4 {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .keranjang-item .item-info p {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-muted);
+    margin: 0;
 }
 
 .keranjang-item .item-qty {
     display: flex;
     align-items: center;
     gap: 8px;
+    grid-column: 2;
+    grid-row: 2;
 }
 
 .keranjang-item .item-qty button {
@@ -342,30 +427,36 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.keranjang-item .item-qty button:hover {
+.keranjang-item .item-qty button:active {
     background: var(--accent-indigo);
     color: white;
-    border-color: var(--accent-indigo);
 }
 
 .keranjang-item .item-qty input {
     width: 50px;
+    height: 32px;
     text-align: center;
-    padding: 8px;
+    padding: 0;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text-primary);
     font-weight: 600;
+    font-size: 14px;
 }
 
 .keranjang-item .item-harga {
     font-weight: 700;
     color: var(--accent-indigo);
-    font-size: 16px;
+    font-size: 15px;
     text-align: right;
+    grid-column: 3;
+    grid-row: 1;
 }
 
 .keranjang-item .item-delete {
@@ -376,23 +467,31 @@
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
 }
 
-.keranjang-item .item-delete:hover {
+.keranjang-item .item-delete:active {
     background: var(--accent-red);
     color: white;
 }
 
-/* Ringkasan */
+/* ==========================================
+   RINGKASAN & PEMBAYARAN - MOBILE
+   ========================================== */
 .card-ringkasan {
-    padding: 24px;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .card-ringkasan h3 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 24px;
+    margin: 0 0 20px 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -406,9 +505,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 0;
+    padding: 14px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .ringkasan-row span:first-child {
@@ -422,19 +521,19 @@
 
 .ringkasan-row.total {
     border-bottom: none;
-    padding-top: 24px;
-    margin-top: 8px;
+    padding-top: 16px;
+    margin-top: 4px;
     border-top: 2px solid var(--accent-indigo);
 }
 
 .ringkasan-row.total span {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
 }
 
 .ringkasan-row.total span:last-child {
     color: var(--accent-indigo);
-    font-size: 22px;
+    font-size: 20px;
 }
 
 .input-diskon,
@@ -446,32 +545,35 @@
 
 .input-diskon input,
 .input-pajak input {
-    width: 70px;
-    padding: 10px;
+    width: 60px;
+    height: 36px;
+    padding: 0 8px;
     background: var(--bg-hover);
     border: 1px solid var(--border);
     border-radius: 10px;
     color: var(--text-primary);
     text-align: center;
     font-weight: 600;
+    font-size: 14px;
 }
 
 .input-diskon span,
 .input-pajak span {
     color: var(--text-muted);
     font-weight: 600;
+    font-size: 14px;
 }
 
 /* Pembayaran */
 .card-pembayaran {
-    padding: 24px;
+    padding: 20px;
 }
 
 .card-pembayaran h3 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 24px;
+    margin: 0 0 20px 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -482,37 +584,49 @@
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .form-control {
     width: 100%;
-    padding: 14px 16px;
+    height: 48px;
+    padding: 0 16px;
     background: var(--bg-hover);
     border: 1px solid var(--border);
     border-radius: 12px;
     color: var(--text-primary);
     font-size: 15px;
     transition: all 0.3s ease;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .form-control:focus {
     outline: none;
     border-color: var(--accent-indigo);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 textarea.form-control {
-    resize: vertical;
+    height: auto;
+    padding: 12px 16px;
     min-height: 80px;
+    resize: vertical;
+}
+
+select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
 }
 
 .input-bayar {
@@ -526,10 +640,12 @@ textarea.form-control {
     left: 16px;
     color: var(--text-muted);
     font-weight: 600;
+    font-size: 15px;
 }
 
 .input-bayar input {
-    padding-left: 48px;
+    padding-left: 44px;
+    font-weight: 600;
 }
 
 .btn-uang-pas {
@@ -543,12 +659,12 @@ textarea.form-control {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    width: 100%;
 }
 
-.btn-uang-pas:hover {
+.btn-uang-pas:active {
     background: var(--accent-indigo);
     color: white;
-    border-color: var(--accent-indigo);
 }
 
 .kembalian-display {
@@ -573,10 +689,14 @@ textarea.form-control {
 
 .btn-proses {
     width: 100%;
-    padding: 18px;
+    height: 52px;
     font-size: 16px;
     font-weight: 700;
     margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .btn-success {
@@ -585,49 +705,63 @@ textarea.form-control {
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+.btn-success:active {
+    transform: scale(0.98);
 }
 
-/* Riwayat Tab */
+/* ==========================================
+   RIWAYAT TAB - MOBILE
+   ========================================== */
 .riwayat-toolbar {
     display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .filter-group {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .filter-group span {
     color: var(--text-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.filter-group input {
+    flex: 1;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
 }
 
 .search-riwayat {
     position: relative;
-    flex: 1;
-    max-width: 300px;
 }
 
 .search-riwayat i {
     position: absolute;
-    left: 16px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+    font-size: 14px;
 }
 
 .search-riwayat input {
     width: 100%;
-    padding: 14px 16px 14px 48px;
+    height: 44px;
+    padding: 0 14px 0 40px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--text-primary);
     font-size: 14px;
 }
@@ -635,63 +769,81 @@ textarea.form-control {
 .riwayat-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .riwayat-item {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 24px;
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    gap: 24px;
-    align-items: center;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
     transition: all 0.3s ease;
 }
 
-.riwayat-item:hover {
+.riwayat-item:active {
     border-color: var(--accent-indigo);
-    box-shadow: var(--shadow);
+    transform: scale(0.99);
+}
+
+.riwayat-item .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
 }
 
 .riwayat-item .invoice-badge {
-    padding: 12px 20px;
+    padding: 8px 14px;
     background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
     color: white;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
+    white-space: nowrap;
 }
 
-.riwayat-item .invoice-info h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 6px;
-}
-
-.riwayat-item .invoice-info p {
-    font-size: 14px;
+.riwayat-item .invoice-date {
+    font-size: 12px;
     color: var(--text-muted);
 }
 
-.riwayat-item .invoice-total {
-    text-align: right;
+.riwayat-item .invoice-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+}
+
+.riwayat-item .invoice-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.riwayat-item .invoice-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
 }
 
 .riwayat-item .invoice-total .amount {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--accent-indigo);
 }
 
 .riwayat-item .invoice-total .status {
-    font-size: 12px;
+    font-size: 11px;
     padding: 6px 12px;
     border-radius: 20px;
-    margin-top: 8px;
+    margin-top: 6px;
     display: inline-block;
+    font-weight: 600;
 }
 
 .riwayat-item .invoice-total .status.lunas {
@@ -706,99 +858,113 @@ textarea.form-control {
 
 .riwayat-item .invoice-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
-/* Supplier Tab */
+.riwayat-item .invoice-actions button {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+/* ==========================================
+   SUPPLIER TAB - MOBILE
+   ========================================== */
 .supplier-toolbar {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    gap: 16px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.supplier-toolbar .btn {
+    width: 100%;
+    justify-content: center;
 }
 
 .search-supplier {
     position: relative;
-    flex: 1;
-    max-width: 300px;
 }
 
 .search-supplier i {
     position: absolute;
-    left: 16px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+    font-size: 14px;
 }
 
 .search-supplier input {
     width: 100%;
-    padding: 14px 16px 14px 48px;
+    height: 44px;
+    padding: 0 14px 0 40px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--text-primary);
     font-size: 14px;
 }
 
 .supplier-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: 1fr;
+    gap: 16px;
 }
 
 .supplier-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 16px;
+    padding: 20px;
     transition: all 0.3s ease;
 }
 
-.supplier-card:hover {
+.supplier-card:active {
     border-color: var(--accent-indigo);
-    box-shadow: var(--shadow);
-    transform: translateY(-4px);
+    transform: scale(0.99);
 }
 
 .supplier-card .supplier-header {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .supplier-card .supplier-avatar {
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
     background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 28px;
+    font-size: 26px;
 }
 
 .supplier-card .supplier-title h4 {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
 }
 
 .supplier-card .supplier-title p {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-muted);
+    margin: 0;
 }
 
 .supplier-card .supplier-info {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
 .supplier-card .supplier-info p {
@@ -807,11 +973,13 @@ textarea.form-control {
     gap: 10px;
     font-size: 14px;
     color: var(--text-secondary);
+    margin: 0;
 }
 
 .supplier-card .supplier-info i {
     color: var(--accent-indigo);
     width: 20px;
+    font-size: 14px;
 }
 
 .supplier-card .supplier-actions {
@@ -819,23 +987,76 @@ textarea.form-control {
     gap: 10px;
 }
 
+.supplier-card .supplier-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ==========================================
+   MODALS - MOBILE OPTIMIZED
+   ========================================== */
+.modal-content {
+    margin: 10px;
+    max-height: calc(100vh - 20px);
+    border-radius: 20px;
+}
+
+.modal-lg {
+    width: auto;
+}
+
+.modal-header {
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 10;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+    font-size: 18px;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-footer {
+    padding: 16px 20px;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-secondary);
+    border-radius: 0 0 20px 20px;
+}
+
 /* Modal Supplier */
 .search-supplier-modal {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .search-supplier-modal i {
     position: absolute;
-    left: 16px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+    font-size: 14px;
 }
 
 .search-supplier-modal input {
     width: 100%;
-    padding: 14px 16px 14px 48px;
+    height: 48px;
+    padding: 0 14px 0 42px;
     background: var(--bg-hover);
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -844,32 +1065,34 @@ textarea.form-control {
 }
 
 .supplier-list-modal {
-    max-height: 400px;
+    max-height: 50vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .supplier-list-item {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     padding: 16px;
     background: var(--bg-hover);
     border-radius: 14px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
 }
 
-.supplier-list-item:hover,
+.supplier-list-item:active,
 .supplier-list-item.selected {
     border-color: var(--accent-indigo);
     background: var(--bg-secondary);
 }
 
 .supplier-list-item .avatar {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
     background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
     border-radius: 12px;
     display: flex;
@@ -881,54 +1104,176 @@ textarea.form-control {
 
 .supplier-list-item .info {
     flex: 1;
+    min-width: 0;
 }
 
 .supplier-list-item .info h4 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .supplier-list-item .info p {
     font-size: 13px;
     color: var(--text-muted);
+    margin: 0;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .pembelian-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .pembelian-right {
-        order: -1;
-    }
-}
-
-@media (max-width: 768px) {
-    .pembelian-tabs {
-        flex-direction: column;
-    }
-    
+/* ==========================================
+   TABLET & DESKTOP BREAKPOINTS
+   ========================================== */
+@media (min-width: 640px) {
     .tab-btn {
-        justify-content: flex-start;
+        padding: 14px 24px;
+        font-size: 14px;
+    }
+    
+    .tab-btn i {
+        font-size: 16px;
+    }
+    
+    .card-header {
+        padding: 20px 24px;
+    }
+    
+    .card-header h3 {
+        font-size: 16px;
+    }
+    
+    .riwayat-toolbar {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .riwayat-toolbar .filter-group {
+        flex: 1;
+        min-width: 280px;
     }
     
     .riwayat-item {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
     }
     
-    .riwayat-item .invoice-total {
-        text-align: left;
+    .riwayat-item .item-header {
+        flex-direction: column;
+        gap: 8px;
     }
     
-    .filter-group {
-        width: 100%;
+    .supplier-toolbar {
+        flex-direction: row;
+        justify-content: space-between;
     }
     
-    .filter-group input {
-        flex: 1;
+    .supplier-toolbar .btn {
+        width: auto;
     }
+    
+    .supplier-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .pembelian-container {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 30px;
+    }
+    
+    .pembelian-left {
+        order: 1;
+    }
+    
+    .pembelian-right {
+        order: 2;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+    
+    .card-ringkasan {
+        position: static;
+    }
+    
+    .supplier-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .keranjang-item {
+        grid-template-columns: 60px 1fr auto auto auto;
+        grid-template-rows: auto;
+    }
+    
+    .keranjang-item .item-img {
+        grid-row: 1;
+    }
+    
+    .keranjang-item .item-info {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    
+    .keranjang-item .item-qty {
+        grid-column: 3;
+        grid-row: 1;
+    }
+    
+    .keranjang-item .item-harga {
+        grid-column: 4;
+        grid-row: 1;
+    }
+    
+    .keranjang-item .item-delete {
+        grid-column: 5;
+        grid-row: 1;
+    }
+}
+
+@media (min-width: 1280px) {
+    .supplier-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ==========================================
+   SAFE AREA & NOTCH SUPPORT
+   ========================================== */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .main-content {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    .mobile-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================
+   DARK MODE SPECIFIC MOBILE FIXES
+   ========================================== */
+[data-theme="dark"] .form-control {
+    color-scheme: dark;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
 }
