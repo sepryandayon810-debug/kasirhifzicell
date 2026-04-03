@@ -1,5 +1,5 @@
 /* ============================================
-   PRODUK MODULE STYLES
+   PRODUK MODULE STYLES - Updated
    ============================================ */
 
 /* Toolbar */
@@ -10,15 +10,16 @@
     gap: 15px;
     margin-bottom: 25px;
     flex-wrap: wrap;
-    padding: 15px;
-    background-color: var(--bg-card);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
 .toolbar-left {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
@@ -29,7 +30,7 @@
 
 .toolbar-right {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -41,47 +42,57 @@
 
 .search-box-produk i {
     position: absolute;
-    left: 12px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-secondary);
+    color: var(--text-muted);
 }
 
 .search-box-produk input {
     width: 100%;
-    padding: 10px 12px 10px 40px;
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 14px 16px 14px 48px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 14px;
     color: var(--text-primary);
+    font-size: 15px;
+    transition: all 0.3s ease;
 }
 
 .search-box-produk input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--accent-indigo);
+    background: var(--bg-secondary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 /* View Toggle */
 .view-toggle {
     display: flex;
-    gap: 5px;
+    gap: 8px;
+    padding: 4px;
+    background: var(--bg-hover);
+    border-radius: 12px;
 }
 
 .view-toggle .view-btn {
-    padding: 8px 12px;
-    background: none;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    border-radius: 6px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .view-toggle .view-btn.active,
 .view-toggle .view-btn:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
+    background: var(--bg-secondary);
+    color: var(--accent-indigo);
+    box-shadow: var(--shadow);
 }
 
 /* Produk Container */
@@ -98,23 +109,23 @@
 .produk-main-container.list-view {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 /* Produk Card (Grid) */
 .produk-card-manajemen {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
     overflow: hidden;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     position: relative;
 }
 
 .produk-card-manajemen:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    border-color: var(--primary-color);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-indigo);
 }
 
 .produk-card-manajemen.hidden-produk {
@@ -127,7 +138,7 @@
     width: 100%;
     height: 150px;
     overflow: hidden;
-    background-color: var(--bg-dark);
+    background: linear-gradient(135deg, var(--bg-hover), var(--bg-secondary));
 }
 
 .produk-card-manajemen .produk-image-container img {
@@ -143,15 +154,16 @@
     align-items: center;
     justify-content: center;
     font-size: 48px;
-    color: var(--text-secondary);
-    background: linear-gradient(135deg, var(--bg-dark), var(--bg-card));
+    color: var(--text-muted);
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    opacity: 0.1;
 }
 
 .produk-card-manajemen .produk-status-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 4px 10px;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
@@ -159,111 +171,114 @@
 }
 
 .produk-card-manajemen .produk-status-badge.aktif {
-    background-color: rgba(16, 185, 129, 0.2);
-    color: var(--success-color);
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-emerald);
 }
 
 .produk-card-manajemen .produk-status-badge.nonaktif {
-    background-color: rgba(107, 114, 128, 0.2);
-    color: var(--text-secondary);
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--text-muted);
 }
 
 .produk-card-manajemen .produk-info {
-    padding: 15px;
+    padding: 20px;
 }
 
 .produk-card-manajemen .produk-kode {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
 }
 
 .produk-card-manajemen .produk-nama {
     font-weight: 600;
-    font-size: var(--font-normal);
-    margin-bottom: 8px;
+    font-size: 15px;
+    margin-bottom: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-primary);
 }
 
 .produk-card-manajemen .produk-harga {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .produk-card-manajemen .harga-jual {
-    color: var(--primary-color);
+    color: var(--accent-indigo);
     font-weight: 700;
-    font-size: var(--font-large);
+    font-size: 18px;
 }
 
 .produk-card-manajemen .harga-modal {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .produk-card-manajemen .produk-stok {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
 }
 
 .produk-card-manajemen .stok-value {
     font-weight: 600;
+    font-size: 14px;
 }
 
 .produk-card-manajemen .stok-value.menipis {
-    color: var(--warning-color);
+    color: var(--accent-amber);
 }
 
 .produk-card-manajemen .stok-value.habis {
-    color: var(--danger-color);
+    color: var(--accent-red);
 }
 
 .produk-card-manajemen .produk-actions {
     display: flex;
-    gap: 5px;
-    padding: 10px 15px;
-    background-color: var(--bg-dark);
-    border-top: 1px solid var(--border-color);
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--bg-hover);
+    border-top: 1px solid var(--border);
 }
 
 .produk-card-manajemen .btn-action {
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: var(--font-small);
+    font-size: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    transition: all 0.3s;
+    gap: 6px;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .produk-card-manajemen .btn-action.edit {
-    background-color: rgba(59, 130, 246, 0.1);
-    color: var(--info-color);
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-indigo);
 }
 
 .produk-card-manajemen .btn-action.edit:hover {
-    background-color: var(--info-color);
+    background: var(--accent-indigo);
     color: white;
 }
 
 .produk-card-manajemen .btn-action.delete {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--danger-color);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
 }
 
 .produk-card-manajemen .btn-action.delete:hover {
-    background-color: var(--danger-color);
+    background: var(--accent-red);
     color: white;
 }
 
@@ -271,17 +286,18 @@
 .produk-list-item-manajemen {
     display: grid;
     grid-template-columns: 60px 2fr 1fr 1fr 100px 150px;
-    gap: 15px;
+    gap: 20px;
     align-items: center;
-    padding: 15px;
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    transition: all 0.3s;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition: all 0.3s ease;
 }
 
 .produk-list-item-manajemen:hover {
-    border-color: var(--primary-color);
+    border-color: var(--accent-indigo);
+    box-shadow: var(--shadow);
 }
 
 .produk-list-item-manajemen.hidden-produk {
@@ -292,41 +308,43 @@
 .produk-list-item-manajemen .list-image {
     width: 60px;
     height: 60px;
-    border-radius: 8px;
+    border-radius: 12px;
     object-fit: cover;
-    background-color: var(--bg-dark);
+    background: var(--bg-hover);
 }
 
 .produk-list-item-manajemen .list-image-placeholder {
     width: 60px;
     height: 60px;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bg-dark);
-    color: var(--text-secondary);
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    color: white;
     font-size: 24px;
 }
 
 .produk-list-item-manajemen .list-info h4 {
-    margin-bottom: 4px;
-    font-size: var(--font-normal);
+    margin-bottom: 6px;
+    font-size: 15px;
+    color: var(--text-primary);
 }
 
 .produk-list-item-manajemen .list-info p {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .produk-list-item-manajemen .list-harga .jual {
-    color: var(--primary-color);
+    color: var(--accent-indigo);
     font-weight: 700;
+    font-size: 16px;
 }
 
 .produk-list-item-manajemen .list-harga .modal {
-    font-size: var(--font-small);
-    color: var(--text-secondary);
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .produk-list-item-manajemen .list-stok {
@@ -335,15 +353,16 @@
 
 .produk-list-item-manajemen .list-stok .value {
     font-weight: 700;
-    font-size: var(--font-large);
+    font-size: 18px;
+    color: var(--text-primary);
 }
 
 .produk-list-item-manajemen .list-stok .value.menipis {
-    color: var(--warning-color);
+    color: var(--accent-amber);
 }
 
 .produk-list-item-manajemen .list-stok .value.habis {
-    color: var(--danger-color);
+    color: var(--accent-red);
 }
 
 .produk-list-item-manajemen .list-status {
@@ -352,7 +371,7 @@
 
 .produk-list-item-manajemen .list-actions {
     display: flex;
-    gap: 5px;
+    gap: 8px;
 }
 
 /* Pagination */
@@ -360,29 +379,30 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    margin-top: 25px;
-    padding: 15px;
+    gap: 8px;
+    margin-top: 30px;
+    padding: 20px;
 }
 
 .pagination-btn {
-    min-width: 40px;
-    height: 40px;
+    min-width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
     color: var(--text-primary);
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .pagination-btn:hover,
 .pagination-btn.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
     color: white;
 }
 
@@ -391,7 +411,7 @@
     cursor: not-allowed;
 }
 
-/* Modal Styles Specific */
+/* Modal Styles */
 .modal-lg {
     max-width: 800px;
 }
@@ -403,8 +423,8 @@
 .row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
 .row .col-4 {
@@ -416,12 +436,12 @@
 }
 
 .form-group .required {
-    color: var(--danger-color);
+    color: var(--accent-red);
 }
 
 .input-group {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .input-group .form-control {
@@ -431,26 +451,27 @@
 /* Image Upload */
 .image-upload-container {
     display: flex;
-    gap: 15px;
+    gap: 20px;
     align-items: flex-start;
 }
 
 .image-preview {
     width: 150px;
     height: 150px;
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .image-preview.has-image {
     border-style: solid;
-    border-color: var(--primary-color);
+    border-color: var(--accent-indigo);
 }
 
 .image-preview img {
@@ -467,52 +488,57 @@
 .image-upload-actions {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 /* Kategori List */
 .kategori-list {
     max-height: 300px;
     overflow-y: auto;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 .kategori-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 15px;
-    background-color: var(--bg-dark);
-    border-radius: 8px;
-    margin-bottom: 8px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
 }
 
 .kategori-item .kategori-nama {
     font-weight: 500;
+    color: var(--text-primary);
 }
 
 .kategori-item .kategori-actions {
     display: flex;
-    gap: 5px;
+    gap: 8px;
 }
 
 /* Stok Masal */
 .stok-masal-info {
-    background-color: rgba(59, 130, 246, 0.1);
-    border-left: 4px solid var(--info-color);
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 4px solid var(--accent-indigo);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
 }
 
 .stok-masal-info i {
-    color: var(--info-color);
-    margin-right: 8px;
+    color: var(--accent-indigo);
+    margin-right: 10px;
 }
 
 .stok-masal-table-container {
     max-height: 400px;
     overflow-y: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
 }
 
 .table-stok-masal {
@@ -522,90 +548,97 @@
 
 .table-stok-masal th,
 .table-stok-masal td {
-    padding: 12px;
+    padding: 16px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border);
 }
 
 .table-stok-masal th {
-    background-color: var(--bg-dark);
+    background: var(--bg-hover);
     font-weight: 600;
     color: var(--text-secondary);
     position: sticky;
     top: 0;
+    font-size: 13px;
+    text-transform: uppercase;
 }
 
 .table-stok-masal input {
     width: 100px;
-    padding: 8px;
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     color: var(--text-primary);
     text-align: center;
+    font-weight: 600;
 }
 
 .table-stok-masal input.perubahan-positif {
-    border-color: var(--success-color);
-    color: var(--success-color);
+    border-color: var(--accent-emerald);
+    color: var(--accent-emerald);
 }
 
 .table-stok-masal input.perubahan-negatif {
-    border-color: var(--danger-color);
-    color: var(--danger-color);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
 }
 
 /* Import */
 .import-info {
-    background-color: rgba(245, 158, 11, 0.1);
-    border-left: 4px solid var(--warning-color);
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    background: rgba(251, 191, 36, 0.1);
+    border-left: 4px solid var(--accent-amber);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: var(--text-primary);
 }
 
 .file-upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
-    padding: 40px;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 50px;
     text-align: center;
-    color: var(--text-secondary);
-    transition: all 0.3s;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
 }
 
 .file-upload-area.dragover {
-    border-color: var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.05);
+    border-color: var(--accent-indigo);
+    background: rgba(99, 102, 241, 0.05);
 }
 
 .file-upload-area i {
-    font-size: 48px;
-    margin-bottom: 15px;
-    color: var(--primary-color);
+    font-size: 56px;
+    margin-bottom: 20px;
+    color: var(--accent-indigo);
 }
 
 .file-upload-area p {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 16px;
 }
 
 .import-preview {
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .preview-table-container {
     max-height: 300px;
     overflow-y: auto;
-    margin: 15px 0;
+    margin: 20px 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
 }
 
 /* Toggle List */
 .toggle-actions {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .toggle-list {
@@ -616,37 +649,51 @@
 .toggle-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background-color: var(--bg-dark);
-    border-radius: 8px;
-    margin-bottom: 8px;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
 }
 
 .toggle-item input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--primary-color);
+    width: 22px;
+    height: 22px;
+    accent-color: var(--accent-indigo);
+    cursor: pointer;
 }
 
 .toggle-item .toggle-info {
     flex: 1;
 }
 
+.toggle-item .toggle-info h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.toggle-item .toggle-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
 .toggle-item .toggle-status {
-    font-size: var(--font-small);
-    padding: 4px 10px;
+    font-size: 12px;
+    padding: 6px 14px;
     border-radius: 20px;
+    font-weight: 600;
 }
 
 .toggle-item .toggle-status.aktif {
-    background-color: rgba(16, 185, 129, 0.2);
-    color: var(--success-color);
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-emerald);
 }
 
 .toggle-item .toggle-status.nonaktif {
-    background-color: rgba(107, 114, 128, 0.2);
-    color: var(--text-secondary);
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--text-muted);
 }
 
 /* Responsive */
@@ -667,7 +714,7 @@
     
     .produk-list-item-manajemen {
         grid-template-columns: 60px 1fr auto;
-        gap: 10px;
+        gap: 15px;
     }
     
     .produk-list-item-manajemen .list-harga,
@@ -679,8 +726,16 @@
 
 @media (max-width: 768px) {
     .produk-main-container.grid-view {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 15px;
+    }
+    
+    .produk-card-manajemen .produk-info {
+        padding: 15px;
+    }
+    
+    .produk-card-manajemen .produk-actions {
+        padding: 10px 15px;
     }
     
     .row {
@@ -695,5 +750,10 @@
     .image-upload-container {
         flex-direction: column;
         align-items: center;
+    }
+    
+    .modal-content {
+        margin: 15px;
+        max-height: calc(100vh - 30px);
     }
 }
