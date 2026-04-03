@@ -6,11 +6,10 @@
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Kasir</title>
     
-    <!-- CSS External (sama seperti yang Anda punya) -->
-    <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/header.css">
-    <link rel="stylesheet" href="../css/responsive.css">
+    <!-- CSS THEME DASHBOARD -->
+    <link rel="stylesheet" href="../css/dashboard-theme.css">
+    
+    <!-- CSS SPESIFIK KASIR -->
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,7 +34,7 @@
         </ul>
     </nav>
 
-    <!-- SIDEBAR - STRUKTUR SAMA PERSIS DASHBOARD -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo"><i class="fas fa-cash-register"></i></div>
@@ -43,7 +42,7 @@
         </div>
         
         <nav class="sidebar-nav">
-            <!-- UTAMA - Dropdown (EXPANDED karena Kasir aktif) -->
+            <!-- UTAMA - Dropdown (EXPANDED) -->
             <div class="nav-section utama">
                 <div class="nav-section-header active" onclick="toggleDropdown('utama')">
                     <div class="nav-section-title-group">
@@ -135,7 +134,7 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content" id="main-content">
-        <!-- HEADER - SAMA PERSIS DASHBOARD -->
+        <!-- HEADER -->
         <header class="main-header">
             <div class="header-left">
                 <button class="menu-toggle" onclick="toggleSidebar()">
@@ -158,7 +157,7 @@
             </div>
         </header>
 
-        <!-- CONTENT KASIR - INTEGRASI DENGAN JS MODULAR -->
+        <!-- CONTENT KASIR -->
         <div class="content-wrapper">
             <div class="kasir-container">
                 <!-- Left: Produk Section -->
@@ -425,22 +424,12 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SCRIPTS - STRUKTUR MODULAR SEPERTI PERMINTAAN -->
-    <!-- ========================================== -->
-    
-    <!-- 1. Firebase Config -->
+    <!-- SCRIPTS -->
     <script src="../js/firebase-config.js"></script>
-    
-    <!-- 2. Utils & Auth -->
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
-    
-    <!-- 3. Components (Shared) -->
     <script src="../js/components/darkmode.js"></script>
     <script src="../js/components/sidebar.js"></script>
-    
-    <!-- 4. Kasir Modules (Spesifik halaman ini) -->
     <script src="../js/modules/kasir/produk-grid.js"></script>
     <script src="../js/modules/kasir/produk-list.js"></script>
     <script src="../js/modules/kasir/keranjang.js"></script>
@@ -450,38 +439,29 @@
     <script src="../js/modules/kasir/edit-harga.js"></script>
     <script src="../js/modules/kasir/uang-pas.js"></script>
     <script src="../js/modules/kasir/pencarian-produk.js"></script>
-    
-    <!-- 5. Main Kasir Controller -->
     <script src="../js/modules/kasir/kasir-main.js"></script>
     
-    <!-- 6. Inline: Fungsi Global yang Dibutuhkan HTML -->
+    <!-- Inline Functions -->
     <script>
-        // Fungsi-fungsi yang dipanggil langsung dari HTML onclick
-        // (Agar tidak perlu ubah semua HTML, cukup wrapper saja)
-        
+        // Wrapper functions untuk onclick HTML
         function toggleDropdown(section) {
-            // Panggil dari sidebar.js jika ada, atau implementasi fallback
-            if (typeof window.Sidebar !== 'undefined' && window.Sidebar.toggleDropdown) {
+            if (window.Sidebar?.toggleDropdown) {
                 window.Sidebar.toggleDropdown(section);
             } else {
-                // Fallback implementation
                 const dropdown = document.getElementById(`dropdown-${section}`);
                 const arrow = document.getElementById(`arrow-${section}`);
                 const header = dropdown?.previousElementSibling;
                 
-                if (dropdown && arrow) {
-                    dropdown.classList.toggle('open');
-                    arrow.classList.toggle('rotate');
-                    header?.classList.toggle('active');
-                    
-                    const isOpen = dropdown.classList.contains('open');
-                    localStorage.setItem(`dropdown-${section}`, isOpen);
-                }
+                dropdown?.classList.toggle('open');
+                arrow?.classList.toggle('rotate');
+                header?.classList.toggle('active');
+                
+                localStorage.setItem(`dropdown-${section}`, dropdown?.classList.contains('open'));
             }
         }
         
         function toggleSidebar() {
-            if (typeof window.Sidebar !== 'undefined' && window.Sidebar.toggle) {
+            if (window.Sidebar?.toggle) {
                 window.Sidebar.toggle();
             } else {
                 const sidebar = document.getElementById('sidebar');
@@ -495,20 +475,20 @@
         }
         
         function toggleDarkMode() {
-            if (typeof window.DarkMode !== 'undefined' && window.DarkMode.toggle) {
+            if (window.DarkMode?.toggle) {
                 window.DarkMode.toggle();
             } else {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                const current = document.documentElement.getAttribute('data-theme');
+                const newTheme = current === 'dark' ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('webpos-theme', newTheme);
             }
         }
         
         function logout() {
-            if (typeof window.Auth !== 'undefined' && window.Auth.logout) {
+            if (window.Auth?.logout) {
                 window.Auth.logout();
-            } else if (typeof firebase !== 'undefined' && firebase.auth) {
+            } else {
                 firebase.auth().signOut().then(() => {
                     window.location.replace('../login.html');
                 });
@@ -519,51 +499,39 @@
             const btn = document.querySelector('.btn-icon i.fa-sync-alt');
             if (btn) btn.classList.add('fa-spin');
             
-            // Panggil refresh dari kasir-main.js
-            if (typeof window.Kasir !== 'undefined' && window.Kasir.refresh) {
+            if (window.Kasir?.refresh) {
                 window.Kasir.refresh();
             }
             
-            setTimeout(() => {
-                if (btn) btn.classList.remove('fa-spin');
-            }, 500);
+            setTimeout(() => btn?.classList.remove('fa-spin'), 500);
         }
         
         function closeModal(modalId) {
             document.getElementById(modalId)?.classList.remove('active');
         }
         
-        // Initialize saat DOM ready
+        // Init
         document.addEventListener('DOMContentLoaded', function() {
-            // Restore dropdown states
+            // Restore dropdowns
             ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
                 const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
-                if (isOpen || section === 'utama') { // utama selalu open di kasir
+                if (isOpen || section === 'utama') {
                     const dropdown = document.getElementById(`dropdown-${section}`);
                     const arrow = document.getElementById(`arrow-${section}`);
                     const header = dropdown?.previousElementSibling;
                     
-                    if (dropdown && section === 'utama') {
-                        // Kasir: section utama selalu expanded
-                        dropdown.classList.add('open');
-                        arrow?.classList.add('rotate');
-                        header?.classList.add('active');
-                    } else if (dropdown && isOpen) {
-                        dropdown.classList.add('open');
-                        arrow?.classList.add('rotate');
-                        header?.classList.add('active');
-                    }
+                    dropdown?.classList.add('open');
+                    arrow?.classList.add('rotate');
+                    header?.classList.add('active');
                 }
             });
             
-            // Update date
+            // Date
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateEl = document.getElementById('current-date');
-            if (dateEl) {
-                dateEl.textContent = new Date().toLocaleDateString('id-ID', options);
-            }
+            document.getElementById('current-date').textContent = 
+                new Date().toLocaleDateString('id-ID', options);
             
-            // Overlay click
+            // Overlay
             document.getElementById('overlay')?.addEventListener('click', () => {
                 document.getElementById('sidebar')?.classList.remove('open');
                 document.getElementById('overlay')?.classList.remove('active');
