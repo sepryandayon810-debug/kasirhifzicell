@@ -65,26 +65,32 @@ const Keranjang = {
      * @param {Object} customData - Data tambahan untuk transaksi manual/topup/tarik
      */
     tambahItem: function(produk, customData = null) {
-        // Untuk transaksi dengan custom data (manual, topup, tarik)
-        if (customData) {
-            this.items.push({
-                id: produk.id || 'manual_' + Date.now(),
-                nama: customData.nama || produk.nama,
-                harga_jual: customData.harga_jual || customData.harga || produk.harga_jual,
-                harga_modal: customData.harga_modal || produk.harga_modal || 0,
-                qty: customData.qty || 1,
-                subtotal: (customData.harga_jual || customData.harga || produk.harga_jual) * (customData.qty || 1),
-                gambar: produk.gambar,
-                jenis: customData.jenis || 'penjualan',
-                keterangan: customData.keterangan || '',
-                stok_tersedia: produk.stok || 9999
-            });
-            
-            this.render();
-            this.saveToStorage();
-            this.showToast('Item ditambahkan ke keranjang', 'success');
-            return;
-        }
+    // Untuk transaksi dengan custom data (manual, topup, tarik)
+    if (customData) {
+        // Hitung subtotal jika belum ada
+        const subtotal = customData.subtotal || (customData.harga_jual * customData.qty);
+        
+        this.items.push({
+            id: produk.id || 'manual_' + Date.now(),
+            nama: customData.nama || produk.nama,
+            harga_jual: customData.harga_jual || customData.harga || produk.harga_jual,
+            harga_modal: customData.harga_modal || produk.harga_modal || 0,
+            qty: customData.qty || 1,
+            subtotal: subtotal,
+            gambar: produk.gambar,
+            jenis: customData.jenis || 'penjualan',
+            keterangan: customData.keterangan || '',
+            stok_tersedia: produk.stok || 9999,
+            // Data tambahan untuk topup/tarik
+            nominal: customData.nominal || 0,
+            fee: customData.fee || 0,
+            provider: customData.provider || ''
+        });
+        
+        this.render();
+        this.saveToStorage();
+        this.showToast('Item ditambahkan ke keranjang', 'success');
+        return;
         
         // Cek stok untuk penjualan normal
         if (produk.stok <= 0) {
