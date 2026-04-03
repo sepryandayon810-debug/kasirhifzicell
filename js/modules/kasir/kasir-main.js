@@ -40,33 +40,45 @@ function initKasir() {
 function setupEventListeners() {
     // Toggle view
     document.querySelectorAll('.view-btn-modern').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
             const view = this.getAttribute('data-view');
             toggleView(view);
         });
     });
     
-    // Jenis transaksi
+    // Jenis transaksi - FIX: prevent default untuk mobile
     document.querySelectorAll('.type-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const jenis = this.getAttribute('data-jenis');
             switchJenisTransaksi(jenis);
         });
     });
     
-    // Tombol manual - FIX
+    // Tombol manual - FIX: tambah touch event untuk mobile
     const btnManual = document.getElementById('btn-transaksi-manual');
     if (btnManual) {
+        // Click untuk desktop
         btnManual.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openModal('modal-transaksi-manual');
+        });
+        
+        // Touch untuk mobile
+        btnManual.addEventListener('touchend', function(e) {
             e.preventDefault();
             e.stopPropagation();
             openModal('modal-transaksi-manual');
         });
     }
     
-    // Quick amount buttons - FIX
+    // Quick amount buttons
     document.querySelectorAll('.quick-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
             const amount = this.getAttribute('data-amount');
             const input = document.getElementById('jumlah-bayar');
             if (amount) {
@@ -95,10 +107,13 @@ function setupEventListeners() {
     // Tombol bayar
     const btnBayar = document.getElementById('btn-bayar');
     if (btnBayar) {
-        btnBayar.addEventListener('click', prosesPembayaran);
+        btnBayar.addEventListener('click', function(e) {
+            e.preventDefault();
+            prosesPembayaran();
+        });
     }
     
-    // Search input - FIX
+    // Search input
     const searchInput = document.getElementById('search-produk');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
@@ -107,8 +122,28 @@ function setupEventListeners() {
             filterProduk(kategori);
         });
     }
+    
+    // Mobile cart button
+    const btnCartMobile = document.getElementById('btn-cart-mobile');
+    if (btnCartMobile) {
+        btnCartMobile.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleKeranjangMobile();
+        });
+    }
+    
+    // Close keranjang mobile saat klik outside
+    document.addEventListener('click', function(e) {
+        const keranjang = document.getElementById('keranjang-section');
+        const btnCart = document.getElementById('btn-cart-mobile');
+        
+        if (keranjang && keranjang.classList.contains('open')) {
+            if (!keranjang.contains(e.target) && !btnCart.contains(e.target)) {
+                keranjang.classList.remove('open');
+            }
+        }
+    });
 }
-
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 'k') {
