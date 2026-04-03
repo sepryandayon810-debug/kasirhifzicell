@@ -95,6 +95,16 @@ function setupEventListeners() {
     if (btnBayar) {
         btnBayar.addEventListener('click', prosesPembayaran);
     }
+    
+    // ✅ TAMBAH: Search input listener
+    const searchInput = document.getElementById('search-produk');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const activePill = document.querySelector('.kategori-pill.active');
+            const kategori = activePill ? activePill.dataset.kategori : '';
+            filterProduk(kategori);
+        });
+    }
 }
 
 /**
@@ -225,7 +235,7 @@ function toggleView(view) {
     const activeBtn = document.querySelector(`[data-view="${view}"]`);
     if (activeBtn) activeBtn.classList.add('active');
     
-    // Filter produk berdasarkan search saat ini
+    // ✅ FIX: Filter berdasarkan search dan kategori yang AKTIF
     const searchTerm = document.getElementById('search-produk')?.value.toLowerCase() || '';
     let filtered = [...produkData];
     
@@ -237,7 +247,10 @@ function toggleView(view) {
         );
     }
     
-    const kategori = document.getElementById('filter-kategori')?.value || '';
+    // ✅ FIX: Cari kategori aktif dari pill (bukan select)
+    const activePill = document.querySelector('.kategori-pill.active');
+    const kategori = activePill ? activePill.dataset.kategori : '';
+    
     if (kategori) {
         filtered = filtered.filter(p => p.kategori === kategori);
     }
@@ -502,15 +515,6 @@ async function prosesPembayaran() {
 /**
  * Update data harian
  */
-/**
- * Update data harian
- */
-/**
- * Update data harian
- */
-/**
- * Update data harian
- */
 async function updateDailyData(uid, items, total) {
     if (typeof database === 'undefined') return;
     
@@ -608,6 +612,7 @@ async function updateDailyData(uid, items, total) {
         console.log('Summary update skipped:', e);
     }
 }
+
 /**
  * Catat hutang
  */
@@ -665,9 +670,8 @@ async function loadPelanggan() {
 }
 
 /**
- * Load kategori
+ * Load kategori - HORIZONTAL SCROLL
  */
-// INI YANG BARU - KATEGORI HORIZONTAL SCROLL
 async function loadKategori() {
     try {
         if (typeof database === 'undefined') return;
@@ -678,9 +682,21 @@ async function loadKategori() {
         
         // Simpan "Semua" button
         const semuaBtn = scrollContainer.querySelector('[data-kategori=""]');
-        scrollContainer.innerHTML = '';
-        scrollContainer.appendChild(semuaBtn);
+        if (!semuaBtn) return;
         
+        // ✅ FIX: Clone untuk bersihkan event listener lama
+        const newSemuaBtn = semuaBtn.cloneNode(true);
+        scrollContainer.innerHTML = '';
+        scrollContainer.appendChild(newSemuaBtn);
+        
+        // Re-attach listener ke Semua
+        newSemuaBtn.addEventListener('click', function() {
+            scrollContainer.querySelectorAll('.kategori-pill').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            filterProduk('');
+        });
+        
+        // Tambah kategori dari Firebase
         snapshot.forEach(child => {
             const kategori = child.val();
             const btn = document.createElement('button');
@@ -690,15 +706,18 @@ async function loadKategori() {
             scrollContainer.appendChild(btn);
         });
         
-        // Event listener untuk filter
-        scrollContainer.querySelectorAll('.kategori-pill').forEach(pill => {
-            pill.addEventListener('click', function() {
-                scrollContainer.querySelectorAll('.kategori-pill').forEach(p => p.classList.remove('active'));
-                this.classList.add('active');
-                
-                const kategori = this.dataset.kategori;
-                filterProduk(kategori);
-            });
+        // ✅ FIX: Event delegation - lebih bersih, tidak dobel
+        scrollContainer.addEventListener('click', function(e) {
+            const pill = e.target.closest('.kategori-pill');
+            if (!pill) return;
+            
+            // Update active state
+            scrollContainer.querySelectorAll('.kategori-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            
+            // Filter
+            const kategori = pill.dataset.kategori;
+            filterProduk(kategori);
         });
         
     } catch (error) {
@@ -706,10 +725,13 @@ async function loadKategori() {
     }
 }
 
-// Filter produk berdasarkan kategori
+/**
+ * Filter produk berdasarkan kategori
+ */
 function filterProduk(kategori) {
     const searchTerm = document.getElementById('search-produk')?.value.toLowerCase() || '';
     
+    // ✅ FIX: Gunakan produkData lokal
     let filtered = [...produkData];
     
     if (kategori) {
@@ -723,8 +745,10 @@ function filterProduk(kategori) {
         );
     }
     
+    // ✅ FIX: Panggil renderProduk() yang sudah ada
     renderProduk(filtered);
 }
+
 /**
  * Cek status kasir
  */
@@ -835,13 +859,18 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Export fungsi ke global scope
+// ============================================
+// EXPORT KE GLOBAL SCOPE
+// ============================================
+
 window.currentView = currentView;
 window.currentJenis = currentJenis;
 window.produkData = produkData;
 window.toggleView = toggleView;
 window.switchJenisTransaksi = switchJenisTransaksi;
 window.loadProduk = loadProduk;
+window.loadKategori = loadKategori;        // ✅ TAMBAH
+window.filterProduk = filterProduk;        // ✅ TAMBAH
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.closeAllModals = closeAllModals;
