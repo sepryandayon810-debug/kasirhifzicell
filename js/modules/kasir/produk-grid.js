@@ -1,99 +1,149 @@
-// Produk Grid View Module - Updated
+/**
+ * Produk Grid View Module
+ * File: js/modules/kasir/produk-grid.js
+ * 
+ * Menangani tampilan produk dalam bentuk grid/card
+ */
+
 const ProdukGrid = {
+    /**
+     * Render produk dalam format grid
+     * @param {Array} produkList - Array data produk
+     * @param {HTMLElement} container - Container untuk render
+     */
     render: function(produkList, container) {
+        if (!container) {
+            console.error('[ProdukGrid] Container tidak ditemukan');
+            return;
+        }
+        
         container.innerHTML = '';
         container.classList.remove('list-view');
         container.classList.add('grid-view');
         
-        if (produkList.length === 0) {
+        if (!produkList || produkList.length === 0) {
             this.renderEmpty(container);
             return;
         }
         
-        // Wrapper untuk grid
-        const gridWrapper = document.createElement('div');
-        gridWrapper.className = 'produk-grid-wrapper';
-        
         produkList.forEach(produk => {
             const card = this.createCard(produk);
-            gridWrapper.appendChild(card);
+            container.appendChild(card);
         });
-        
-        container.appendChild(gridWrapper);
     },
     
+    /**
+     * Buat elemen card produk
+     * @param {Object} produk - Data produk
+     * @returns {HTMLElement} Card element
+     */
     createCard: function(produk) {
         const card = document.createElement('div');
-        card.className = 'produk-card-kasir';
-        card.dataset.id = produk.id; // Penting untuk update realtime
+        card.className = 'produk-card';
+        card.dataset.id = produk.id || produk.key;
         
-        // Styling berdasarkan stok
+        // Stok styling sesuai CSS
         if (produk.stok <= 0) {
             card.classList.add('stok-habis');
         } else if (produk.stok <= 5) {
             card.classList.add('stok-menipis');
         }
         
-        // Gambar produk
+        // Gambar produk - sesuai CSS .produk-img
         const imageHtml = produk.gambar 
             ? `<img src="${produk.gambar}" alt="${produk.nama}" loading="lazy">`
             : `<i class="fas fa-box"></i>`;
         
-        // Status stok
-        const stokClass = produk.stok <= 0 ? 'habis' : (produk.stok <= 5 ? 'menipis' : 'tersedia');
-        const stokText = produk.stok <= 0 ? 'Habis' : `${produk.stok}`;
+        // Stok text
+        const stokText = produk.stok <= 0 ? 'Stok Habis' : `Stok: ${produk.stok}`;
         
         card.innerHTML = `
-            <div class="card-image-kasir">${imageHtml}</div>
-            <div class="card-body-kasir">
-                <h4 class="card-nama-kasir">${produk.nama}</h4>
-                <p class="card-harga-kasir">${formatRupiah(produk.harga_jual)}</p>
-                <div class="card-meta-kasir">
-                    <span class="badge-stok-kasir ${stokClass}">${stokText}</span>
-                    ${produk.kategori ? `<span class="badge-kategori-kasir">${produk.kategori}</span>` : ''}
-                </div>
-            </div>
+            <div class="produk-img">${imageHtml}</div>
+            <div class="produk-nama" title="${produk.nama}">${produk.nama}</div>
+            <div class="produk-harga">${formatRupiah(produk.harga_jual || produk.hargaJual || 0)}</div>
+            <div class="produk-stok">${stokText}</div>
         `;
         
-        // Event click
+        // Event click untuk tambah ke keranjang
         card.addEventListener('click', () => {
             if (produk.stok > 0) {
-                window.tambahKeKeranjang(produk);
+                // Panggil fungsi global dari kasir-main.js
+                if (typeof window.Keranjang !== 'undefined' && window.Keranjang.tambahItem) {
+                    window.Keranjang.tambahItem(produk);
+                } else if (typeof window.tambahKeKeranjang === 'function') {
+                    window.tambahKeKeranjang(produk);
+                } else {
+                    console.error('[ProdukGrid] Keranjang tidak ditemukan');
+                }
             } else {
-                showToast('Stok produk habis', 'warning');
+                this.showToast('Stok produk habis', 'warning');
             }
         });
         
         return card;
     },
     
+    /**
+     * Tampilan kosong
+     * @param {HTMLElement} container 
+     */
     renderEmpty: function(container) {
         container.innerHTML = `
-            <div class="empty-state-kasir">
-                <i class="fas fa-box-open"></i>
+            <div class="loading-produk">
+                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
                 <p>Tidak ada produk</p>
             </div>
         `;
     },
     
+    /**
+     * Update card secara realtime (setelah transaksi)
+     * @param {string} produkId - ID produk
+     * @param {number} newStok - Stok baru
+     */
     updateCard: function(produkId, newStok) {
-        const card = document.querySelector(`.produk-card-kasir[data-id="${produkId}"]`);
+        const card = document.querySelector(`.produk-card[data-id="${produkId}"]`);
         if (!card) return;
         
-        const stokEl = card.querySelector('.badge-stok-kasir');
+        const stokEl = card.querySelector('.produk-stok');
         if (stokEl) {
-            stokEl.textContent = newStok <= 0 ? 'Habis' : `${newStok}`;
-            stokEl.className = 'badge-stok-kasir ' + (newStok <= 0 ? 'habis' : (newStok <= 5 ? 'menipis' : 'tersedia'));
+            stokEl.textContent = newStok <= 0 ? 'Stok Habis' : `Stok: ${newStok}`;
         }
         
-        // Update class card
+        // Update class stok
         card.classList.remove('stok-habis', 'stok-menipis');
         if (newStok <= 0) {
             card.classList.add('stok-habis');
         } else if (newStok <= 5) {
             card.classList.add('stok-menipis');
         }
+    },
+    
+    /**
+     * Helper: Format rupiah
+     * @param {number} angka 
+     * @returns {string}
+     */
+    formatRupiah: function(angka) {
+        if (typeof formatRupiah === 'function') {
+            return formatRupiah(angka);
+        }
+        return 'Rp ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    },
+    
+    /**
+     * Helper: Show toast
+     * @param {string} message 
+     * @param {string} type 
+     */
+    showToast: function(message, type = 'info') {
+        if (typeof showToast === 'function') {
+            showToast(message, type);
+        } else {
+            console.log(`[${type}] ${message}`);
+        }
     }
 };
 
+// Export ke window
 window.ProdukGrid = ProdukGrid;
