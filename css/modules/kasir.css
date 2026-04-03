@@ -649,6 +649,16 @@
     color: white;
 }
 
+.cart-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-remove-item[title="Edit"]:hover {
+    background: var(--accent-indigo);
+    color: white;
+}
+
 /* ===== SUMMARY ===== */
 .summary-modern {
     background: var(--bg-hover);
