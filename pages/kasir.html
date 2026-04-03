@@ -21,7 +21,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
-    <div class="overlay" id="overlay"></div>
+    <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
     
     <!-- MOBILE NAV -->
     <nav class="mobile-nav">
@@ -157,9 +157,7 @@
             </div>
         </header>
 
-        <!-- ============================================ -->
-        <!-- KASIR CONTAINER - TAMPILAN MODERN -->
-        <!-- ============================================ -->
+        <!-- KASIR CONTAINER -->
         <div class="kasir-container">
             
             <!-- PRODUK SECTION -->
@@ -167,7 +165,6 @@
                 
                 <!-- Sticky Search Header -->
                 <div class="search-sticky-header">
-                    <!-- Modern Search Box -->
                     <div class="search-box-modern">
                         <i class="fas fa-search"></i>
                         <input type="text" id="search-produk" placeholder="Cari produk...">
@@ -183,10 +180,8 @@
                             <button class="kategori-chip active" data-kategori="">
                                 <span>Semua</span>
                             </button>
-                            <!-- Kategori lain di-load dari Firebase -->
                         </div>
                         
-                        <!-- Floating Manual Button -->
                         <button class="btn-floating-manual" id="btn-transaksi-manual">
                             <i class="fas fa-plus"></i>
                             <span>Manual</span>
@@ -217,7 +212,6 @@
             <!-- KERANJANG SECTION -->
             <div class="keranjang-section-modern" id="keranjang-section">
                 
-                <!-- Header -->
                 <div class="keranjang-header-modern">
                     <div class="keranjang-title">
                         <i class="fas fa-shopping-basket"></i>
@@ -226,7 +220,6 @@
                     <span class="badge-count" id="cart-count">0</span>
                 </div>
                 
-                <!-- Transaction Type -->
                 <div class="transaksi-type-modern">
                     <button class="type-btn active" data-jenis="penjualan">
                         <i class="fas fa-shopping-bag"></i>
@@ -242,7 +235,6 @@
                     </button>
                 </div>
                 
-                <!-- Cart Items -->
                 <div class="keranjang-items-modern" id="keranjang-items">
                     <div class="empty-cart-modern">
                         <i class="fas fa-shopping-basket"></i>
@@ -251,15 +243,10 @@
                     </div>
                 </div>
                 
-                <!-- Summary -->
                 <div class="summary-modern">
                     <div class="summary-row-modern">
                         <span class="summary-label">Subtotal</span>
                         <span class="summary-value" id="subtotal">Rp 0</span>
-                    </div>
-                    <div class="summary-row-modern" id="row-diskon" style="display: none;">
-                        <span class="summary-label">Diskon</span>
-                        <span class="summary-value" id="diskon">Rp 0</span>
                     </div>
                     <div class="summary-row-modern total">
                         <span class="summary-label">TOTAL</span>
@@ -267,7 +254,6 @@
                     </div>
                 </div>
                 
-                <!-- Payment -->
                 <div class="payment-section-modern">
                     <div class="payment-method">
                         <label>Metode Pembayaran</label>
@@ -300,9 +286,6 @@
                         <select class="select-modern" id="select-pelanggan">
                             <option value="">Pilih Pelanggan</option>
                         </select>
-                        <button class="btn btn-sm btn-secondary" id="btn-tambah-pelanggan" style="margin-top: 8px;">
-                            <i class="fas fa-plus"></i> Pelanggan Baru
-                        </button>
                     </div>
                     
                     <button class="btn-pay-modern" id="btn-bayar">
@@ -320,10 +303,8 @@
         </footer>
     </main>
 
-    <!-- ========================================== -->
     <!-- MOBILE CART BUTTON -->
-    <!-- ========================================== -->
-    <button class="btn-cart-mobile" id="btn-cart-mobile" onclick="toggleKeranjangMobile()">
+    <button class="btn-cart-mobile" id="btn-cart-mobile">
         <i class="fas fa-shopping-basket"></i>
         <span class="badge-float" id="mobile-count">0</span>
     </button>
@@ -332,7 +313,7 @@
     <div class="modal" id="modal-transaksi-manual">
         <div class="modal-content modal-lg">
             <div class="modal-header">
-                <h3>Transaksi Manual</h3>
+                <h3><i class="fas fa-plus-circle"></i> Transaksi Manual</h3>
                 <button class="btn-close" onclick="closeModal('modal-transaksi-manual')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -367,7 +348,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-transaksi-manual')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-manual">Tambah ke Keranjang</button>
+                <button class="btn btn-primary" id="btn-simpan-manual">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
             </div>
         </div>
     </div>
@@ -375,24 +358,12 @@
     <div class="modal" id="modal-topup">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Top Up</h3>
+                <h3><i class="fas fa-mobile-alt"></i> Top Up</h3>
                 <button class="btn-close" onclick="closeModal('modal-topup')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Nominal Top Up</label>
-                    <input type="number" id="topup-nominal" class="form-control" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>Admin Fee</label>
-                    <input type="number" id="topup-fee-input" class="form-control" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Total</label>
-                    <div class="total-display" id="topup-total">Rp 0</div>
-                </div>
                 <div class="form-group">
                     <label>Provider</label>
                     <select id="topup-provider" class="form-control">
@@ -403,10 +374,24 @@
                         <option value="lainnya">Lainnya</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Nominal</label>
+                    <input type="number" id="topup-nominal" class="form-control" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Admin Fee</label>
+                    <input type="number" id="topup-fee-input" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Total Bayar</label>
+                    <div class="total-display" id="topup-total">Rp 0</div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-topup')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-topup">Tambah ke Keranjang</button>
+                <button class="btn btn-primary" id="btn-simpan-topup">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
             </div>
         </div>
     </div>
@@ -414,7 +399,7 @@
     <div class="modal" id="modal-tarik">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Tarik Tunai</h3>
+                <h3><i class="fas fa-hand-holding-usd"></i> Tarik Tunai</h3>
                 <button class="btn-close" onclick="closeModal('modal-tarik')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -435,7 +420,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-tarik')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-tarik">Tambah ke Keranjang</button>
+                <button class="btn btn-primary" id="btn-simpan-tarik">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
             </div>
         </div>
     </div>
@@ -443,7 +430,7 @@
     <div class="modal" id="modal-edit-harga">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Edit Harga</h3>
+                <h3><i class="fas fa-edit"></i> Edit Item</h3>
                 <button class="btn-close" onclick="closeModal('modal-edit-harga')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -451,7 +438,7 @@
             <div class="modal-body">
                 <input type="hidden" id="edit-index">
                 <div class="form-group">
-                    <label>Harga Jual Baru</label>
+                    <label>Harga Jual</label>
                     <input type="number" id="edit-harga-baru" class="form-control">
                 </div>
                 <div class="form-group">
@@ -461,7 +448,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-edit-harga')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-edit">Simpan</button>
+                <button class="btn btn-primary" id="btn-simpan-edit">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
             </div>
         </div>
     </div>
@@ -483,90 +472,86 @@
     <script src="../js/modules/kasir/pencarian-produk.js"></script>
     <script src="../js/modules/kasir/kasir-main.js"></script>
     
-    <!-- Inline Functions -->
     <script>
         function toggleDropdown(section) {
-            if (window.Sidebar?.toggleDropdown) {
-                window.Sidebar.toggleDropdown(section);
-            } else {
-                const dropdown = document.getElementById(`dropdown-${section}`);
-                const arrow = document.getElementById(`arrow-${section}`);
-                const header = dropdown?.previousElementSibling;
-                
-                dropdown?.classList.toggle('open');
-                arrow?.classList.toggle('rotate');
-                header?.classList.toggle('active');
-                
-                localStorage.setItem(`dropdown-${section}`, dropdown?.classList.contains('open'));
-            }
+            const dropdown = document.getElementById(`dropdown-${section}`);
+            const arrow = document.getElementById(`arrow-${section}`);
+            const header = dropdown?.previousElementSibling;
+            
+            dropdown?.classList.toggle('open');
+            arrow?.classList.toggle('rotate');
+            header?.classList.toggle('active');
+            
+            localStorage.setItem(`dropdown-${section}`, dropdown?.classList.contains('open'));
         }
         
         function toggleSidebar() {
-            if (window.Sidebar?.toggle) {
-                window.Sidebar.toggle();
-            } else {
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('overlay');
-                
-                if (window.innerWidth <= 768) {
-                    sidebar?.classList.toggle('open');
-                    overlay?.classList.toggle('active');
-                }
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar?.classList.toggle('open');
+                overlay?.classList.toggle('active');
             }
         }
         
         function toggleDarkMode() {
-            if (window.DarkMode?.toggle) {
-                window.DarkMode.toggle();
-            } else {
-                const current = document.documentElement.getAttribute('data-theme');
-                const newTheme = current === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('webpos-theme', newTheme);
-            }
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('webpos-theme', newTheme);
         }
         
         function logout() {
-            if (window.Auth?.logout) {
-                window.Auth.logout();
-            } else {
-                firebase.auth().signOut().then(() => {
-                    window.location.replace('../login.html');
-                });
-            }
+            firebase.auth().signOut().then(() => {
+                window.location.replace('../login.html');
+            });
         }
         
         function refreshData() {
             const btn = document.querySelector('.btn-icon i.fa-sync-alt');
             if (btn) btn.classList.add('fa-spin');
             
-            if (window.Kasir?.refresh) {
-                window.Kasir.refresh();
+            if (window.loadProduk) {
+                window.loadProduk();
             }
             
             setTimeout(() => btn?.classList.remove('fa-spin'), 500);
         }
         
         function closeModal(modalId) {
-            document.getElementById(modalId)?.classList.remove('active');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+            document.getElementById('overlay')?.classList.remove('active');
         }
         
-        // ==========================================
-        // FUNGSI KERANJANG MOBILE
-        // ==========================================
-        function toggleKeranjangMobile() {
-            document.getElementById('keranjang-section').classList.toggle('open');
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            });
+            document.getElementById('sidebar')?.classList.remove('open');
+            document.getElementById('keranjang-section')?.classList.remove('open');
+            document.getElementById('overlay')?.classList.remove('active');
         }
-
-        function updateMobileCount(count) {
-            const badge = document.getElementById('mobile-count');
-            if (badge) {
-                badge.textContent = count;
-                badge.style.display = count > 0 ? 'flex' : 'none';
+        
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+                document.getElementById('overlay')?.classList.add('active');
             }
         }
         
-        // Init
+        function toggleKeranjangMobile() {
+            const keranjang = document.getElementById('keranjang-section');
+            keranjang?.classList.toggle('open');
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Restore dropdowns
             ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
@@ -586,12 +571,6 @@
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('current-date').textContent = 
                 new Date().toLocaleDateString('id-ID', options);
-            
-            // Overlay
-            document.getElementById('overlay')?.addEventListener('click', () => {
-                document.getElementById('sidebar')?.classList.remove('open');
-                document.getElementById('overlay')?.classList.remove('active');
-            });
         });
     </script>
 </body>
