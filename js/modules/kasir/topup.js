@@ -55,25 +55,28 @@ function simpanTopup() {
     const provider = providerSelect?.value || 'lainnya';
     const providerName = providerSelect?.options[providerSelect.selectedIndex]?.text || 'Lainnya';
     
+    const totalTopup = topupData.nominal + topupData.fee;
+    
     // Buat objek untuk Keranjang module
     const produkTopup = {
         id: 'topup_' + Date.now(),
         nama: `Top Up ${providerName}`,
-        harga_jual: topupData.total,
-        harga_modal: topupData.nominal,
+        harga_jual: totalTopup, // Total yang dibayar customer
+        harga_modal: topupData.nominal, // Modal yang ditransfer
         stok: 9999
     };
     
     const customData = {
-        nama: `Top Up ${providerName} - ${typeof formatRupiah === 'function' ? formatRupiah(topupData.nominal) : 'Rp ' + topupData.nominal}`,
-        harga_jual: topupData.total,
+        nama: `Top Up ${providerName} - ${formatRupiah(topupData.nominal)}`,
+        harga_jual: totalTopup,
         harga_modal: topupData.nominal,
         qty: 1,
         keterangan: `Provider: ${providerName}, Nominal: ${topupData.nominal}, Fee: ${topupData.fee}`,
         jenis: 'topup',
         provider: provider,
         nominal: topupData.nominal,
-        fee: topupData.fee
+        fee: topupData.fee,
+        subtotal: totalTopup // Penting: total yang masuk ke kas
     };
     
     // Gunakan Keranjang module
