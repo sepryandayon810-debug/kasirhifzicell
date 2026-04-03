@@ -61,8 +61,8 @@ function simpanTopup() {
     const produkTopup = {
         id: 'topup_' + Date.now(),
         nama: `Top Up ${providerName}`,
-        harga_jual: totalTopup, // Total yang dibayar customer
-        harga_modal: topupData.nominal, // Modal yang ditransfer
+        harga_jual: totalTopup,
+        harga_modal: topupData.nominal,
         stok: 9999
     };
     
@@ -76,7 +76,7 @@ function simpanTopup() {
         provider: provider,
         nominal: topupData.nominal,
         fee: topupData.fee,
-        subtotal: totalTopup // Penting: total yang masuk ke kas
+        subtotal: totalTopup // ✅ Pastikan subtotal ada
     };
     
     // Gunakan Keranjang module
