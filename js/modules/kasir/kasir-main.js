@@ -502,6 +502,9 @@ async function prosesPembayaran() {
 /**
  * Update data harian
  */
+/**
+ * Update data harian
+ */
 async function updateDailyData(uid, items, total) {
     if (typeof database === 'undefined') return;
     
@@ -512,15 +515,36 @@ async function updateDailyData(uid, items, total) {
     const current = snapshot.val() || {};
     
     let penjualan = 0, topup = 0, tarik = 0, laba = 0;
+    let uangMasuk = 0, uangKeluar = 0;
     
     items.forEach(item => {
         if (item.jenis === 'penjualan') {
             penjualan += item.subtotal;
             laba += ((item.harga_jual - (item.harga_modal || 0)) * item.qty);
+            uangMasuk += item.subtotal; // Penjualan = uang masuk
         } else if (item.jenis === 'topup') {
-            topup += item.subtotal;
+            // Top Up: Total yang dibayar customer (nominal + fee) = uang masuk
+            const totalTopup = item.subtotal || (item.harga_jual * item.qty);
+            topup += totalTopup;
+            uangMasuk += totalTopup;
+            // Laba dari fee top up
+            laba += (item.fee || 0);
         } else if (item.jenis === 'tarik') {
-            tarik += item.nominal || item.subtotal;
+            // Tarik Tunai: 
+            // - Modal keluar = nominal (uang keluar)
+            // - Fee = uang masuk (laba)
+            const nominal = item.nominal || item.harga_modal || 0;
+            const fee = item.fee || 0;
+            const totalTarik = item.subtotal || (nominal - fee);
+            
+            tarik += totalTarik;
+            uangKeluar += nominal; // Modal keluar
+            uangMasuk += fee; // Fee masuk ke kas
+            laba += fee; // Laba dari fee
+        } else if (item.jenis === 'manual') {
+            penjualan += item.subtotal;
+            laba += ((item.harga_jual - (item.harga_modal || 0)) * item.qty);
+            uangMasuk += item.subtotal;
         }
     });
     
@@ -528,8 +552,26 @@ async function updateDailyData(uid, items, total) {
         total_penjualan: (current.total_penjualan || 0) + penjualan,
         total_topup: (current.total_topup || 0) + topup,
         total_tarik: (current.total_tarik || 0) + tarik,
+        total_uang_masuk: (current.total_uang_masuk || 0) + uangMasuk,
+        total_uang_keluar: (current.total_uang_keluar || 0) + uangKeluar,
         laba: (current.laba || 0) + laba,
         total_transaksi: (current.total_transaksi || 0) + 1,
+        last_update: firebase.database.ServerValue?.TIMESTAMP || Date.now()
+    });
+    
+    // Update summary untuk owner
+    const summaryRef = database.ref(`daily_summary/${today}`);
+    const sumSnapshot = await summaryRef.once('value');
+    const sumData = sumSnapshot.val() || {};
+    
+    await summaryRef.update({
+        total_penjualan: (sumData.total_penjualan || 0) + penjualan,
+        total_topup: (sumData.total_topup || 0) + topup,
+        total_tarik: (sumData.total_tarik || 0) + tarik,
+        total_uang_masuk: (sumData.total_uang_masuk || 0) + uangMasuk,
+        total_uang_keluar: (sumData.total_uang_keluar || 0) + uangKeluar,
+        laba: (sumData.laba || 0) + laba,
+        total_transaksi: (sumData.total_transaksi || 0) + 1,
         last_update: firebase.database.ServerValue?.TIMESTAMP || Date.now()
     });
 }
