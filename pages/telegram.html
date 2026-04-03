@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#6366f1">
+    <title>WebPOS - Telegram</title>
+    
+    <!-- CSS THEME DASHBOARD -->
+    <link rel="stylesheet" href="../css/dashboard-theme.css">
+    
+    <!-- CSS SPESIFIK TELEGRAM -->
+    <link rel="stylesheet" href="../css/modules/telegram.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
+    
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="./kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
+            <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
+            <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Menu</a></li>
+        </ul>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fas fa-cash-register"></i></div>
+            <h3>WebPOS</h3>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <!-- UTAMA - Dropdown -->
+            <div class="nav-section utama">
+                <div class="nav-section-header" onclick="toggleDropdown('utama')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-th-large"></i></div>
+                        <span class="nav-section-title">Utama</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-utama"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-utama">
+                    <ul>
+                        <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li><a href="./kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
+                        <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
+                        <li><a href="./pembelian.html"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- TRANSAKSI - Dropdown -->
+            <div class="nav-section transaksi">
+                <div class="nav-section-header" onclick="toggleDropdown('transaksi')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <span class="nav-section-title">Transaksi</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-transaksi"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-transaksi">
+                    <ul>
+                        <li><a href="./riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat Transaksi</a></li>
+                        <li><a href="./modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal Harian</a></li>
+                        <li><a href="./kas-management.html"><i class="fas fa-wallet"></i> Kas Management</a></li>
+                        <li><a href="./hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang Piutang</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- LAINNYA - Dropdown (EXPANDED - ACTIVE) -->
+            <div class="nav-section lainnya">
+                <div class="nav-section-header active" onclick="toggleDropdown('lainnya')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-ellipsis-h"></i></div>
+                        <span class="nav-section-title">Lainnya</span>
+                    </div>
+                    <div class="dropdown-arrow rotate" id="arrow-lainnya"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown open" id="dropdown-lainnya">
+                    <ul>
+                        <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+                        <li><a href="./data-pelanggan.html"><i class="fas fa-users"></i> Data Pelanggan</a></li>
+                        <li><a href="./telegram.html" class="active"><i class="fas fa-paper-plane"></i> Telegram</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- PENGATURAN - Dropdown -->
+            <div class="nav-section pengaturan">
+                <div class="nav-section-header" onclick="toggleDropdown('pengaturan')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-cog"></i></div>
+                        <span class="nav-section-title">Pengaturan</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-pengaturan"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-pengaturan">
+                    <ul>
+                        <li><a href="./setting.html"><i class="fas fa-sliders-h"></i> Setting</a></li>
+                        <li><a href="./printer.html"><i class="fas fa-print"></i> Printer</a></li>
+                        <li><a href="./user.html"><i class="fas fa-user-cog"></i> User</a></li>
+                        <li><a href="./reset.html"><i class="fas fa-redo"></i> Reset Data</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">Loading...</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+                <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="main-content">
+        <!-- HEADER -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1><i class="fab fa-telegram"></i> Telegram</h1>
+                    <p>Kirim notifikasi & laporan via Telegram Bot</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn-darkmode" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="btn-icon" onclick="refreshData()" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- TELEGRAM CONTAINER -->
+        <div class="telegram-container">
+            
+            <!-- SETUP SECTION -->
+            <div class="telegram-section setup-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="section-title-group">
+                        <h2>Konfigurasi Bot</h2>
+                        <p>Atur bot Telegram untuk mengirim notifikasi</p>
+                    </div>
+                </div>
+                
+                <div class="setup-card">
+                    <div class="form-group">
+                        <label>Bot Token</label>
+                        <div class="input-group">
+                            <input type="password" id="bot-token" class="form-control" placeholder="Masukkan bot token dari @BotFather">
+                            <button class="btn-toggle-password" onclick="togglePasswordVisibility('bot-token')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="form-help">Dapatkan token dari @BotFather di Telegram</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Chat ID / Group ID</label>
+                        <input type="text" id="chat-id" class="form-control" placeholder="Contoh: 123456789 atau -1001234567890">
+                        <small class="form-help">ID pengguna atau grup yang akan menerima notifikasi</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nama Toko (Opsional)</label>
+                        <input type="text" id="store-name" class="form-control" placeholder="Nama toko Anda">
+                    </div>
+                    
+                    <div class="setup-actions">
+                        <button class="btn btn-primary" onclick="saveTelegramConfig()">
+                            <i class="fas fa-save"></i> Simpan Konfigurasi
+                        </button>
+                        <button class="btn btn-secondary" onclick="testTelegramConnection()">
+                            <i class="fas fa-paper-plane"></i> Test Koneksi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK SEND SECTION -->
+            <div class="telegram-section quick-send-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="section-title-group">
+                        <h2>Kirim Pesan Cepat</h2>
+                        <p>Kirim pesan kustom ke Telegram</p>
+                    </div>
+                </div>
+                
+                <div class="quick-send-card">
+                    <div class="form-group">
+                        <label>Pesan</label>
+                        <textarea id="quick-message" class="form-control" rows="4" placeholder="Tulis pesan yang ingin dikirim..."></textarea>
+                    </div>
+                    
+                    <div class="quick-send-actions">
+                        <button class="btn btn-telegram" onclick="sendQuickMessage()">
+                            <i class="fab fa-telegram"></i> Kirim Pesan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEMPLATES SECTION -->
+            <div class="telegram-section templates-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="section-title-group">
+                        <h2>Template Pesan</h2>
+                        <p>Pilih template untuk mengirim laporan cepat</p>
+                    </div>
+                </div>
+                
+                <div class="templates-grid">
+                    <div class="template-card" onclick="sendTemplate('daily_report')">
+                        <div class="template-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Laporan Harian</h3>
+                            <p>Kirim ringkasan penjualan hari ini</p>
+                        </div>
+                        <div class="template-action">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" onclick="sendTemplate('low_stock')">
+                        <div class="template-icon" style="background: var(--accent-rose);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Stok Menipis</h3>
+                            <p>Daftar produk dengan stok rendah</p>
+                        </div>
+                        <div class="template-action">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" onclick="sendTemplate('best_selling')">
+                        <div class="template-icon" style="background: var(--accent-emerald);">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Produk Terlaris</h3>
+                            <p>Daftar produk paling laris minggu ini</p>
+                        </div>
+                        <div class="template-action">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" onclick="sendTemplate('financial_summary')">
+                        <div class="template-icon" style="background: var(--accent-amber);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Ringkasan Keuangan</h3>
+                            <p>Total pendapatan & pengeluaran</p>
+                        </div>
+                        <div class="template-action">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUTO NOTIFICATION SECTION -->
+            <div class="telegram-section auto-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="section-title-group">
+                        <h2>Notifikasi Otomatis</h2>
+                        <p>Aktifkan notifikasi otomatis untuk event tertentu</p>
+                    </div>
+                </div>
+                
+                <div class="auto-notifications-list">
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="notification-details">
+                                <h3>Transaksi Baru</h3>
+                                <p>Kirim notifikasi setiap ada penjualan</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notif-transaksi" onchange="toggleNotification('transaksi')">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-icon" style="background: var(--accent-rose);">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <div class="notification-details">
+                                <h3>Stok Habis</h3>
+                                <p>Kirim notifikasi saat produk stok habis</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notif-stok" onchange="toggleNotification('stok')">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-icon" style="background: var(--accent-amber);">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="notification-details">
+                                <h3>Modal Harian</h3>
+                                <p>Kirim notifikasi modal di awal hari</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notif-modal" onchange="toggleNotification('modal')">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-icon" style="background: var(--accent-purple);">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="notification-details">
+                                <h3>Laporan Harian Otomatis</h3>
+                                <p>Kirim laporan otomatis setiap jam 9 malam</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notif-laporan" onchange="toggleNotification('laporan')">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOGS SECTION -->
+            <div class="telegram-section logs-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="section-title-group">
+                        <h2>Riwayat Pengiriman</h2>
+                        <p>Log pesan yang telah dikirim</p>
+                    </div>
+                </div>
+                
+                <div class="logs-card">
+                    <div class="logs-header">
+                        <div class="logs-filter">
+                            <button class="filter-btn active" onclick="filterLogs('all')">Semua</button>
+                            <button class="filter-btn" onclick="filterLogs('success')">Berhasil</button>
+                            <button class="filter-btn" onclick="filterLogs('failed')">Gagal</button>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> Bersihkan
+                        </button>
+                    </div>
+                    
+                    <div class="logs-list" id="logs-list">
+                        <div class="empty-logs">
+                            <i class="fas fa-inbox"></i>
+                            <p>Belum ada riwayat pengiriman</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="page-footer">
+            <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
+        </footer>
+    </main>
+
+    <!-- MODAL: KONFIRMASI HAPUS LOG -->
+    <div class="modal" id="modal-clear-logs">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-circle"></i> Konfirmasi</h3>
+                <button class="btn-close" onclick="closeModal('modal-clear-logs')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus semua riwayat pengiriman?</p>
+                <p class="text-muted">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-clear-logs')">Batal</button>
+                <button class="btn btn-danger" onclick="confirmClearLogs()">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components/darkmode.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/modules/telegram/telegram.js"></script>
+    
+    <script>
+        function toggleDropdown(section) {
+            const dropdown = document.getElementById(`dropdown-${section}`);
+            const arrow = document.getElementById(`arrow-${section}`);
+            const header = dropdown?.previousElementSibling;
+            
+            dropdown?.classList.toggle('open');
+            arrow?.classList.toggle('rotate');
+            header?.classList.toggle('active');
+            
+            localStorage.setItem(`dropdown-${section}`, dropdown?.classList.contains('open'));
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar?.classList.toggle('open');
+                overlay?.classList.toggle('active');
+            }
+        }
+        
+        function toggleDarkMode() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('webpos-theme', newTheme);
+        }
+        
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.replace('../login.html');
+            });
+        }
+        
+        function refreshData() {
+            const btn = document.querySelector('.btn-icon i.fa-sync-alt');
+            if (btn) btn.classList.add('fa-spin');
+            
+            if (typeof loadTelegramLogs === 'function') {
+                loadTelegramLogs();
+            }
+            
+            setTimeout(() => btn?.classList.remove('fa-spin'), 500);
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+            document.getElementById('overlay')?.classList.remove('active');
+        }
+        
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            });
+            document.getElementById('sidebar')?.classList.remove('open');
+            document.getElementById('overlay')?.classList.remove('active');
+        }
+        
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+                document.getElementById('overlay')?.classList.add('active');
+            }
+        }
+        
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = input?.nextElementSibling;
+            const icon = btn?.querySelector('i');
+            
+            if (input?.type === 'password') {
+                input.type = 'text';
+                icon?.classList.remove('fa-eye');
+                icon?.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon?.classList.remove('fa-eye-slash');
+                icon?.classList.add('fa-eye');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restore dropdowns
+            ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
+                const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
+                if (isOpen || section === 'lainnya') {
+                    const dropdown = document.getElementById(`dropdown-${section}`);
+                    const arrow = document.getElementById(`arrow-${section}`);
+                    const header = dropdown?.previousElementSibling;
+                    
+                    dropdown?.classList.add('open');
+                    arrow?.classList.add('rotate');
+                    header?.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
