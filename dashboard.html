@@ -476,6 +476,11 @@
         .summary-card.penjualan::before { background: linear-gradient(90deg, var(--accent-indigo), var(--accent-purple)); }
         .summary-card.laba::before { background: linear-gradient(90deg, var(--accent-emerald), var(--accent-teal)); }
         .summary-card.transaksi::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+        .summary-card.summary-kas::before { background: linear-gradient(90deg, var(--accent-indigo), var(--accent-purple)); }
+        .summary-card.summary-kas .summary-icon-large { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)); color: var(--accent-indigo); }
+        .summary-card.summary-kas .summary-value-large { color: var(--accent-indigo); }
+        
+        .summary-card:hover {
         
         .summary-card:hover {
             transform: translateY(-4px);
@@ -1187,7 +1192,6 @@
         }
 
         // Load Dashboard Data
-        // Load Dashboard Data
 async function loadDashboardData() {
     const today = new Date().toISOString().split('T')[0];
     
@@ -1292,7 +1296,7 @@ async function loadDashboardData() {
         const sisaKas = modalAwal + uangMasuk - uangKeluar + hutangMasuk - hutangBayar;
 
         // Update UI - Card Atas (Summary)
-        updateElement('total-penjualan', formatRupiah(penjualanProduk));
+        updateElement('summary-kas', formatRupiah(sisaKas));
         updateElement('total-laba', formatRupiah(laba));
         updateElement('total-transaksi', transaksi + ' Transaksi');
 
