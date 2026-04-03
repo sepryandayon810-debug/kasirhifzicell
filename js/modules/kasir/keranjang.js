@@ -48,6 +48,24 @@ const Keranjang = {
         this.addItem(produk, customData);
     },
     
+    // ✅ TAMBAHKAN FUNGSI INI DI SINI (setelah tambahItem, sebelum updateQty)
+    editItem: function(index, data) {
+        if (index < 0 || index >= this.items.length) return;
+        
+        if (data.harga !== undefined) {
+            this.items[index].harga_jual = data.harga;
+        }
+        if (data.qty !== undefined) {
+            this.items[index].qty = data.qty;
+        }
+        
+        this.items[index].subtotal = this.items[index].harga_jual * this.items[index].qty;
+        
+        this.saveToStorage();
+        this.render();
+        this.updateMobileCount();
+    },
+    
     updateQty: function(index, change) {
         if (index < 0 || index >= this.items.length) return;
         
@@ -160,38 +178,40 @@ const Keranjang = {
     },
     
     createItemHTML: function(item, index) {
-    return `
-        <div class="cart-item-modern" data-index="${index}">
-            <div class="cart-item-img">
-                <i class="fas fa-box"></i>
+        return `
+            <div class="cart-item-modern" data-index="${index}">
+                <div class="cart-item-img">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.nama}</div>
+                    <div class="cart-item-price">${formatRupiah(item.harga_jual)} x ${item.qty}</div>
+                </div>
+                <div class="qty-control-modern">
+                    <button class="qty-btn-modern" onclick="window.Keranjang.updateQty(${index}, -1)">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="qty-value-modern">${item.qty}</span>
+                    <button class="qty-btn-modern" onclick="window.Keranjang.updateQty(${index}, 1)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="cart-item-total">
+                    ${formatRupiah(item.subtotal)}
+                </div>
+                <div class="cart-item-actions" style="display: flex; gap: 4px;">
+                    <button class="btn-remove-item" onclick="window.openEditModal(${index})" title="Edit" style="color: var(--accent-indigo);">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-remove-item" onclick="window.Keranjang.removeItem(${index})" title="Hapus">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
-            <div class="cart-item-info">
-                <div class="cart-item-name">${item.nama}</div>
-                <div class="cart-item-price">${formatRupiah(item.harga_jual)} x ${item.qty}</div>
-            </div>
-            <div class="qty-control-modern">
-                <button class="qty-btn-modern" onclick="window.Keranjang.updateQty(${index}, -1)">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <span class="qty-value-modern">${item.qty}</span>
-                <button class="qty-btn-modern" onclick="window.Keranjang.updateQty(${index}, 1)">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            <div class="cart-item-total">
-                ${formatRupiah(item.subtotal)}
-            </div>
-            <div class="cart-item-actions" style="display: flex; gap: 4px;">
-                <button class="btn-remove-item" onclick="window.openEditModal(${index})" title="Edit" style="color: var(--accent-indigo);">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-remove-item" onclick="window.Keranjang.removeItem(${index})" title="Hapus">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-    `;
-}
+        `;
+    }
+};
+
 // Inisialisasi
 document.addEventListener('DOMContentLoaded', function() {
     Keranjang.init();
