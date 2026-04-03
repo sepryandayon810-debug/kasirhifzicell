@@ -6,35 +6,14 @@
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Kasir</title>
     
-    <!-- CSS DASHBOARD (untuk tema sidebar/header) -->
+    <!-- CSS External (sama seperti yang Anda punya) -->
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/responsive.css">
-    
-    <!-- CSS KASIR (konten tetap sama) -->
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- OVERRIDE: Gradient sidebar -->
-    <style>
-        /* Sidebar header gradient ungu */
-        .sidebar-header {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-        }
-        
-        /* Active menu */
-        .menu-link.active {
-            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)) !important;
-            border-left: 3px solid #8b5cf6 !important;
-        }
-        
-        /* Dropdown section active */
-        .has-dropdown.active > .dropdown-toggle {
-            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)) !important;
-        }
-    </style>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -43,153 +22,146 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <!-- SIDEBAR DENGAN DROPDOWN -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-cash-register"></i>
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i> Kasir</a></li>
+            <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
+            <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Menu</a></li>
+        </ul>
+    </nav>
+
+    <!-- SIDEBAR - STRUKTUR SAMA PERSIS DASHBOARD -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fas fa-cash-register"></i></div>
+            <h3>WebPOS</h3>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <!-- UTAMA - Dropdown (EXPANDED karena Kasir aktif) -->
+            <div class="nav-section utama">
+                <div class="nav-section-header active" onclick="toggleDropdown('utama')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-th-large"></i></div>
+                        <span class="nav-section-title">Utama</span>
+                    </div>
+                    <div class="dropdown-arrow rotate" id="arrow-utama"><i class="fas fa-chevron-down"></i></div>
                 </div>
-                <h3>WebPOS</h3>
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <div class="nav-dropdown open" id="dropdown-utama">
+                    <ul>
+                        <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i> Kasir</a></li>
+                        <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
+                        <li><a href="./pembelian.html"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
+                    </ul>
+                </div>
             </div>
             
-            <div class="sidebar-search">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="menu-search" placeholder="Cari menu...">
+            <!-- TRANSAKSI - Dropdown -->
+            <div class="nav-section transaksi">
+                <div class="nav-section-header" onclick="toggleDropdown('transaksi')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <span class="nav-section-title">Transaksi</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-transaksi"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-transaksi">
+                    <ul>
+                        <li><a href="./riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat Transaksi</a></li>
+                        <li><a href="./modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal Harian</a></li>
+                        <li><a href="./kas-management.html"><i class="fas fa-wallet"></i> Kas Management</a></li>
+                        <li><a href="./hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang Piutang</a></li>
+                    </ul>
                 </div>
             </div>
             
-            <nav class="sidebar-nav">
-                <ul id="menu-list">
-                    <!-- UTAMA - DROPDOWN (EXPANDED) -->
-                    <li class="menu-item has-dropdown active">
-                        <a href="#" class="menu-link dropdown-toggle">
-                            <i class="fas fa-th-large"></i>
-                            <span>Utama</span>
-                            <i class="fas fa-chevron-down dropdown-icon"></i>
-                        </a>
-                        <ul class="dropdown-menu show">
-                            <li><a href="../dashboard.html" class="menu-link"><i class="fas fa-home"></i> Dashboard</a></li>
-                            <li><a href="kasir.html" class="menu-link active"><i class="fas fa-cash-register"></i> Kasir</a></li>
-                            <li><a href="produk.html" class="menu-link"><i class="fas fa-box"></i> Produk</a></li>
-                            <li><a href="pembelian.html" class="menu-link"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- TRANSAKSI - DROPDOWN -->
-                    <li class="menu-item has-dropdown">
-                        <a href="#" class="menu-link dropdown-toggle">
-                            <i class="fas fa-exchange-alt"></i>
-                            <span>Transaksi</span>
-                            <i class="fas fa-chevron-down dropdown-icon"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="riwayat-transaksi.html" class="menu-link"><i class="fas fa-history"></i> Riwayat</a></li>
-                            <li><a href="modal-harian.html" class="menu-link"><i class="fas fa-money-bill-wave"></i> Modal</a></li>
-                            <li><a href="kas-management.html" class="menu-link"><i class="fas fa-wallet"></i> Kas</a></li>
-                            <li><a href="hutang-piutang.html" class="menu-link"><i class="fas fa-hand-holding-usd"></i> Hutang</a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- LAINNYA - DROPDOWN -->
-                    <li class="menu-item has-dropdown">
-                        <a href="#" class="menu-link dropdown-toggle">
-                            <i class="fas fa-ellipsis-h"></i>
-                            <span>Lainnya</span>
-                            <i class="fas fa-chevron-down dropdown-icon"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="laporan.html" class="menu-link"><i class="fas fa-chart-bar"></i> Laporan</a></li>
-                            <li><a href="data-pelanggan.html" class="menu-link"><i class="fas fa-users"></i> Pelanggan</a></li>
-                            <li><a href="saldo-telegram.html" class="menu-link"><i class="fab fa-telegram"></i> Telegram</a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- PENGATURAN - DROPDOWN -->
-                    <li class="menu-item has-dropdown">
-                        <a href="#" class="menu-link dropdown-toggle">
-                            <i class="fas fa-cog"></i>
-                            <span>Pengaturan</span>
-                            <i class="fas fa-chevron-down dropdown-icon"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="setting.html" class="menu-link"><i class="fas fa-sliders-h"></i> Setting</a></li>
-                            <li><a href="printer-struk.html" class="menu-link"><i class="fas fa-print"></i> Printer</a></li>
-                            <li><a href="management-user.html" class="menu-link"><i class="fas fa-user-cog"></i> User</a></li>
-                            <li><a href="reset-data.html" class="menu-link"><i class="fas fa-redo"></i> Reset</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
+            <!-- LAINNYA - Dropdown -->
+            <div class="nav-section lainnya">
+                <div class="nav-section-header" onclick="toggleDropdown('lainnya')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-ellipsis-h"></i></div>
+                        <span class="nav-section-title">Lainnya</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-lainnya"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-lainnya">
+                    <ul>
+                        <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+                        <li><a href="./data-pelanggan.html"><i class="fas fa-users"></i> Data Pelanggan</a></li>
+                        <li><a href="./telegram.html"><i class="fas fa-paper-plane"></i> Telegram</a></li>
+                    </ul>
+                </div>
+            </div>
             
-            <div class="sidebar-footer">
+            <!-- PENGATURAN - Dropdown -->
+            <div class="nav-section pengaturan">
+                <div class="nav-section-header" onclick="toggleDropdown('pengaturan')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-cog"></i></div>
+                        <span class="nav-section-title">Pengaturan</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-pengaturan"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-pengaturan">
+                    <ul>
+                        <li><a href="./setting.html"><i class="fas fa-sliders-h"></i> Setting</a></li>
+                        <li><a href="./printer.html"><i class="fas fa-print"></i> Printer</a></li>
+                        <li><a href="./user.html"><i class="fas fa-user-cog"></i> User</a></li>
+                        <li><a href="./reset.html"><i class="fas fa-redo"></i> Reset Data</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar" id="user-avatar">U</div>
                 <div class="user-info">
-                    <div class="user-avatar" id="user-avatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="user-details">
-                        <span id="user-name">Loading...</span>
-                        <small id="user-role">Administrator</small>
-                    </div>
+                    <div class="user-name" id="user-name">Loading...</div>
+                    <div class="user-role">Administrator</div>
                 </div>
-                <button class="btn-logout" id="btn-logout">
+                <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
-        </aside>
+        </div>
+    </aside>
 
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            <!-- HEADER DENGAN DARK MODE -->
-            <header class="main-header">
-                <div class="header-left">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h2 id="page-title">Kasir</h2>
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="main-content">
+        <!-- HEADER - SAMA PERSIS DASHBOARD -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1>Kasir</h1>
+                    <p id="current-date">Memuat...</p>
                 </div>
-                
-                <div class="header-center">
-                    <div class="status-indicators">
-                        <div class="status-item">
-                            <span class="status-label">Shift</span>
-                            <span class="status-value" id="header-shift">-</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">Status</span>
-                            <span class="status-value" id="header-status">
-                                <span class="badge badge-success">Open</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="header-right">
-                    <!-- DARK MODE TOGGLE -->
-                    <button class="header-btn" id="btn-darkmode" title="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    
-                    <button class="header-btn" id="cloud-status">
-                        <i class="fas fa-cloud"></i>
-                        <span>Online</span>
-                    </button>
-                    <button class="header-btn" id="btn-toggle-view" title="Ganti Tampilan">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-                    <div class="datetime" id="header-datetime">
-                        <span id="current-time">--:--</span>
-                        <small id="current-date">--/--/----</small>
-                    </div>
-                </div>
-            </header>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn-darkmode" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="btn-icon" onclick="refreshData()" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
 
-            <!-- KASIR CONTENT - TETAP SAMA SEPERTI YANG ANDA SUKA -->
+        <!-- CONTENT KASIR - INTEGRASI DENGAN JS MODULAR -->
+        <div class="content-wrapper">
             <div class="kasir-container">
+                <!-- Left: Produk Section -->
                 <div class="produk-section">
                     <div class="produk-toolbar">
                         <div class="search-produk">
@@ -223,6 +195,7 @@
                     </div>
                 </div>
 
+                <!-- Right: Keranjang Section -->
                 <div class="keranjang-section">
                     <div class="keranjang-header">
                         <h3><i class="fas fa-shopping-cart"></i> Keranjang</h3>
@@ -307,15 +280,21 @@
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
+
+            <footer class="page-footer">
+                <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
+            </footer>
+        </div>
+    </main>
 
     <!-- MODALS -->
     <div class="modal" id="modal-transaksi-manual">
         <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h3>Transaksi Manual</h3>
-                <button class="btn-close" onclick="closeModal('modal-transaksi-manual')"><i class="fas fa-times"></i></button>
+                <button class="btn-close" onclick="closeModal('modal-transaksi-manual')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -356,7 +335,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Top Up</h3>
-                <button class="btn-close" onclick="closeModal('modal-topup')"><i class="fas fa-times"></i></button>
+                <button class="btn-close" onclick="closeModal('modal-topup')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -393,7 +374,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Tarik Tunai</h3>
-                <button class="btn-close" onclick="closeModal('modal-tarik')"><i class="fas fa-times"></i></button>
+                <button class="btn-close" onclick="closeModal('modal-tarik')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -420,7 +403,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Harga</h3>
-                <button class="btn-close" onclick="closeModal('modal-edit-harga')"><i class="fas fa-times"></i></button>
+                <button class="btn-close" onclick="closeModal('modal-edit-harga')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-index">
@@ -440,18 +425,22 @@
         </div>
     </div>
 
-    <!-- SCRIPTS - STRUKTUR TETAP -->
+    <!-- ========================================== -->
+    <!-- SCRIPTS - STRUKTUR MODULAR SEPERTI PERMINTAAN -->
+    <!-- ========================================== -->
+    
+    <!-- 1. Firebase Config -->
     <script src="../js/firebase-config.js"></script>
+    
+    <!-- 2. Utils & Auth -->
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
     
-    <!-- DARK MODE MODULE -->
+    <!-- 3. Components (Shared) -->
     <script src="../js/components/darkmode.js"></script>
-    
-    <!-- SIDEBAR MODULE -->
     <script src="../js/components/sidebar.js"></script>
     
-    <!-- KASIR MODULES -->
+    <!-- 4. Kasir Modules (Spesifik halaman ini) -->
     <script src="../js/modules/kasir/produk-grid.js"></script>
     <script src="../js/modules/kasir/produk-list.js"></script>
     <script src="../js/modules/kasir/keranjang.js"></script>
@@ -461,6 +450,125 @@
     <script src="../js/modules/kasir/edit-harga.js"></script>
     <script src="../js/modules/kasir/uang-pas.js"></script>
     <script src="../js/modules/kasir/pencarian-produk.js"></script>
+    
+    <!-- 5. Main Kasir Controller -->
     <script src="../js/modules/kasir/kasir-main.js"></script>
+    
+    <!-- 6. Inline: Fungsi Global yang Dibutuhkan HTML -->
+    <script>
+        // Fungsi-fungsi yang dipanggil langsung dari HTML onclick
+        // (Agar tidak perlu ubah semua HTML, cukup wrapper saja)
+        
+        function toggleDropdown(section) {
+            // Panggil dari sidebar.js jika ada, atau implementasi fallback
+            if (typeof window.Sidebar !== 'undefined' && window.Sidebar.toggleDropdown) {
+                window.Sidebar.toggleDropdown(section);
+            } else {
+                // Fallback implementation
+                const dropdown = document.getElementById(`dropdown-${section}`);
+                const arrow = document.getElementById(`arrow-${section}`);
+                const header = dropdown?.previousElementSibling;
+                
+                if (dropdown && arrow) {
+                    dropdown.classList.toggle('open');
+                    arrow.classList.toggle('rotate');
+                    header?.classList.toggle('active');
+                    
+                    const isOpen = dropdown.classList.contains('open');
+                    localStorage.setItem(`dropdown-${section}`, isOpen);
+                }
+            }
+        }
+        
+        function toggleSidebar() {
+            if (typeof window.Sidebar !== 'undefined' && window.Sidebar.toggle) {
+                window.Sidebar.toggle();
+            } else {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+                
+                if (window.innerWidth <= 768) {
+                    sidebar?.classList.toggle('open');
+                    overlay?.classList.toggle('active');
+                }
+            }
+        }
+        
+        function toggleDarkMode() {
+            if (typeof window.DarkMode !== 'undefined' && window.DarkMode.toggle) {
+                window.DarkMode.toggle();
+            } else {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('webpos-theme', newTheme);
+            }
+        }
+        
+        function logout() {
+            if (typeof window.Auth !== 'undefined' && window.Auth.logout) {
+                window.Auth.logout();
+            } else if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    window.location.replace('../login.html');
+                });
+            }
+        }
+        
+        function refreshData() {
+            const btn = document.querySelector('.btn-icon i.fa-sync-alt');
+            if (btn) btn.classList.add('fa-spin');
+            
+            // Panggil refresh dari kasir-main.js
+            if (typeof window.Kasir !== 'undefined' && window.Kasir.refresh) {
+                window.Kasir.refresh();
+            }
+            
+            setTimeout(() => {
+                if (btn) btn.classList.remove('fa-spin');
+            }, 500);
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId)?.classList.remove('active');
+        }
+        
+        // Initialize saat DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restore dropdown states
+            ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
+                const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
+                if (isOpen || section === 'utama') { // utama selalu open di kasir
+                    const dropdown = document.getElementById(`dropdown-${section}`);
+                    const arrow = document.getElementById(`arrow-${section}`);
+                    const header = dropdown?.previousElementSibling;
+                    
+                    if (dropdown && section === 'utama') {
+                        // Kasir: section utama selalu expanded
+                        dropdown.classList.add('open');
+                        arrow?.classList.add('rotate');
+                        header?.classList.add('active');
+                    } else if (dropdown && isOpen) {
+                        dropdown.classList.add('open');
+                        arrow?.classList.add('rotate');
+                        header?.classList.add('active');
+                    }
+                }
+            });
+            
+            // Update date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) {
+                dateEl.textContent = new Date().toLocaleDateString('id-ID', options);
+            }
+            
+            // Overlay click
+            document.getElementById('overlay')?.addEventListener('click', () => {
+                document.getElementById('sidebar')?.classList.remove('open');
+                document.getElementById('overlay')?.classList.remove('active');
+            });
+        });
+    </script>
 </body>
 </html>
