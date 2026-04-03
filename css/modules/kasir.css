@@ -28,12 +28,7 @@
     gap: 20px;
 }
 
-/* Toolbar Header */
-.produk-toolbar {
-/* ============================================
-   SEARCH & KATEGORI HORIZONTAL SCROLL
-   ============================================ */
-
+/* ===== SEARCH & KATEGORI HORIZONTAL SCROLL ===== */
 .search-filter-container {
     display: flex;
     flex-direction: column;
@@ -153,7 +148,7 @@
     box-shadow: 0 6px 20px rgba(99,102,241,0.4);
 }
 
-/* Mobile */
+/* Mobile Responsive */
 @media (max-width: 768px) {
     .kategori-scroll {
         padding-right: 0;
@@ -171,7 +166,8 @@
         transform: scale(1.02);
     }
 }
-/* Buttons */
+
+/* ===== BUTTONS ===== */
 .btn {
     padding: 14px 24px;
     border-radius: 14px;
@@ -876,16 +872,32 @@ textarea.form-control {
 }
 
 @media (max-width: 768px) {
-    .produk-toolbar {
-        flex-direction: column;
+    .search-filter-container {
+        gap: 10px;
     }
     
-    .search-produk {
-        min-width: 100%;
+    .search-box {
+        padding: 12px 16px;
+    }
+    
+    .kategori-pill {
+        padding: 8px 16px;
+        font-size: 13px;
     }
     
     .produk-container.grid-view {
         grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .produk-card {
+        padding: 16px;
+    }
+    
+    .produk-img {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
     }
     
     .jenis-transaksi {
@@ -938,397 +950,26 @@ textarea.form-control {
     justify-content: center;
 }
 
-/* ============================================
-   RESPONSIVE MOBILE - PERBAIKAN LENGKAP
-   ============================================ */
-
-/* Tablet (768px - 1024px) */
-@media (max-width: 1024px) {
-    .kasir-container {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-    
-    .keranjang-section {
-        position: fixed;
-        bottom: 80px;
-        left: 16px;
-        right: 16px;
-        top: auto;
-        max-height: 70vh;
-        z-index: 50;
-        display: none;
-        border-radius: 20px 20px 0 0;
-        animation: slideUp 0.3s ease;
-    }
-    
-    @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
-    
-    .keranjang-section.open {
-        display: flex;
-    }
-    
-    .btn-keranjang-mobile {
-        display: flex;
-    }
-    
-    .produk-section {
-        padding: 16px;
-    }
-}
-
-/* HP Besar (576px - 767px) */
-@media (max-width: 767px) {
-    .main-header {
-        margin: 12px;
-        padding: 16px;
-        border-radius: 16px;
-    }
-    
-    .page-title h1 {
-        font-size: 20px;
-    }
-    
-    .content-wrapper {
-        padding: 0 12px 100px 12px;
-    }
-    
-    .produk-toolbar {
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .search-produk {
-        min-width: 100%;
-    }
-    
-    .search-produk input {
-        padding: 12px 16px 12px 44px;
-        font-size: 14px;
-    }
-    
-    .btn {
-        padding: 12px 20px;
-        font-size: 13px;
-    }
-    
-    .produk-container.grid-view {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-    
-    .produk-card {
-        padding: 16px;
-    }
-    
-    .produk-img {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
-        border-radius: 16px;
-    }
-    
-    .produk-nama {
-        font-size: 12px;
-    }
-    
-    .produk-harga {
-        font-size: 14px;
-    }
-    
-    .view-toggle {
-        align-self: flex-start;
-    }
-    
-    .jenis-transaksi {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-    }
-    
-    .jenis-btn {
-        padding: 12px 8px;
-        font-size: 11px;
-    }
-    
-    .jenis-btn i {
-        font-size: 20px;
-    }
-}
-
-/* HP Kecil (<= 575px) */
-@media (max-width: 575px) {
-    .sidebar {
-        width: 85%;
-        max-width: 280px;
-    }
-    
-    .mobile-nav {
-        height: 65px;
-    }
-    
-    .mobile-nav a {
-        font-size: 10px;
-        padding: 4px 8px;
-    }
-    
-    .mobile-nav a i {
-        font-size: 18px;
-    }
-    
-    .produk-container.grid-view {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    
-    .produk-card {
-        padding: 12px;
-        border-radius: 14px;
-    }
-    
-    .produk-img {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        border-radius: 12px;
-        margin-bottom: 12px;
-    }
-    
-    .produk-nama {
-        font-size: 11px;
-        margin-bottom: 4px;
-    }
-    
-    .produk-harga {
-        font-size: 13px;
-    }
-    
-    .produk-stok {
-        font-size: 10px;
-    }
-    
-    .keranjang-header h3 {
-        font-size: 16px;
-    }
-    
-    .jenis-transaksi {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-    }
-    
-    .jenis-btn {
-        padding: 10px 4px;
-        font-size: 10px;
-        border-radius: 12px;
-    }
-    
-    .jenis-btn i {
-        font-size: 18px;
-    }
-    
-    .summary-row.total span:last-child {
-        font-size: 20px;
-    }
-    
-    .kembalian-display {
-        font-size: 20px;
-        padding: 14px;
-    }
-    
-    .btn-bayar {
-        padding: 16px;
-        font-size: 15px;
-    }
-    
-    .modal-content {
-        margin: 12px;
-        border-radius: 20px;
-    }
-    
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: 16px;
-    }
-    
-    .modal-header h3 {
-        font-size: 18px;
-    }
-    
-    .row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .keranjang-item {
-        padding: 12px;
-        gap: 12px;
-    }
-    
-    .keranjang-item-img {
-        width: 48px;
-        height: 48px;
-        font-size: 20px;
-    }
-    
-    .qty-btn {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .btn-keranjang-mobile {
-        width: 56px;
-        height: 56px;
-        font-size: 22px;
-        bottom: 85px;
-        right: 16px;
-    }
-}
-
-/* HP Sangat Kecil (<= 375px) */
-@media (max-width: 375px) {
-    .produk-container.grid-view {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .produk-card {
-        padding: 10px;
-    }
-    
-    .produk-img {
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
-    }
-    
-    .produk-nama {
-        font-size: 10px;
-    }
-    
-    .produk-harga {
-        font-size: 12px;
-    }
-    
-    .jenis-btn {
-        font-size: 9px;
-        padding: 8px 2px;
-    }
-    
-    .jenis-btn i {
-        font-size: 16px;
-    }
-    
-    .form-control {
-        padding: 12px 14px;
-        font-size: 14px;
-    }
-    
-    .header-actions {
-        gap: 8px;
-    }
-    
-    .btn-darkmode,
-    .btn-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-    }
-}
-
-/* Landscape HP */
-@media (max-height: 500px) and (orientation: landscape) {
-    .keranjang-section {
-        max-height: 80vh;
-    }
-    
-    .modal-body {
-        max-height: 50vh;
-    }
-}
-
-/* Touch Device Optimization */
-@media (hover: none) and (pointer: coarse) {
-    .produk-card:hover {
-        transform: none;
-    }
-    
-    .produk-card:active {
-        transform: scale(0.98);
-        background: var(--bg-primary);
-    }
-    
-    .btn:hover {
-        transform: none;
-    }
-    
-    .btn:active {
-        transform: scale(0.96);
-    }
-    
-    .qty-btn {
-        min-width: 44px;
-        min-height: 44px;
-    }
-}
-
-/* Safe Area for Notch HP */
-@supports (padding-top: env(safe-area-inset-top)) {
-    .sidebar-header {
-        padding-top: calc(20px + env(safe-area-inset-top));
-    }
-    
-    .mobile-nav {
-        padding-bottom: env(safe-area-inset-bottom);
-        height: calc(65px + env(safe-area-inset-bottom));
-    }
-    
-    .content-wrapper {
-        padding-bottom: calc(100px + env(safe-area-inset-bottom));
-    }
-    
-    .btn-keranjang-mobile {
-        bottom: calc(85px + env(safe-area-inset-bottom));
-    }
-}
-
-/* Dark Mode Mobile Optimization */
-[data-theme="dark"] .keranjang-section {
-    background: var(--bg-secondary);
-}
-
-[data-theme="dark"] .produk-card {
-    background: rgba(30, 41, 59, 0.5);
-}
-
-[data-theme="dark"] .produk-card:hover {
-    background: var(--bg-hover);
-}
-
-/* ============================================
-   FIX KASIR - PRODUK GRID & LIST
-   ============================================ */
+/* ===== FIX KASIR - PRODUK GRID & LIST ===== */
 
 /* FIX 1: Grid View - Card tidak memanjang */
 .produk-container.grid-view {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
-    align-items: start; /* ✅ Penting: card tidak memanjang */
+    align-items: start;
     align-content: start;
 }
 
 .produk-container.grid-view .produk-card {
-    height: auto; /* ✅ Jangan 100% */
+    height: auto;
     min-height: 200px;
     display: flex;
     flex-direction: column;
 }
 
 .produk-container.grid-view .produk-img {
-    height: 120px; /* ✅ Fixed height */
+    height: 120px;
     flex-shrink: 0;
 }
 
@@ -1564,7 +1205,7 @@ textarea.form-control {
     text-align: right;
 }
 
-/* Mobile */
+/* Mobile untuk Grid & List */
 @media (max-width: 768px) {
     .produk-container.grid-view {
         grid-template-columns: repeat(2, 1fr);
@@ -1572,7 +1213,7 @@ textarea.form-control {
     }
     
     .produk-container.list-view .produk-table-header {
-        display: none; /* Sembunyikan header di mobile */
+        display: none;
     }
     
     .produk-container.list-view .produk-table-row {
