@@ -508,6 +508,9 @@ async function prosesPembayaran() {
 /**
  * Update data harian
  */
+/**
+ * Update data harian
+ */
 async function updateDailyData(uid, items, total) {
     if (typeof database === 'undefined') return;
     
@@ -517,79 +520,94 @@ async function updateDailyData(uid, items, total) {
     const snapshot = await dailyRef.once('value');
     const current = snapshot.val() || {};
     
-    let penjualan = 0, topup = 0, tarik = 0, laba = 0;
-    let uangMasuk = 0, uangKeluar = 0;
+    // Inisialisasi semua field
+    let penjualanProduk = 0;      // Hanya dari produk fisik
+    let topup = 0;                // Total top up (nominal + fee)
+    let tarikTunai = 0;           // Nominal tarik (modal keluar)
+    let laba = 0;                 // Dari fee + margin produk
+    let uangMasuk = 0;            // Semua uang yang masuk kas
+    let uangKeluar = 0;           // Semua uang yang keluar dari kas
     
     items.forEach(item => {
         if (item.jenis === 'penjualan') {
-            penjualan += item.subtotal;
-            laba += ((item.harga_jual - (item.harga_modal || 0)) * item.qty);
+            // ✅ Penjualan produk fisik
+            const itemLaba = (item.harga_jual - (item.harga_modal || 0)) * item.qty;
+            penjualanProduk += item.subtotal;
+            laba += itemLaba;
             uangMasuk += item.subtotal;
+            
         } else if (item.jenis === 'topup') {
-            // Top Up: Total yang dibayar customer (nominal + fee)
+            // ✅ Top Up: Uang masuk = nominal + fee, Laba = fee saja
             const nominal = item.nominal || 0;
             const fee = item.fee || 0;
             const totalTopup = item.subtotal || (nominal + fee);
             
-            topup += totalTopup; // Total Top Up untuk card
-            uangMasuk += totalTopup; // Masuk ke uang masuk
-            laba += fee; // Laba dari fee
-        } else if (item.jenis === 'tarik') {
-            // Tarik Tunai: 
-            const nominal = item.nominal || item.harga_modal || 0;
-            const fee = item.fee || 0;
-            const diterima = item.subtotal || (nominal - fee);
+            topup += totalTopup;           // Card Top Up: 22k
+            uangMasuk += totalTopup;       // Uang Masuk: +22k
+            // ❌ TIDAK masuk ke penjualanProduk
+            laba += fee;                   // Laba: +2k dari fee
             
-            tarik += nominal; // Nominal tarik untuk card (modal keluar)
-            uangKeluar += nominal; // Modal keluar
-            uangMasuk += fee; // Fee masuk ke kas
-            laba += fee; // Laba dari fee
+        } else if (item.jenis === 'tarik') {
+            // ✅ Tarik Tunai: Modal keluar, fee masuk
+            const nominal = item.nominal || 0;      // 10k
+            const fee = item.fee || 0;              // 2k
+            const diterima = item.subtotal || (nominal - fee);  // 8k
+            
+            tarikTunai += nominal;         // Card Tarik: 10k (modal keluar)
+            uangKeluar += nominal;         // Uang Keluar: +10k
+            uangMasuk += fee;              // Uang Masuk: +2k (fee)
+            // ❌ TIDAK masuk ke penjualanProduk
+            laba += fee;                   // Laba: +2k dari fee
+            
         } else if (item.jenis === 'manual') {
-            penjualan += item.subtotal;
-            laba += ((item.harga_jual - (item.harga_modal || 0)) * item.qty);
+            // ✅ Transaksi manual = penjualan produk
+            const itemLaba = (item.harga_jual - (item.harga_modal || 0)) * item.qty;
+            penjualanProduk += item.subtotal;
+            laba += itemLaba;
             uangMasuk += item.subtotal;
         }
     });
     
     // Update dengan field yang benar
     await dailyRef.update({
-        // Card atas
-        total_penjualan: (current.total_penjualan || 0) + penjualan,
-        laba: (current.laba || 0) + laba,
+        // Card atas - Summary Keuangan
+        penjualan_produk: (current.penjualan_produk || 0) + penjualanProduk,  // ✅ Hanya produk
+        laba: (current.laba || 0) + laba,                                      // ✅ Dari fee + margin
         total_transaksi: (current.total_transaksi || 0) + 1,
         
-        // Card tengah
+        // Card tengah - Aliran Kas
         modal_awal: current.modal_awal || 0,
-        uang_masuk: (current.uang_masuk || 0) + uangMasuk,
-        uang_keluar: (current.uang_keluar || 0) + uangKeluar,
-        topup: (current.topup || 0) + topup, // ✅ Field untuk card Top Up
-        tarik_tunai: (current.tarik_tunai || 0) + tarik, // ✅ Field untuk card Tarik Tunai
+        uang_masuk: (current.uang_masuk || 0) + uangMasuk,      // ✅ Semua uang masuk
+        uang_keluar: (current.uang_keluar || 0) + uangKeluar,   // ✅ Semua uang keluar
+        
+        // Card bawah - Rincian Transaksi
+        topup: (current.topup || 0) + topup,                    // ✅ Total top up
+        tarik_tunai: (current.tarik_tunai || 0) + tarikTunai,   // ✅ Nominal tarik
         hutang_masuk: current.hutang_masuk || 0,
         
         last_update: firebase.database.ServerValue?.TIMESTAMP || Date.now()
     });
     
-    // Update summary untuk owner (jika ada)
+    // Update summary untuk owner
     try {
         const summaryRef = database.ref(`daily_summary/${today}`);
         const sumSnapshot = await summaryRef.once('value');
         const sumData = sumSnapshot.val() || {};
         
         await summaryRef.update({
-            total_penjualan: (sumData.total_penjualan || 0) + penjualan,
+            penjualan_produk: (sumData.penjualan_produk || 0) + penjualanProduk,
             laba: (sumData.laba || 0) + laba,
             total_transaksi: (sumData.total_transaksi || 0) + 1,
             uang_masuk: (sumData.uang_masuk || 0) + uangMasuk,
             uang_keluar: (sumData.uang_keluar || 0) + uangKeluar,
             topup: (sumData.topup || 0) + topup,
-            tarik_tunai: (sumData.tarik_tunai || 0) + tarik,
+            tarik_tunai: (sumData.tarik_tunai || 0) + tarikTunai,
             last_update: firebase.database.ServerValue?.TIMESTAMP || Date.now()
         });
     } catch (e) {
         console.log('Summary update skipped:', e);
     }
 }
-
 /**
  * Catat hutang
  */
