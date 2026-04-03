@@ -1,4 +1,7 @@
-// Top Up Module
+/**
+ * Top Up Module
+ * File: js/modules/kasir/topup.js
+ */
 
 let topupData = {
     nominal: 0,
@@ -25,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function calculateTopup() {
-    const nominal = parseInt(document.getElementById('topup-nominal').value) || 0;
-    const fee = parseInt(document.getElementById('topup-fee-input').value) || 0;
+    const nominal = parseInt(document.getElementById('topup-nominal')?.value) || 0;
+    const fee = parseInt(document.getElementById('topup-fee-input')?.value) || 0;
     
     topupData = {
         nominal: nominal,
@@ -34,7 +37,12 @@ function calculateTopup() {
         total: nominal + fee
     };
     
-    document.getElementById('topup-total').textContent = formatRupiah(topupData.total);
+    const totalEl = document.getElementById('topup-total');
+    if (totalEl) {
+        totalEl.textContent = typeof formatRupiah === 'function' 
+            ? formatRupiah(topupData.total) 
+            : 'Rp ' + topupData.total.toLocaleString('id-ID');
+    }
 }
 
 function simpanTopup() {
@@ -43,26 +51,38 @@ function simpanTopup() {
         return;
     }
     
-    const provider = document.getElementById('topup-provider').value;
-    const providerName = document.getElementById('topup-provider').options[document.getElementById('topup-provider').selectedIndex].text;
+    const providerSelect = document.getElementById('topup-provider');
+    const provider = providerSelect?.value || 'lainnya';
+    const providerName = providerSelect?.options[providerSelect.selectedIndex]?.text || 'Lainnya';
     
-    // Buat item topup
-    const itemTopup = {
+    // Buat objek untuk Keranjang module
+    const produkTopup = {
         id: 'topup_' + Date.now(),
-        nama: `Top Up ${providerName} - ${formatRupiah(topupData.nominal)}`,
-        harga: topupData.total,
-        harga_modal: topupData.nominal, // Modal = nominal yang ditransfer
+        nama: `Top Up ${providerName}`,
+        harga_jual: topupData.total,
+        harga_modal: topupData.nominal,
+        stok: 9999
+    };
+    
+    const customData = {
+        nama: `Top Up ${providerName} - ${typeof formatRupiah === 'function' ? formatRupiah(topupData.nominal) : 'Rp ' + topupData.nominal}`,
+        harga_jual: topupData.total,
+        harga_modal: topupData.nominal,
         qty: 1,
-        jenis: 'topup',
         keterangan: `Provider: ${providerName}, Nominal: ${topupData.nominal}, Fee: ${topupData.fee}`,
+        jenis: 'topup',
         provider: provider,
         nominal: topupData.nominal,
         fee: topupData.fee
     };
     
-    // Tambah ke keranjang global
-    keranjang.push(itemTopup);
-    renderKeranjang();
+    // Gunakan Keranjang module
+    if (typeof window.Keranjang !== 'undefined') {
+        window.Keranjang.tambahItem(produkTopup, customData);
+    } else {
+        console.error('Keranjang module not loaded');
+        return;
+    }
     
     // Reset form
     document.getElementById('topup-nominal').value = '';
@@ -71,14 +91,18 @@ function simpanTopup() {
     topupData = { nominal: 0, fee: 0, total: 0 };
     
     // Tutup modal
-    closeModal('modal-topup');
+    if (typeof closeModal === 'function') {
+        closeModal('modal-topup');
+    }
     
     // Reset jenis transaksi ke penjualan
     document.querySelectorAll('.jenis-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector('[data-jenis="penjualan"]').classList.add('active');
-    currentJenis = 'penjualan';
+    const btnPenjualan = document.querySelector('[data-jenis="penjualan"]');
+    if (btnPenjualan) btnPenjualan.classList.add('active');
     
-    showToast('Top up ditambahkan ke keranjang', 'success');
+    if (typeof showToast === 'function') {
+        showToast('Top up ditambahkan ke keranjang', 'success');
+    }
 }
