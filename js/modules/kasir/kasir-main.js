@@ -667,31 +667,64 @@ async function loadPelanggan() {
 /**
  * Load kategori
  */
+// INI YANG BARU - KATEGORI HORIZONTAL SCROLL
 async function loadKategori() {
     try {
         if (typeof database === 'undefined') return;
         
         const snapshot = await database.ref('kategori').orderByChild('nama').once('value');
-        const select = document.getElementById('filter-kategori');
-        if (!select) return;
+        const scrollContainer = document.getElementById('kategori-scroll');
+        if (!scrollContainer) return;
         
-        // Simpan opsi pertama (Semua Kategori)
-        const firstOption = select.options[0];
-        select.innerHTML = '';
-        select.appendChild(firstOption);
+        // Simpan "Semua" button
+        const semuaBtn = scrollContainer.querySelector('[data-kategori=""]');
+        scrollContainer.innerHTML = '';
+        scrollContainer.appendChild(semuaBtn);
         
         snapshot.forEach(child => {
             const kategori = child.val();
-            const option = document.createElement('option');
-            option.value = child.key;
-            option.textContent = kategori.nama;
-            select.appendChild(option);
+            const btn = document.createElement('button');
+            btn.className = 'kategori-pill';
+            btn.dataset.kategori = child.key;
+            btn.textContent = kategori.nama;
+            scrollContainer.appendChild(btn);
         });
+        
+        // Event listener untuk filter
+        scrollContainer.querySelectorAll('.kategori-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                scrollContainer.querySelectorAll('.kategori-pill').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                
+                const kategori = this.dataset.kategori;
+                filterProduk(kategori);
+            });
+        });
+        
     } catch (error) {
         console.error('Error loading kategori:', error);
     }
 }
 
+// Filter produk berdasarkan kategori
+function filterProduk(kategori) {
+    const searchTerm = document.getElementById('search-produk')?.value.toLowerCase() || '';
+    
+    let filtered = [...produkData];
+    
+    if (kategori) {
+        filtered = filtered.filter(p => p.kategori === kategori);
+    }
+    
+    if (searchTerm) {
+        filtered = filtered.filter(p => 
+            p.nama?.toLowerCase().includes(searchTerm) ||
+            (p.kode && p.kode.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    renderProduk(filtered);
+}
 /**
  * Cek status kasir
  */
