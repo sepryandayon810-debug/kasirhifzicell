@@ -159,26 +159,28 @@ const TelegramTopup = {
         this.currentFilter = filter;
     },
     
-    renderManualAddSection: function() {
+     renderManualAddSection: function() {
         const isVisible = TelegramConfig.sectionVisibility.manualTopup;
         
-        return TelegramUI.renderSectionHeader('Tambah Topup Manual (Lainnya)', '➕', 'manualTopup') +
-            (isVisible ? `
-            <div class="tg-section-content" style="padding: 20px; border-top: 1px solid #e0e0e0;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 100px; gap: 12px; align-items: end;">
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Jumlah (Rp)</label>
-                        <input type="number" id="manualAmount" placeholder="100000" 
-                               style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+        if (!isVisible) {
+            return TelegramUI.renderSectionHeader('Tambah Topup Manual (Lainnya)', '➕', 'manualTopup') + 
+                   TelegramUI.renderSectionFooter();
+        }
+        
+        return TelegramUI.renderSectionHeader('Tambah Topup Manual (Lainnya)', '➕', 'manualTopup') + `
+            <div class="tg-section-content">
+                <div class="tg-form-grid" style="grid-template-columns: 1fr 1fr 1fr auto;">
+                    <div class="tg-form-group">
+                        <label>Jumlah (Rp)</label>
+                        <input type="number" id="manualAmount" placeholder="100000">
                     </div>
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Pengirim</label>
-                        <input type="text" id="manualSender" placeholder="Nama" 
-                               style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <div class="tg-form-group">
+                        <label>Pengirim</label>
+                        <input type="text" id="manualSender" placeholder="Nama pengirim">
                     </div>
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Metode</label>
-                        <select id="manualMethod" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <div class="tg-form-group">
+                        <label>Metode</label>
+                        <select id="manualMethod">
                             <option>Transfer BCA</option>
                             <option>Transfer BNI</option>
                             <option>Transfer BRI</option>
@@ -190,16 +192,15 @@ const TelegramTopup = {
                             <option>Lainnya</option>
                         </select>
                     </div>
-                    <div>
-                        <button onclick="TelegramModule.addManual()" 
-                                style="width: 100%; padding: 10px; background: #4caf50; color: white; 
-                                       border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                            Tambah
+                    <div class="tg-form-group">
+                        <label>&nbsp;</label>
+                        <button class="tg-btn tg-btn-success" onclick="TelegramModule.addManual()">
+                            ➕ Tambah
                         </button>
                     </div>
                 </div>
             </div>
-            ` : '');
+        ` + TelegramUI.renderSectionFooter();
     },
     
     renderTopupListSection: function() {
@@ -211,78 +212,39 @@ const TelegramTopup = {
         const filtered = statusFiltered.sort((a, b) => b.timestamp - a.timestamp);
         
         const arrowIcon = this.isVisible ? '🔽' : '▶️';
-        const containerDisplay = this.isVisible ? 'block' : 'none';
         
-        let html = `
-            <div style="background: white; border-radius: 16px; padding: 20px; margin-bottom: 24px; 
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" 
-                     onclick="TelegramModule.toggleTopupList()">
-                    <h3 style="margin: 0; color: #333; display: flex; align-items: center; gap: 8px; font-size: 18px;">
-                        📨 Daftar Topup 
-                        <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                                     color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                            ${filtered.length}
-                        </span>
-                        <span style="font-size: 13px; color: #666; font-weight: 400; margin-left: 8px;">
-                            (${this.getFilterLabel()})
-                        </span>
-                    </h3>
-                    <button style="background: #f5f5f5; border: none; padding: 8px 16px; border-radius: 8px; 
-                                   cursor: pointer; font-size: 16px;">
-                        <span>${arrowIcon}</span>
-                        <span style="font-size: 12px; color: #666; font-weight: 500; margin-left: 6px;">
-                            ${this.isVisible ? 'Sembunyikan' : 'Tampilkan'}
-                        </span>
-                    </button>
-                </div>
-        `;
+        let html = TelegramUI.renderSectionHeader(
+            `📨 Daftar Topup <span class="tg-badge">${filtered.length}</span> <span style="font-size: 13px; opacity: 0.8;">(${this.getFilterLabel()})</span>`, 
+            '📋', 
+            'topupList'
+        );
         
         if (this.isVisible) {
             html += `
-                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px;">
-                        <span style="font-size: 13px; color: #666; font-weight: 500;">Filter Status:</span>
-                        ${['all', 'pending', 'confirmed', 'rejected'].map(f => `
-                            <button onclick="event.stopPropagation(); TelegramModule.setFilter('${f}')" 
-                                    style="padding: 6px 14px; border: 2px solid ${this.currentFilter === f ? 
-                                        (f === 'all' ? '#667eea' : f === 'pending' ? '#ff9800' : 
-                                         f === 'confirmed' ? '#4caf50' : '#f44336') : '#e0e0e0'}; 
-                                   background: ${this.currentFilter === f ? 
-                                        (f === 'all' ? '#667eea' : f === 'pending' ? '#ff9800' : 
-                                         f === 'confirmed' ? '#4caf50' : '#f44336') : 'white'}; 
-                                   color: ${this.currentFilter === f ? 'white' : '#666'}; 
-                                   border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: 500;">
-                                ${f === 'all' ? 'Semua' : f === 'pending' ? 'Pending' : 
-                                  f === 'confirmed' ? 'Dikonfirmasi' : 'Ditolak'}
-                            </button>
-                        `).join('')}
+                <div class="tg-section-content">
+                    <div class="tg-list-header">
+                        <div class="tg-list-filters">
+                            ${['all', 'pending', 'confirmed', 'rejected'].map(f => `
+                                <button class="tg-list-filter-btn ${this.currentFilter === f ? 'active' : ''}" 
+                                        onclick="event.stopPropagation(); TelegramModule.setFilter('${f}')">
+                                    ${f === 'all' ? 'Semua' : f === 'pending' ? '⏳ Pending' : f === 'confirmed' ? '✅ Dikonfirmasi' : '❌ Ditolak'}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button class="tg-btn tg-btn-ghost tg-btn-sm" onclick="event.stopPropagation(); TelegramModule.toggleTopupList()">
+                            ${arrowIcon} Sembunyikan
+                        </button>
                     </div>
-                    ${this.renderTopupItems(filtered)}
+                    ${filtered.length > 0 ? this.renderTopupItems(filtered) : this.renderEmptyState()}
                 </div>
             `;
         }
         
-        html += '</div>';
+        html += TelegramUI.renderSectionFooter();
         return html;
     },
     
     renderTopupItems: function(items) {
-        if (items.length === 0) {
-            return `
-                <div style="text-align: center; padding: 40px 20px; color: #999;">
-                    <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
-                    <div style="font-size: 16px; font-weight: 500; color: #666; margin-bottom: 4px;">
-                        Tidak ada data topup
-                    </div>
-                    <div style="font-size: 13px; color: #999;">
-                        untuk periode ${this.getFilterLabel().toLowerCase()}
-                    </div>
-                </div>
-            `;
-        }
-        
         return `
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 ${items.map(t => this.renderTopupItem(t)).join('')}
@@ -294,70 +256,58 @@ const TelegramTopup = {
         const date = new Date(t.timestamp);
         const dateStr = date.toLocaleDateString('id-ID');
         const timeStr = date.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-        const isSynced = t.syncedToSheet ? '✓' : '';
         
-        let statusBg, statusText, actions;
+        let statusClass = t.status;
+        let statusLabel = t.status === 'confirmed' ? '✅ Dikonfirmasi' : 
+                         t.status === 'pending' ? '⏳ Pending' : '❌ Ditolak';
         
-        if (t.status === 'confirmed') {
-            statusBg = '#e8f5e9';
-            statusText = '✅ Dikonfirmasi';
-            actions = '';
-        } else if (t.status === 'rejected') {
-            statusBg = '#ffebee';
-            statusText = '❌ Ditolak';
-            actions = '';
-        } else {
-            statusBg = '#fff3e0';
-            statusText = '⏳ Pending';
+        let actions = '';
+        if (t.status === 'pending') {
             actions = `
-                <button onclick="event.stopPropagation(); TelegramModule.confirmTopup('${t.id}')" 
-                        style="background: #4caf50; color: white; border: none; padding: 6px 12px; 
-                               border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
-                    Konfirmasi
+                <button class="tg-action-btn confirm" onclick="event.stopPropagation(); TelegramModule.confirmTopup('${t.id}')">
+                    ✓ Konfirmasi
                 </button>
-                <button onclick="event.stopPropagation(); TelegramModule.rejectTopup('${t.id}')" 
-                        style="background: #f44336; color: white; border: none; padding: 6px 12px; 
-                               border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
-                    Tolak
+                <button class="tg-action-btn reject" onclick="event.stopPropagation(); TelegramModule.rejectTopup('${t.id}')">
+                    ✕ Tolak
                 </button>
             `;
         }
         
         return `
-            <div style="background: ${statusBg}; border-radius: 12px; padding: 16px; 
-                        border-left: 4px solid ${t.status === 'confirmed' ? '#4caf50' : 
-                                                t.status === 'rejected' ? '#f44336' : '#ff9800'};">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 4px;">
-                            ${TelegramUtils.formatMoney(t.amount)} 
-                            <span style="font-size: 12px; color: #4caf50; margin-left: 4px;">${isSynced}</span>
-                        </div>
-                        <div style="font-size: 13px; color: #666;">
-                            <span style="font-weight: 500; color: #333;">${TelegramUtils.escapeHtml(t.sender || 'Unknown')}</span>
-                            <span style="color: #ccc; margin: 0 6px;">•</span>
-                            <span>${TelegramUtils.escapeHtml(t.method || '-')}</span>
-                            <span style="color: #ccc; margin: 0 6px;">•</span>
-                            <span>${dateStr} ${timeStr}</span>
-                            ${t.sheetRow ? `<span style="color: #ccc; margin: 0 6px;">•</span><span style="color: #2196f3;">Row: ${t.sheetRow}</span>` : ''}
-                        </div>
+            <div class="tg-topup-item ${statusClass}">
+                <div class="tg-topup-main">
+                    <div class="tg-topup-amount">
+                        ${TelegramUtils.formatMoney(t.amount)}
+                        ${t.syncedToSheet ? '<span class="tg-sync-indicator">✓ synced</span>' : ''}
                     </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                        <span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; 
-                                     background: white; color: ${t.status === 'confirmed' ? '#2e7d32' : 
-                                                                t.status === 'rejected' ? '#c62828' : '#e65100'};">
-                            ${statusText}
-                        </span>
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-                            ${actions}
-                            <button onclick="event.stopPropagation(); TelegramModule.deleteTopup('${t.id}')" 
-                                    style="background: #9e9e9e; color: white; border: none; padding: 6px 12px; 
-                                           border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
-                                🗑️ Hapus
-                            </button>
-                        </div>
+                    <div class="tg-topup-meta">
+                        <span style="font-weight: 600; color: var(--text-primary);">${TelegramUtils.escapeHtml(t.sender || 'Unknown')}</span>
+                        <span class="dot">•</span>
+                        <span>${TelegramUtils.escapeHtml(t.method || '-')}</span>
+                        <span class="dot">•</span>
+                        <span>${dateStr} ${timeStr}</span>
+                        ${t.sheetRow ? `<span class="dot">•</span><span style="color: #3b82f6; font-weight: 500;">Row: ${t.sheetRow}</span>` : ''}
                     </div>
                 </div>
+                <div class="tg-topup-status">
+                    <span class="tg-status-label ${statusClass}">${statusLabel}</span>
+                    <div class="tg-topup-actions">
+                        ${actions}
+                        <button class="tg-action-btn delete" onclick="event.stopPropagation(); TelegramModule.deleteTopup('${t.id}')" title="Hapus dari tampilan">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    
+    renderEmptyState: function() {
+        return `
+            <div class="tg-empty-state">
+                <div class="tg-empty-icon">📭</div>
+                <div class="tg-empty-title">Tidak ada data topup</div>
+                <div class="tg-empty-desc">untuk periode ${this.getFilterLabel().toLowerCase()}</div>
             </div>
         `;
     },
