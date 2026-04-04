@@ -1,887 +1,564 @@
 /**
- * Kasir Main Controller - FIXED VERSION
- * File: js/modules/kasir/kasir-main.js
- * Fix: Filter kategori by ID & nama, Grid 4+ kolom, Dark mode sync
+ * WebPOS Kasir Main Module v2.0
+ * Features: Product loading, category filtering, search, grid/list view
  */
 
-// State global
-let currentView = 'grid';
-let currentJenis = 'penjualan';
-let produkData = [];
-let pelangganData = [];
-let kategoriMap = {}; // FIX: Tambah map untuk lookup nama kategori
-
-// Inisialisasi saat DOM ready
-document.addEventListener('DOMContentLoaded', function() {
-    // FIX: Dark mode sync
-    initTheme();
+const KasirMain = (function() {
+    'use strict';
     
-    if (typeof auth !== 'undefined') {
-        auth.onAuthStateChanged(function(user) {
-            if (user) {
-                initKasir();
-            } else {
-                if (!window.location.pathname.includes('login.html')) {
-                    window.location.replace('../login.html');
-                }
-            }
-        });
-    } else {
-        initKasir();
-    }
-});
-
-// FIX: Theme sync function
-function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    // State
+    const state = {
+        produk: [],
+        kategori: [],
+        keranjang: [],
+        filter: {
+            kategori: '',
+            search: '',
+            view: 'grid'
+        },
+        isLoading: false
+    };
     
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'theme') {
-            document.documentElement.setAttribute('data-theme', e.newValue || 'light');
-        }
-    });
-}
-
-function initKasir() {
-    loadProduk();
-    loadPelanggan();
-    loadKategori();
-    setupEventListeners();
-    setupKeyboardShortcuts();
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
-    checkKasirStatus();
-}
-
-function setupEventListeners() {
-    // Toggle view
-    document.querySelectorAll('.view-btn-modern').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const view = this.getAttribute('data-view');
-            toggleView(view);
-        });
-    });
+    // DOM Elements Cache
+    let elements = {};
     
-    // Jenis transaksi
-    document.querySelectorAll('.type-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const jenis = this.getAttribute('data-jenis');
-            switchJenisTransaksi(jenis);
-        });
-    });
-    
-    // Tombol manual
-    const btnManual = document.getElementById('btn-transaksi-manual');
-    if (btnManual) {
-        btnManual.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openModal('modal-transaksi-manual');
-        });
-        
-        btnManual.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openModal('modal-transaksi-manual');
-        });
-    }
-    
-    // Quick amount buttons
-    document.querySelectorAll('.quick-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const amount = this.getAttribute('data-amount');
-            const input = document.getElementById('jumlah-bayar');
-            if (amount) {
-                input.value = amount;
-            } else if (this.classList.contains('uang-pas')) {
-                const totalText = document.getElementById('total-bayar')?.textContent || '0';
-                const total = parseRupiah(totalText);
-                input.value = total;
-            }
-            hitungKembalian();
-        });
-    });
-    
-    // Metode pembayaran
-    const metodeSelect = document.getElementById('metode-pembayaran');
-    if (metodeSelect) {
-        metodeSelect.addEventListener('change', handleMetodeChange);
-    }
-    
-    // Jumlah bayar
-    const jumlahBayar = document.getElementById('jumlah-bayar');
-    if (jumlahBayar) {
-        jumlahBayar.addEventListener('input', hitungKembalian);
-    }
-    
-    // Tombol bayar
-    const btnBayar = document.getElementById('btn-bayar');
-    if (btnBayar) {
-        btnBayar.addEventListener('click', function(e) {
-            e.preventDefault();
-            prosesPembayaran();
-        });
-    }
-    
-    // Search input - FIX: Panggil filterProduk dengan kategori aktif
-    const searchInput = document.getElementById('search-produk');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const activeChip = document.querySelector('.kategori-chip.active');
-            const kategori = activeChip ? activeChip.dataset.kategori : '';
-            filterProduk(kategori);
-        });
-    }
-    
-    // Mobile cart button
-    const btnCartMobile = document.getElementById('btn-cart-mobile');
-    if (btnCartMobile) {
-        btnCartMobile.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleKeranjangMobile();
-        });
-    }
-    
-    // Close keranjang mobile saat klik outside
-    document.addEventListener('click', function(e) {
-        const keranjang = document.getElementById('keranjang-section');
-        const btnCart = document.getElementById('btn-cart-mobile');
-        
-        if (keranjang && keranjang.classList.contains('open')) {
-            if (!keranjang.contains(e.target) && !btnCart.contains(e.target)) {
-                keranjang.classList.remove('open');
-            }
-        }
-    });
-}
-
-function setupKeyboardShortcuts() {
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'k') {
-            e.preventDefault();
-            const searchInput = document.getElementById('search-produk');
-            if (searchInput) searchInput.focus();
-        }
-        
-        if (e.key === 'F2') {
-            e.preventDefault();
-            const jumlahBayar = document.getElementById('jumlah-bayar');
-            if (jumlahBayar) jumlahBayar.focus();
-        }
-        
-        if (e.key === 'F4') {
-            e.preventDefault();
-            openModal('modal-transaksi-manual');
-        }
-        
-        if (e.key === 'Escape') {
-            closeAllModals();
-        }
-    });
-}
-
-async function loadProduk() {
-    try {
-        const container = document.getElementById('produk-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="loading-produk" style="grid-column: 1/-1;">
-                    <div class="spinner"></div>
-                    <p>Memuat produk...</p>
-                </div>
-            `;
-        }
-        
-        if (typeof database === 'undefined') {
-            throw new Error('Database not initialized');
-        }
-        
-        // Load dari cache dulu untuk tampilkan sementara
-        const cached = localStorage.getItem('produk_data_cache');
-        if (cached) {
-            try {
-                const cachedData = JSON.parse(cached);
-                if (cachedData && cachedData.length > 0) {
-                    console.log('[Kasir] Loading from cache:', cachedData.length, 'produk');
-                    produkData = cachedData;
-                    renderProduk(produkData);
-                    
-                    if (container) {
-                        container.innerHTML = '';
-                    }
-                }
-            } catch (e) {
-                console.error('[Kasir] Error parsing cache:', e);
-            }
-        }
-        
-        // Load fresh data dari Firebase
-        const snapshot = await database.ref('produk').orderByChild('status').equalTo('aktif').once('value');
-        const freshData = [];
-        
-        snapshot.forEach(child => {
-            const val = child.val();
-            freshData.push({
-                id: child.key,
-                kode: (val.kode || '').toString(),
-                barcode: (val.barcode || '').toString(),
-                nama: (val.nama || '').toString(),
-                kategori: (val.kategori || '').toString(), // ID kategori
-                kategori_nama: (val.kategori_nama || '').toString(),
-                satuan: (val.satuan || 'pcs').toString(),
-                harga_jual: parseInt(val.harga_jual || val.hargaJual || 0),
-                harga_modal: parseInt(val.harga_modal || val.hargaModal || 0),
-                stok: parseInt(val.stok || 0),
-                gambar: val.gambar || null,
-                status: (val.status || 'aktif').toString().toLowerCase()
-            });
-        });
-        
-        // Update cache dan render ulang jika ada perubahan
-        if (freshData.length > 0) {
-            produkData = freshData;
-            localStorage.setItem('produk_data_cache', JSON.stringify(freshData));
-            localStorage.setItem('produk_last_update', Date.now());
-            console.log('[Kasir] Fresh data loaded:', freshData.length, 'produk');
-            renderProduk(produkData);
-        } else if (!cached) {
-            if (container) {
-                container.innerHTML = `
-                    <div class="loading-produk" style="grid-column: 1/-1;">
-                        <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <p>Belum ada produk</p>
-                    </div>
-                `;
-            }
-        }
-        
-    } catch (error) {
-        console.error('Error loading produk:', error);
-        
-        // Fallback ke cache jika error
-        const cached = localStorage.getItem('produk_data_cache');
-        if (cached) {
-            try {
-                produkData = JSON.parse(cached);
-                renderProduk(produkData);
-                showToast('Menggunakan data cache', 'warning');
-                return;
-            } catch (e) {
-                console.error('Error parsing cache:', e);
-            }
-        }
-        
-        const container = document.getElementById('produk-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="loading-produk" style="grid-column: 1/-1;">
-                    <i class="fas fa-exclamation-circle" style="font-size: 48px; color: var(--accent-rose); margin-bottom: 15px;"></i>
-                    <p>Gagal memuat produk</p>
-                    <button class="btn btn-primary" onclick="loadProduk()" style="margin-top: 15px;">
-                        <i class="fas fa-sync"></i> Coba Lagi
-                    </button>
-                </div>
-            `;
-        }
-    }
-}
-
-function renderProduk(produkList) {
-    const container = document.getElementById('produk-container');
-    if (!container) return;
-    
-    if (produkList.length === 0) {
-        container.innerHTML = `
-            <div class="loading-produk" style="grid-column: 1/-1;">
-                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                <p>Tidak ada produk</p>
-            </div>
-        `;
-        return;
-    }
-    
-    // FIX: Set class modern dengan view yang benar
-    container.className = `produk-container-modern ${currentView}-view`;
-    
-    // Gunakan module yang sudah ada (ProdukGrid & ProdukList)
-    if (currentView === 'grid') {
-        if (typeof ProdukGrid !== 'undefined') {
-            ProdukGrid.render(produkList, container);
-        } else {
-            console.error('ProdukGrid module not loaded');
-        }
-    } else {
-        if (typeof ProdukList !== 'undefined') {
-            ProdukList.render(produkList, container);
-        } else {
-            console.error('ProdukList module not loaded');
-        }
-    }
-}
-
-function toggleView(view) {
-    currentView = view;
-    localStorage.setItem('kasir_view_preference', view); // FIX: Simpan preference
-    
-    document.querySelectorAll('.view-btn-modern').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const activeBtn = document.querySelector(`.view-btn-modern[data-view="${view}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
-    
-    // FIX: Panggil filterProduk dengan kategori aktif
-    const activeChip = document.querySelector('.kategori-chip.active');
-    const kategori = activeChip ? activeChip.dataset.kategori : '';
-    filterProduk(kategori);
-}
-
-function switchJenisTransaksi(jenis) {
-    currentJenis = jenis;
-    
-    document.querySelectorAll('.type-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const activeBtn = document.querySelector(`.type-btn[data-jenis="${jenis}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
-    
-    if (jenis === 'topup') {
-        openModal('modal-topup');
-    } else if (jenis === 'tarik') {
-        openModal('modal-tarik');
-    }
-}
-
-function handleMetodeChange() {
-    const metode = document.getElementById('metode-pembayaran')?.value;
-    const groupPelanggan = document.getElementById('group-pelanggan');
-    const groupBayar = document.getElementById('group-bayar');
-    const groupKembalian = document.getElementById('group-kembalian');
-    
-    if (groupPelanggan) {
-        groupPelanggan.style.display = metode === 'hutang' ? 'block' : 'none';
-    }
-    if (groupBayar) {
-        groupBayar.style.display = metode === 'hutang' ? 'none' : 'block';
-    }
-    if (groupKembalian) {
-        groupKembalian.style.display = metode === 'hutang' ? 'none' : 'block';
-    }
-}
-
-function hitungKembalian() {
-    const keranjang = window.Keranjang ? window.Keranjang.getItems() : [];
-    const total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
-    const bayarInput = document.getElementById('jumlah-bayar');
-    const bayar = bayarInput ? (parseRupiah(bayarInput.value) || 0) : 0;
-    const kembalian = bayar - total;
-    
-    const kembalianEl = document.getElementById('kembalian');
-    if (!kembalianEl) return;
-    
-    kembalianEl.textContent = formatRupiah(Math.abs(kembalian));
-    
-    if (kembalian < 0) {
-        kembalianEl.style.color = 'var(--accent-rose)';
-        kembalianEl.textContent = '-' + kembalianEl.textContent;
-    } else {
-        kembalianEl.style.color = 'var(--accent-indigo)';
-    }
-}
-
-async function loadKategori() {
-    try {
-        if (typeof database === 'undefined') return;
-        
-        const snapshot = await database.ref('kategori').orderByChild('nama').once('value');
-        const scrollContainer = document.getElementById('kategori-scroll');
-        if (!scrollContainer) return;
-        
-        // FIX: Build kategoriMap
-        kategoriMap = {};
-        snapshot.forEach(child => {
-            const kategori = child.val();
-            kategoriMap[child.key] = kategori.nama || '';
-            kategoriMap[(kategori.nama || '').toLowerCase()] = kategori.nama || '';
-        });
-        
-        const semuaBtn = scrollContainer.querySelector('.kategori-chip');
-        if (!semuaBtn) return;
-        
-        const newSemuaBtn = semuaBtn.cloneNode(true);
-        scrollContainer.innerHTML = '';
-        scrollContainer.appendChild(newSemuaBtn);
-        
-        newSemuaBtn.addEventListener('click', function() {
-            document.querySelectorAll('.kategori-chip').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            filterProduk('');
-        });
-        
-        snapshot.forEach(child => {
-            const kategori = child.val();
-            const btn = document.createElement('button');
-            btn.className = 'kategori-chip';
-            btn.dataset.kategori = child.key; // FIX: Simpan ID kategori
-            btn.innerHTML = `<span>${kategori.nama}</span>`;
-            scrollContainer.appendChild(btn);
-        });
-        
-        // Event delegation
-        scrollContainer.addEventListener('click', function(e) {
-            const chip = e.target.closest('.kategori-chip');
-            if (!chip) return;
-            
-            document.querySelectorAll('.kategori-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            
-            filterProduk(chip.dataset.kategori);
-        });
-        
-    } catch (error) {
-        console.error('Error loading kategori:', error);
-    }
-}
-
-// FIX: Fungsi filterProduk yang benar
-function filterProduk(kategori) {
-    const searchTerm = document.getElementById('search-produk')?.value.toLowerCase() || '';
-    let filtered = [...produkData];
-    
-    // FIX: Filter by kategori ID atau nama
-    if (kategori) {
-        const selectedLower = kategori.toLowerCase();
-        
-        filtered = filtered.filter(p => {
-            const prodKategori = p.kategori.toLowerCase(); // ID kategori
-            const prodKategoriNama = (kategoriMap[p.kategori] || p.kategori_nama || '').toLowerCase();
-            
-            // Match jika ID kategori sama ATAU nama kategori sama
-            return prodKategori === selectedLower || 
-                   prodKategoriNama === selectedLower;
-        });
-        
-        console.log('[Kasir] Filter by kategori:', kategori, 'Result:', filtered.length);
-    }
-    
-    // Filter by search term
-    if (searchTerm) {
-        filtered = filtered.filter(p => 
-            p.nama?.toLowerCase().includes(searchTerm) ||
-            (p.kode && p.kode.toLowerCase().includes(searchTerm)) ||
-            (p.barcode && p.barcode.toLowerCase().includes(searchTerm))
-        );
-    }
-    
-    renderProduk(filtered);
-}
-
-function cleanItemsForFirebase(items) {
-    return items.map(item => {
-        const cleanItem = {
-            id: item.id || '',
-            nama: item.nama || '',
-            harga_jual: item.harga_jual || 0,
-            harga_modal: item.harga_modal || 0,
-            qty: item.qty || 1,
-            subtotal: item.subtotal || 0,
-            jenis: item.jenis || 'penjualan',
-            keterangan: item.keterangan || '',
-            laba: ((item.harga_jual || 0) - (item.harga_modal || 0)) * (item.qty || 1)
-        };
-        
-        if (item.gambar && item.gambar !== undefined && item.gambar !== null) {
-            cleanItem.gambar = item.gambar;
-        }
-        
-        if (item.jenis === 'topup') {
-            cleanItem.provider = item.provider || '';
-            cleanItem.nominal = item.nominal || 0;
-            cleanItem.fee = item.fee || 0;
-        } else if (item.jenis === 'tarik') {
-            cleanItem.nominal = item.nominal || 0;
-            cleanItem.fee = item.fee || 0;
-        }
-        
-        return cleanItem;
-    });
-}
-
-// =============================================================================
-// PROSES PEMBAYARAN - PERBAIKAN UPDATE STOK
-// =============================================================================
-async function prosesPembayaran() {
-    const keranjang = window.Keranjang ? window.Keranjang.getItems() : [];
-    
-    if (keranjang.length === 0) {
-        showToast('Keranjang masih kosong', 'warning');
-        return;
-    }
-
-    const total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
-    const metode = document.getElementById('metode-pembayaran')?.value || 'tunai';
-    const bayar = parseRupiah(document.getElementById('jumlah-bayar')?.value) || 0;
-    
-    if (metode === 'tunai' && bayar < total) {
-        showToast('Jumlah bayar kurang dari total', 'error');
-        return;
-    }
-    
-    if (metode === 'hutang') {
-        const pelanggan = document.getElementById('select-pelanggan')?.value;
-        if (!pelanggan) {
-            showToast('Pilih pelanggan untuk transaksi hutang', 'warning');
+    // Initialize
+    function init() {
+        cacheElements();
+        if (!elements.container) {
+            console.warn('KasirMain: Container not found');
             return;
         }
+        
+        loadKategori();
+        loadProduk();
+        bindEvents();
+        setupRealtimeListener();
+        
+        console.log('KasirMain initialized');
     }
     
-    const btnBayar = document.getElementById('btn-bayar');
-    if (btnBayar) {
-        btnBayar.disabled = true;
-        btnBayar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-    }
-    
-    try {
-        let session = null;
-        const sessionData = localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session');
-        if (sessionData) {
-            try {
-                session = JSON.parse(sessionData);
-            } catch (e) {
-                console.error('Error parsing session:', e);
-            }
-        }
-        
-        if (!session || !session.uid) {
-            const user = auth?.currentUser;
-            if (!user) throw new Error('Sesi habis, silakan login ulang');
-            
-            session = {
-                uid: user.uid,
-                nama: user.displayName || user.email?.split('@')[0] || 'Kasir',
-                role: 'kasir',
-                shift: 'shift-1'
-            };
-        }
-        
-        const today = getToday();
-        const kodeTransaksi = generateKodeTransaksi();
-        const cleanItems = cleanItemsForFirebase(keranjang);
-        
-        const transaksiData = {
-            kode: kodeTransaksi,
-            tanggal: today,
-            waktu: new Date().toISOString(),
-            kasir_id: session.uid,
-            kasir_nama: session.nama,
-            shift: session.shift || 'shift-1',
-            items: cleanItems,
-            subtotal: total,
-            diskon: 0,
-            total: total,
-            metode_pembayaran: metode,
-            bayar: metode === 'hutang' ? 0 : bayar,
-            kembalian: metode === 'tunai' ? (bayar - total) : 0,
-            pelanggan_id: metode === 'hutang' ? document.getElementById('select-pelanggan').value : null,
-            status: 'selesai',
-            created_at: firebase.database.ServerValue?.TIMESTAMP || Date.now()
+    // Cache DOM elements
+    function cacheElements() {
+        elements = {
+            container: document.getElementById('produk-container'),
+            searchInput: document.getElementById('search-produk'),
+            kategoriSelect: document.getElementById('filter-kategori'),
+            kategoriChips: document.getElementById('kategori-scroll'),
+            viewGrid: document.getElementById('view-grid'),
+            viewList: document.getElementById('view-list'),
+            lastUpdate: document.getElementById('last-update')
         };
-        
-        if (typeof database !== 'undefined') {
-            // Simpan transaksi
-            await database.ref(`transaksi/${today}/${kodeTransaksi}`).set(transaksiData);
-            
-            // Update stok produk
-            for (const item of keranjang) {
-                if (item.jenis === 'penjualan' && item.id && !item.id.startsWith('manual_')) {
-                    const produkRef = database.ref(`produk/${item.id}`);
-                    const snapshot = await produkRef.once('value');
-                    const produk = snapshot.val();
-                    
-                    if (produk) {
-                        const currentStok = parseInt(produk.stok) || 0;
-                        const qty = parseInt(item.qty) || 1;
-                        const newStok = Math.max(0, currentStok - qty);
-                        const currentTerjual = parseInt(produk.terjual) || 0;
-                        
-                        console.log(`[Kasir] Update stok ${produk.nama}: ${currentStok} -> ${newStok}`);
-                        
-                        await produkRef.update({
-                            stok: newStok,
-                            terjual: currentTerjual + qty,
-                            updated_at: Date.now()
-                        });
-                        
-                        // Update cache
-                        const cached = localStorage.getItem('produk_data_cache');
-                        if (cached) {
-                            try {
-                                const cachedData = JSON.parse(cached);
-                                const idx = cachedData.findIndex(p => p.id === item.id);
-                                if (idx >= 0) {
-                                    cachedData[idx].stok = newStok;
-                                    cachedData[idx].terjual = currentTerjual + qty;
-                                    localStorage.setItem('produk_data_cache', JSON.stringify(cachedData));
-                                }
-                            } catch (e) {
-                                console.error('Error updating cache:', e);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            await updateDailyData(session.uid, keranjang, total);
-            
-            if (metode === 'hutang') {
-                await catatHutang(transaksiData);
-            }
-        }
-        
-        window.Keranjang.clear();
-        window.Keranjang.clearDraft();
-        
-        const jumlahBayarInput = document.getElementById('jumlah-bayar');
-        if (jumlahBayarInput) jumlahBayarInput.value = '';
-        
-        showToast(`Transaksi ${kodeTransaksi} berhasil`, 'success');
-        
-        // Reload produk untuk refresh stok
-        setTimeout(loadProduk, 500);
-        
-    } catch (error) {
-        console.error('Error proses pembayaran:', error);
-        showToast('Gagal memproses pembayaran: ' + error.message, 'error');
-    } finally {
-        if (btnBayar) {
-            btnBayar.disabled = false;
-            btnBayar.innerHTML = '<i class="fas fa-check-circle"></i> Bayar Sekarang';
-        }
     }
-}
-
-async function updateDailyData(uid, items, total) {
-    if (typeof database === 'undefined') return;
     
-    const today = getToday();
-    const dailyRef = database.ref(`daily_data/${uid}/${today}`);
-    const snapshot = await dailyRef.once('value');
-    const current = snapshot.val() || {};
-    
-    let penjualanProduk = 0;
-    let topup = 0;
-    let tarikTunai = 0;
-    let laba = 0;
-    let uangMasuk = 0;
-    let uangKeluar = 0;
-    
-    items.forEach(item => {
-        if (item.jenis === 'penjualan') {
-            const itemLaba = (item.harga_jual - (item.harga_modal || 0)) * item.qty;
-            penjualanProduk += item.subtotal;
-            laba += itemLaba;
-            uangMasuk += item.subtotal;
-        } else if (item.jenis === 'topup') {
-            const nominal = item.nominal || 0;
-            const fee = item.fee || 0;
-            const totalTopup = item.subtotal || (nominal + fee);
-            topup += totalTopup;
-            uangMasuk += totalTopup;
-            laba += fee;
-        } else if (item.jenis === 'tarik') {
-            const nominal = item.nominal || 0;
-            const fee = item.fee || 0;
-            tarikTunai += nominal;
-            uangKeluar += nominal;
-            uangMasuk += fee;
-            laba += fee;
-        } else if (item.jenis === 'manual') {
-            const itemLaba = (item.harga_jual - (item.harga_modal || 0)) * item.qty;
-            penjualanProduk += item.subtotal;
-            laba += itemLaba;
-            uangMasuk += item.subtotal;
-        }
-    });
-    
-    await dailyRef.update({
-        penjualan_produk: (current.penjualan_produk || 0) + penjualanProduk,
-        laba: (current.laba || 0) + laba,
-        total_transaksi: (current.total_transaksi || 0) + 1,
-        modal_awal: current.modal_awal || 0,
-        uang_masuk: (current.uang_masuk || 0) + uangMasuk,
-        uang_keluar: (current.uang_keluar || 0) + uangKeluar,
-        topup: (current.topup || 0) + topup,
-        tarik_tunai: (current.tarik_tunai || 0) + tarikTunai,
-        hutang_masuk: current.hutang_masuk || 0,
-        last_update: firebase.database.ServerValue?.TIMESTAMP || Date.now()
-    });
-}
-
-async function catatHutang(transaksi) {
-    if (!transaksi.pelanggan_id || typeof database === 'undefined') return;
-    
-    const hutangRef = database.ref(`hutang/${transaksi.pelanggan_id}`).push();
-    
-    await hutangRef.set({
-        transaksi_id: transaksi.kode,
-        tanggal: transaksi.tanggal,
-        jumlah: transaksi.total,
-        sisa: transaksi.total,
-        status: 'belum_lunas',
-        items: transaksi.items,
-        created_at: firebase.database.ServerValue?.TIMESTAMP || Date.now()
-    });
-    
-    const pelangganRef = database.ref(`pelanggan/${transaksi.pelanggan_id}`);
-    const snapshot = await pelangganRef.once('value');
-    const pelanggan = snapshot.val() || {};
-    
-    await pelangganRef.update({
-        total_hutang: (pelanggan.total_hutang || 0) + transaksi.total
-    });
-}
-
-async function loadPelanggan() {
-    try {
-        if (typeof database === 'undefined') return;
+    // Load Kategori dari Firebase
+    function loadKategori() {
+        const kategoriRef = firebase.database().ref('kategori');
         
-        const snapshot = await database.ref('pelanggan').orderByChild('nama').once('value');
-        const select = document.getElementById('select-pelanggan');
-        if (!select) return;
-        
-        pelangganData = [];
-        select.innerHTML = '<option value="">Pilih Pelanggan</option>';
-        
-        snapshot.forEach(child => {
-            const pelanggan = child.val();
-            pelangganData.push({ id: child.key, ...pelanggan });
+        kategoriRef.once('value', (snapshot) => {
+            state.kategori = [];
+            const data = snapshot.val();
             
-            const option = document.createElement('option');
-            option.value = child.key;
-            option.textContent = `${pelanggan.nama} ${pelanggan.telepon ? '(' + pelanggan.telepon + ')' : ''}`;
-            select.appendChild(option);
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    state.kategori.push({
+                        id: key,
+                        nama: data[key].nama || 'Tanpa Nama',
+                        icon: data[key].icon || 'fa-tag'
+                    });
+                });
+            }
+            
+            // Add "Umum" as default if no categories
+            if (state.kategori.length === 0) {
+                state.kategori.push({ id: 'umum', nama: 'Umum', icon: 'fa-box' });
+            }
+            
+            renderKategoriOptions();
+            renderKategoriChips();
+        }).catch(err => {
+            console.error('Error loading kategori:', err);
         });
-    } catch (error) {
-        console.error('Error loading pelanggan:', error);
     }
-}
-
-async function checkKasirStatus() {
-    try {
-        const session = JSON.parse(localStorage.getItem('webpos_session') || sessionStorage.getItem('webpos_session') || '{}');
-        if (!session || session.role !== 'kasir' || typeof database === 'undefined') return;
+    
+    // Render Dropdown Kategori
+    function renderKategoriOptions() {
+        if (!elements.kategoriSelect) return;
         
-        const today = getToday();
-        const snapshot = await database.ref(`daily_data/${session.uid}/${today}`).once('value');
-        const data = snapshot.val();
+        let html = '<option value="">Semua Kategori</option>';
         
-        if (!data || data.status === 'closed') {
-            await database.ref(`daily_data/${session.uid}/${today}`).update({
-                status: 'open',
-                opened_at: firebase.database.ServerValue?.TIMESTAMP || Date.now()
+        state.kategori.forEach(kat => {
+            html += `<option value="${kat.id}">${kat.nama}</option>`;
+        });
+        
+        elements.kategoriSelect.innerHTML = html;
+    }
+    
+    // Render Kategori Chips (Filter Cepat)
+    function renderKategoriChips() {
+        if (!elements.kategoriChips) return;
+        
+        let html = `
+            <button class="kategori-chip ${state.filter.kategori === '' ? 'active' : ''}" data-kategori="">
+                <i class="fas fa-th-large"></i>
+                <span>Semua</span>
+            </button>
+        `;
+        
+        state.kategori.forEach(kat => {
+            html += `
+                <button class="kategori-chip ${state.filter.kategori === kat.id ? 'active' : ''}" 
+                        data-kategori="${kat.id}" title="${kat.nama}">
+                    <i class="fas ${kat.icon}"></i>
+                    <span>${kat.nama}</span>
+                </button>
+            `;
+        });
+        
+        elements.kategoriChips.innerHTML = html;
+        
+        // Bind click events
+        elements.kategoriChips.querySelectorAll('.kategori-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const kategoriId = this.dataset.kategori;
+                setKategoriFilter(kategoriId);
             });
-            showToast('Kasir berhasil dibuka', 'success');
+        });
+    }
+    
+    // Set Filter Kategori
+    function setKategoriFilter(kategoriId) {
+        state.filter.kategori = kategoriId;
+        
+        // Update select dropdown
+        if (elements.kategoriSelect) {
+            elements.kategoriSelect.value = kategoriId;
         }
-    } catch (error) {
-        console.error('Error checking kasir status:', error);
+        
+        // Update chips UI
+        document.querySelectorAll('.kategori-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.kategori === kategoriId);
+        });
+        
+        // Apply filter dengan animasi
+        filterAndRender();
+        
+        // Scroll ke container produk
+        elements.container?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-}
-
-function updateDateTime() {
-    const timeEl = document.getElementById('current-time');
-    const dateEl = document.getElementById('current-date');
-    const now = new Date();
     
-    if (timeEl) {
-        timeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    // Load Produk dari Firebase
+    function loadProduk() {
+        state.isLoading = true;
+        showLoading();
+        
+        const produkRef = firebase.database().ref('produk');
+        
+        produkRef.once('value', (snapshot) => {
+            state.produk = [];
+            const data = snapshot.val();
+            
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    // Hanya tampilkan produk aktif
+                    if (data[key].status !== 'nonaktif') {
+                        state.produk.push({
+                            id: key,
+                            nama: data[key].nama || 'Tanpa Nama',
+                            kode: data[key].kode || '',
+                            barcode: data[key].barcode || '',
+                            hargaJual: parseInt(data[key].hargaJual) || 0,
+                            hargaModal: parseInt(data[key].hargaModal) || 0,
+                            stok: parseInt(data[key].stok) || 0,
+                            kategoriId: data[key].kategoriId || 'umum',
+                            gambar: data[key].gambar || null,
+                            satuan: data[key].satuan || 'pcs',
+                            minStok: parseInt(data[key].minStok) || 5
+                        });
+                    }
+                });
+            }
+            
+            state.isLoading = false;
+            filterAndRender();
+            updateLastUpdate();
+            
+        }).catch(err => {
+            console.error('Error loading produk:', err);
+            state.isLoading = false;
+            showError('Gagal memuat produk');
+        });
     }
-    if (dateEl) {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        dateEl.textContent = now.toLocaleDateString('id-ID', options);
-    }
-}
-
-function openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('active');
-}
-
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
-}
-
-function closeAllModals() {
-    document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
-}
-
-function getToday() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-}
-
-function generateKodeTransaksi() {
-    const now = new Date();
-    const date = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    return `TRX${date}${random}`;
-}
-
-function formatRupiah(angka) {
-    if (typeof angka !== 'number') angka = parseInt(angka) || 0;
-    return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-
-function parseRupiah(str) {
-    if (!str) return 0;
-    return parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-}
-
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 16px 24px;
-        border-radius: 12px;
-        color: white;
-        font-weight: 600;
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#6366f1'};
-    `;
-    toast.textContent = message;
-    document.body.appendChild(toast);
     
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+    // Filter dan Render
+    function filterAndRender() {
+        let filtered = [...state.produk];
+        
+        // Filter by kategori
+        if (state.filter.kategori) {
+            filtered = filtered.filter(p => p.kategoriId === state.filter.kategori);
+        }
+        
+        // Filter by search
+        if (state.filter.search) {
+            const searchLower = state.filter.search.toLowerCase().trim();
+            filtered = filtered.filter(p => 
+                p.nama.toLowerCase().includes(searchLower) ||
+                p.kode.toLowerCase().includes(searchLower) ||
+                p.barcode.toLowerCase().includes(searchLower)
+            );
+        }
+        
+        // Sort by nama
+        filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+        
+        renderProduk(filtered);
+    }
+    
+    // Render Loading State
+    function showLoading() {
+        if (!elements.container) return;
+        elements.container.innerHTML = `
+            <div class="loading-produk">
+                <div class="spinner"></div>
+                <p>Memuat produk...</p>
+            </div>
+        `;
+    }
+    
+    // Render Error State
+    function showError(message) {
+        if (!elements.container) return;
+        elements.container.innerHTML = `
+            <div class="empty-state error">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>${message}</p>
+                <button onclick="KasirMain.refresh()" class="btn-retry">
+                    <i class="fas fa-redo"></i> Coba Lagi
+                </button>
+            </div>
+        `;
+    }
+    
+    // Render Produk Grid/List
+    function renderProduk(produkList) {
+        if (!elements.container) return;
+        
+        if (produkList.length === 0) {
+            elements.container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <p>Tidak ada produk</p>
+                    <span>${state.filter.search ? 'Coba kata kunci lain' : 'Tambahkan produk baru'}</span>
+                </div>
+            `;
+            return;
+        }
+        
+        const isGrid = state.filter.view === 'grid';
+        elements.container.className = `produk-container-modern ${isGrid ? 'grid-view' : 'list-view'}`;
+        
+        let html = '';
+        
+        produkList.forEach((produk, index) => {
+            if (isGrid) {
+                html += renderGridItem(produk, index);
+            } else {
+                html += renderListItem(produk, index);
+            }
+        });
+        
+        elements.container.innerHTML = html;
+        
+        // Bind events dengan delay untuk animasi
+        setTimeout(() => {
+            bindProdukEvents();
+        }, 50);
+    }
+    
+    // Render Grid Item
+    function renderGridItem(produk, index) {
+        const stok = produk.stok || 0;
+        const stokClass = stok <= 0 ? 'empty' : stok <= produk.minStok ? 'low' : stok <= 10 ? 'medium' : 'high';
+        const stokText = stok <= 0 ? 'Habis' : stok <= produk.minStok ? 'Kritis' : stok;
+        const isDisabled = stok <= 0;
+        
+        const kategori = state.kategori.find(k => k.id === produk.kategoriId);
+        const kategoriNama = kategori ? kategori.nama : 'Umum';
+        const kategoriIcon = kategori ? kategori.icon : 'fa-box';
+        
+        return `
+            <div class="produk-card-modern ${isDisabled ? 'disabled' : ''}" 
+                 style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
+                <div class="produk-image-modern">
+                    ${produk.gambar ? 
+                        `<img src="${produk.gambar}" alt="${produk.nama}" loading="lazy">` : 
+                        `<i class="fas ${kategoriIcon}"></i>`
+                    }
+                    <span class="stok-badge ${stokClass}">${stokText}</span>
+                </div>
+                <div class="produk-info-modern">
+                    <h4 class="produk-nama-modern" title="${produk.nama}">${produk.nama}</h4>
+                    <p class="produk-kategori-modern">
+                        <i class="fas fa-tag"></i> ${kategoriNama}
+                    </p>
+                    <div class="produk-meta-modern">
+                        <span class="produk-kode">${produk.kode || '-'}</span>
+                        <span class="produk-satuan">${produk.satuan}</span>
+                    </div>
+                    <div class="produk-price-modern">
+                        <span class="harga-jual">Rp ${formatRupiah(produk.hargaJual)}</span>
+                        ${produk.hargaModal > 0 ? `<span class="harga-modal">Rp ${formatRupiah(produk.hargaModal)}</span>` : ''}
+                    </div>
+                </div>
+                <button class="btn-add-cart ${isDisabled ? 'disabled' : ''}" 
+                        data-id="${produk.id}" 
+                        ${isDisabled ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        `;
+    }
+    
+    // Render List Item
+    function renderListItem(produk, index) {
+        const stok = produk.stok || 0;
+        const isDisabled = stok <= 0;
+        
+        const kategori = state.kategori.find(k => k.id === produk.kategoriId);
+        const kategoriNama = kategori ? kategori.nama : 'Umum';
+        
+        return `
+            <div class="produk-list-item-modern ${isDisabled ? 'disabled' : ''}"
+                 style="animation: slideInRight 0.3s ease ${index * 0.03}s both;">
+                <div class="list-checkbox">
+                    <input type="checkbox" class="select-item" data-id="${produk.id}">
+                </div>
+                <div class="list-image">
+                    ${produk.gambar ? 
+                        `<img src="${produk.gambar}" alt="${produk.nama}" loading="lazy">` : 
+                        `<i class="fas fa-box"></i>`
+                    }
+                </div>
+                <div class="list-info">
+                    <h4>${produk.nama}</h4>
+                    <p>
+                        <span class="badge-kategori">${kategoriNama}</span>
+                        <span class="badge-stok ${stok <= 0 ? 'danger' : stok <= 5 ? 'warning' : 'success'}">
+                            Stok: ${stok}
+                        </span>
+                    </p>
+                </div>
+                <div class="list-price">
+                    <span class="price-jual">Rp ${formatRupiah(produk.hargaJual)}</span>
+                </div>
+                <button class="btn-add-cart ${isDisabled ? 'disabled' : ''}" 
+                        data-id="${produk.id}"
+                        ${isDisabled ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        `;
+    }
+    
+    // Bind events untuk produk items
+    function bindProdukEvents() {
+        // Add to cart buttons
+        document.querySelectorAll('.btn-add-cart:not(.disabled)').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const produkId = this.dataset.id;
+                addToCart(produkId);
+                
+                // Visual feedback
+                this.classList.add('clicked');
+                setTimeout(() => this.classList.remove('clicked'), 200);
+            });
+        });
+        
+        // Card click untuk edit (opsional)
+        document.querySelectorAll('.produk-card-modern').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.btn-add-cart')) {
+                    // Bisa tambah fitur quick view di sini
+                }
+            });
+        });
+    }
+    
+    // Add to Cart
+    function addToCart(produkId) {
+        const produk = state.produk.find(p => p.id === produkId);
+        if (!produk) return;
+        
+        // Cek stok
+        if (produk.stok <= 0) {
+            showToast('Stok produk habis!', 'error');
+            return;
+        }
+        
+        // Tambah ke keranjang via global Keranjang module
+        if (window.Keranjang && window.Keranjang.add) {
+            window.Keranjang.add({
+                id: produk.id,
+                nama: produk.nama,
+                hargaJual: produk.hargaJual,
+                hargaModal: produk.hargaModal,
+                stok: produk.stok,
+                gambar: produk.gambar
+            });
+            
+            showToast(`${produk.nama} ditambahkan`, 'success');
+        } else {
+            console.warn('Keranjang module not found');
+        }
+    }
+    
+    // Bind Events
+    function bindEvents() {
+        // Search input dengan debounce
+        if (elements.searchInput) {
+            elements.searchInput.addEventListener('input', debounce(function() {
+                state.filter.search = this.value;
+                filterAndRender();
+            }, 300));
+            
+            // Focus search on Ctrl+K
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    elements.searchInput.focus();
+                }
+            });
+        }
+        
+        // Kategori Select
+        if (elements.kategoriSelect) {
+            elements.kategoriSelect.addEventListener('change', function() {
+                setKategoriFilter(this.value);
+            });
+        }
+        
+        // View Toggle
+        if (elements.viewGrid) {
+            elements.viewGrid.addEventListener('click', () => setView('grid'));
+        }
+        if (elements.viewList) {
+            elements.viewList.addEventListener('click', () => setView('list'));
+        }
+        
+        // Listen for theme changes
+        window.addEventListener('themechange', () => {
+            // Re-render jika perlu adjust warna
+            filterAndRender();
+        });
+    }
+    
+    // Set View Mode
+    function setView(view) {
+        state.filter.view = view;
+        
+        elements.viewGrid?.classList.toggle('active', view === 'grid');
+        elements.viewList?.classList.toggle('active', view === 'list');
+        
+        // Save preference
+        localStorage.setItem('kasir-view-mode', view);
+        
+        filterAndRender();
+    }
+    
+    // Setup Realtime Listener
+    function setupRealtimeListener() {
+        const produkRef = firebase.database().ref('produk');
+        
+        produkRef.on('child_changed', (snapshot) => {
+            const id = snapshot.key;
+            const data = snapshot.val();
+            
+            // Update local data
+            const index = state.produk.findIndex(p => p.id === id);
+            if (index !== -1) {
+                if (data.status === 'nonaktif') {
+                    state.produk.splice(index, 1);
+                } else {
+                    state.produk[index] = { ...state.produk[index], ...data };
+                }
+                filterAndRender();
+            }
+        });
+        
+        produkRef.on('child_added', (snapshot) => {
+            loadProduk(); // Reload untuk simplicity
+        });
+        
+        produkRef.on('child_removed', () => {
+            loadProduk();
+        });
+    }
+    
+    // Helper: Format Rupiah
+    function formatRupiah(angka) {
+        if (!angka) return '0';
+        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+    
+    // Helper: Debounce
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Helper: Show Toast
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    // Update last update time
+    function updateLastUpdate() {
+        if (elements.lastUpdate) {
+            const now = new Date();
+            elements.lastUpdate.textContent = `Terakhir update: ${now.toLocaleTimeString('id-ID')}`;
+        }
+    }
+    
+    // Public API
+    return {
+        init,
+        refresh: loadProduk,
+        setKategoriFilter,
+        getState: () => state,
+        filterAndRender
+    };
+})();
 
-// Global exports
-window.currentView = currentView;
-window.currentJenis = currentJenis;
-window.produkData = produkData;
-window.toggleView = toggleView;
-window.switchJenisTransaksi = switchJenisTransaksi;
-window.loadProduk = loadProduk;
-window.loadKategori = loadKategori;
-window.filterProduk = filterProduk;
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.closeAllModals = closeAllModals;
-window.formatRupiah = formatRupiah;
-window.parseRupiah = parseRupiah;
-window.showToast = showToast;
-window.getToday = getToday;
-window.generateKodeTransaksi = generateKodeTransaksi;
-window.hitungKembalian = hitungKembalian;
-window.cleanItemsForFirebase = cleanItemsForFirebase;
-
-console.log('Kasir Main Module Loaded (Fixed Version)');
+// Auto-init
+document.addEventListener('DOMContentLoaded', () => {
+    // Delay untuk memastikan Firebase siap
+    setTimeout(() => KasirMain.init(), 100);
+});
