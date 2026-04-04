@@ -229,42 +229,37 @@ function jsonResponse(data) {
     renderSection: function() {
         const isVisible = TelegramConfig.sectionVisibility.gasSetup;
         
-        return TelegramUI.renderSectionHeader('Setup Google Apps Script (GAS)', '📋', 'gasSetup') +
-            (isVisible ? `
-            <div class="tg-section-content" style="padding: 20px; border-top: 1px solid #e0e0e0;">
-                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 16px; margin-bottom: 16px; border-radius: 8px;">
-                    <strong>🚀 Cara Setup:</strong>
-                    <ol style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: #555; line-height: 1.8;">
-                        <li>Buka <a href="https://script.google.com" target="_blank" style="color: #2196f3;">script.google.com</a></li>
-                        <li>Klik "New Project" → Hapus code default</li>
-                        <li>Copy kode di bawah → Paste → Save (Ctrl+S)</li>
-                        <li>Deploy → New deployment → Web app</li>
-                        <li><strong>Execute as:</strong> Me | <strong>Access:</strong> Anyone</li>
-                        <li>Copy URL Web App ke kolom "Script URL" di atas</li>
-                    </ol>
-                </div>
+        if (!isVisible) {
+            return TelegramUI.renderSectionHeader('Setup Google Apps Script (GAS)', '📋', 'gasSetup') + 
+                   TelegramUI.renderSectionFooter();
+        }
+        
+        return TelegramUI.renderSectionHeader('Setup Google Apps Script (GAS)', '📋', 'gasSetup') + `
+            <div class="tg-section-content">
+                ${TelegramUI.renderInfoBox('success', '🚀 Cara Setup', [
+                    'Buka <a href="https://script.google.com" target="_blank" style="color: #059669; text-decoration: underline;">script.google.com</a>',
+                    'Klik "New Project" → Hapus code default',
+                    'Copy kode di bawah → Paste → Save (Ctrl+S)',
+                    'Deploy → New deployment → Web app',
+                    '<strong>Execute as:</strong> Me | <strong>Access:</strong> Anyone',
+                    'Copy URL Web App ke kolom "Script URL" di atas'
+                ])}
                 
-                <button id="btnShowGasCode" 
-                        style="padding: 10px 20px; background: #ff9800; color: white; border: none; 
-                               border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button id="btnShowGasCode" class="tg-btn tg-btn-main" style="margin-top: 16px;">
                     📋 Copy Kode GAS
                 </button>
                 
-                <div id="gasCodeContainer" style="display: none; margin-top: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; 
-                                background: #333; color: white; padding: 10px 16px; border-radius: 8px 8px 0 0;">
-                        <span>Code.gs</span>
-                        <button id="btnCopyGas" style="padding: 6px 12px; background: #555; color: white; 
-                                                       border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            📋 Copy
+                <div id="gasCodeContainer" class="tg-gas-container" style="display: none;">
+                    <div class="tg-gas-header">
+                        <span>📄 Code.gs</span>
+                        <button id="btnCopyGas" class="tg-btn tg-btn-outline" style="font-size: 12px; padding: 6px 12px;">
+                            📋 Copy All
                         </button>
                     </div>
-                    <pre id="gasCodeDisplay" style="background: #f5f5f5; padding: 16px; margin: 0; 
-                                                    border-radius: 0 0 8px 8px; overflow-x: auto; 
-                                                    font-size: 12px; line-height: 1.5; max-height: 400px; overflow-y: auto;"></pre>
+                    <pre id="gasCodeDisplay" class="tg-gas-code"></pre>
                 </div>
             </div>
-            ` : '');
+        ` + TelegramUI.renderSectionFooter();
     },
     
     bindEvents: function() {
