@@ -1,35 +1,113 @@
-// Dropdown toggle
-document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-    toggle.addEventListener('click', function(e) {
-        e.preventDefault();
-        const parent = this.closest('.has-dropdown');
-        const menu = parent.querySelector('.dropdown-menu');
-        
-        parent.classList.toggle('active');
-        menu.classList.toggle('show');
-        
-        // Save state
-        const section = this.querySelector('span').textContent.toLowerCase();
-        localStorage.setItem(`sidebar-${section}`, menu.classList.contains('show'));
-    });
-});
+/**
+ * Sidebar & Dropdown - Fixed Version
+ * File: js/components/sidebar.js
+ */
 
-// Restore state
-document.querySelectorAll('.has-dropdown').forEach(item => {
-    const section = item.querySelector('span').textContent.toLowerCase();
-    const isOpen = localStorage.getItem(`sidebar-${section}`) === 'true';
+const Sidebar = {
+    init: function() {
+        console.log('[Sidebar] Initializing...');
+        
+        this.sidebar = document.getElementById('sidebar');
+        this.overlay = document.getElementById('overlay');
+        this.menuToggle = document.querySelector('.menu-toggle') || 
+                         document.getElementById('menu-toggle');
+        
+        // Bind toggle button
+        if (this.menuToggle) {
+            this.menuToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggle();
+            });
+        } else {
+            console.warn('[Sidebar] Menu toggle button not found');
+        }
+        
+        // Bind overlay
+        if (this.overlay) {
+            this.overlay.addEventListener('click', () => this.close());
+        }
+        
+        // Initialize dropdowns
+        this.initDropdowns();
+        
+        // Restore dropdown state
+        this.restoreDropdownState();
+        
+        console.log('[Sidebar] Initialized');
+    },
     
-    if (isOpen || item.classList.contains('active')) {
-        item.classList.add('active');
-        item.querySelector('.dropdown-menu').classList.add('show');
+    toggle: function() {
+        if (!this.sidebar) return;
+        
+        this.sidebar.classList.toggle('open');
+        if (this.overlay) {
+            this.overlay.classList.toggle('active');
+        }
+    },
+    
+    close: function() {
+        if (!this.sidebar) return;
+        
+        this.sidebar.classList.remove('open');
+        if (this.overlay) {
+            this.overlay.classList.remove('active');
+        }
+    },
+    
+    initDropdowns: function() {
+        const headers = document.querySelectorAll('.nav-section-header');
+        
+        headers.forEach(header => {
+            header.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = header.closest('.nav-section');
+                if (!section) return;
+                
+                const dropdown = section.querySelector('.nav-dropdown');
+                const arrow = header.querySelector('.dropdown-arrow');
+                
+                if (dropdown) {
+                    const isOpen = dropdown.classList.toggle('open');
+                    
+                    // Toggle arrow rotation
+                    if (arrow) {
+                        arrow.classList.toggle('rotate', isOpen);
+                    }
+                    
+                    // Toggle active class on header
+                    header.classList.toggle('active', isOpen);
+                    
+                    // Save state
+                    const sectionName = section.classList[1] || 'section';
+                    localStorage.setItem(`dropdown-${sectionName}`, isOpen);
+                }
+            });
+        });
+    },
+    
+    restoreDropdownState: function() {
+        const sections = ['utama', 'transaksi', 'lainnya', 'pengaturan'];
+        
+        sections.forEach(section => {
+            const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
+            if (isOpen) {
+                const dropdown = document.getElementById(`dropdown-${section}`);
+                const header = document.querySelector(`.nav-section.${section} .nav-section-header`);
+                const arrow = header?.querySelector('.dropdown-arrow');
+                
+                if (dropdown) dropdown.classList.add('open');
+                if (header) header.classList.add('active');
+                if (arrow) arrow.classList.add('rotate');
+            }
+        });
     }
-});
+};
 
-// Mobile toggle
-document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
-    document.getElementById('sidebar').classList.toggle('show');
-});
+// Initialize when DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => Sidebar.init());
+} else {
+    Sidebar.init();
+}
 
-document.getElementById('sidebar-toggle').addEventListener('click', function() {
-    document.getElementById('sidebar').classList.toggle('collapsed');
-});
+window.Sidebar = Sidebar;
