@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../css/dashboard-theme.css">
     <link rel="stylesheet" href="css/dashboard-enhanced.css">
     
-    <!-- CSS SPESIFIK KASIR - MODERN -->
+    <!-- CSS SPESIFIK KASIR - MODERN (UPDATE - timpa file lama) -->
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,6 +20,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- Theme Sync (BARU - untuk dark mode antar halaman) -->
+    <script src="../js/theme-sync.js"></script>
 </head>
 <body>
     <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
@@ -161,47 +164,68 @@
         <!-- KASIR CONTAINER -->
         <div class="kasir-container">
             
-            <!-- PRODUK SECTION -->
+            <!-- PRODUK SECTION - UPDATED STRUCTURE -->
             <div class="produk-section">
                 
-                <!-- Sticky Search Header -->
+                <!-- Sticky Search Header - BARU (2 row, tidak tumpang tindih) -->
                 <div class="search-sticky-header">
-                    <div class="search-box-modern">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="search-produk" placeholder="Cari produk...">
-                        <div class="search-shortcuts">
-                            <span class="kbd">Ctrl</span>
-                            <span class="kbd">K</span>
+                    <div class="search-container-modern">
+                        
+                        <!-- ROW 1: Search + Manual -->
+                        <div class="search-row-main">
+                            <div class="search-box-wrapper">
+                                <div class="search-box-modern">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="search-produk" placeholder="Cari produk (nama, kode, barcode)...">
+                                    <div class="search-shortcuts">
+                                        <span class="kbd">Ctrl</span>
+                                        <span class="kbd">K</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-floating-manual" id="btn-transaksi-manual">
+                                <i class="fas fa-plus"></i>
+                                <span>Manual</span>
+                            </button>
                         </div>
+                        
+                        <!-- ROW 2: Filter Kategori + View Toggle -->
+                        <div class="filter-row-modern">
+                            <div class="filter-group">
+                                <label>Kategori:</label>
+                                <select id="filter-kategori" class="filter-select-modern">
+                                    <option value="">Semua Kategori</option>
+                                </select>
+                            </div>
+                            
+                            <div class="view-toggle-modern">
+                                <button class="view-btn-modern active" id="view-grid" data-view="grid" title="Grid View">
+                                    <i class="fas fa-th-large"></i>
+                                </button>
+                                <button class="view-btn-modern" id="view-list" data-view="list" title="List View">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
                     </div>
-                    
-                    <!-- Kategori Chips -->
+                </div>
+                
+                <!-- Kategori Chips - DIPISAH DARI HEADER -->
+                <div class="kategori-section-modern">
+                    <span class="kategori-label">Filter Cepat:</span>
                     <div class="kategori-chips-container">
                         <div class="kategori-scroll-modern" id="kategori-scroll">
                             <button class="kategori-chip active" data-kategori="">
                                 <span>Semua</span>
                             </button>
                         </div>
-                        
-                        <button class="btn-floating-manual" id="btn-transaksi-manual">
-                            <i class="fas fa-plus"></i>
-                            <span>Manual</span>
-                        </button>
                     </div>
                 </div>
                 
-                <!-- View Toggle -->
-                <div class="view-toggle-modern">
-                    <button class="view-btn-modern active" data-view="grid">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-                    <button class="view-btn-modern" data-view="list">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-                
-                <!-- Produk Container -->
-                <div class="produk-container-modern grid-view" id="produk-container">
+                <!-- Produk Container - BARU (minimal 4 kolom di laptop) -->
+                <div id="produk-container" class="produk-container-modern grid-view">
                     <div class="loading-produk">
                         <div class="spinner"></div>
                         <p>Memuat produk...</p>
@@ -210,7 +234,7 @@
                 
             </div>
             
-            <!-- KERANJANG SECTION -->
+            <!-- KERANJANG SECTION - CLASS TETAP SAMA -->
             <div class="keranjang-section-modern" id="keranjang-section">
                 
                 <div class="keranjang-header-modern">
@@ -310,7 +334,7 @@
         <span class="badge-float" id="mobile-count">0</span>
     </button>
 
-    <!-- MODALS -->
+    <!-- MODALS (tetap sama) -->
     <div class="modal" id="modal-transaksi-manual">
         <div class="modal-content modal-lg">
             <div class="modal-header">
@@ -379,7 +403,6 @@
                         <option value="nagari">NAGARI</option>
                         <option value="mandiri">MANDIRI</option>
                         <option value="lainnya">Lainnya</option>
-                        
                     </select>
                 </div>
                 <div class="form-group">
@@ -478,9 +501,11 @@
     <script src="../js/modules/kasir/edit-harga.js"></script>
     <script src="../js/modules/kasir/uang-pas.js"></script>
     <script src="../js/modules/kasir/pencarian-produk.js"></script>
+    <!-- UPDATE - timpa dengan file fix kategori -->
     <script src="../js/modules/kasir/kasir-main.js"></script>
     
     <script>
+        // ... (script bawaan tetap sama)
         function toggleDropdown(section) {
             const dropdown = document.getElementById(`dropdown-${section}`);
             const arrow = document.getElementById(`arrow-${section}`);
@@ -508,6 +533,12 @@
             const newTheme = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('webpos-theme', newTheme);
+            
+            // Trigger sync untuk halaman lain
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'theme',
+                newValue: newTheme
+            }));
         }
         
         function logout() {
