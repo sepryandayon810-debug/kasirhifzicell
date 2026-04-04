@@ -1,154 +1,178 @@
 /**
- * Kategori Manager Module
+ * Kategori Manager - WebPOS Modern
+ * File: js/modules/produk/kategori-manager.js
  */
 
-async function loadKategoriList() {
-    try {
-        const snapshot = await database.ref('kategori').orderByChild('nama').once('value');
-        const container = document.getElementById('kategori-list');
+const KategoriManager = {
+    elements: {},
+    kategoriData: [],
+    editingId: null,
+    
+    init: function() {
+        this.cacheElements();
+        this.setupEventListeners();
+    },
+    
+    cacheElements: function() {
+        this.elements = {
+            modal: document.getElementById('modal-kategori'),
+            btnClose: document.getElementById('close-kategori'),
+            btnCancel: document.getElementById('cancel-kategori'),
+            form: document.getElementById('form-kategori'),
+            inputNama: document.getElementById('kategori-nama'),
+            inputDeskripsi: document.getElementById('kategori-deskripsi'),
+            btnSave: document.getElementById('save-kategori'),
+            listContainer: document.getElementById('kategori-list'),
+            emptyState: document.getElementById('kategori-empty')
+        };
+    },
+    
+    setupEventListeners: function() {
+        this.elements.btnClose?.addEventListener('click', () => this.close());
+        this.elements.btnCancel?.addEventListener('click', () => this.close());
+        this.elements.form?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.save();
+        });
+        
+        // Load data when modal opens
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-kategori-manager')) {
+                this.loadKategori();
+            }
+        });
+    },
+    
+    loadKategori: function() {
+        if (typeof firebase === 'undefined') return;
+        
+        firebase.database().ref('kategori').on('value', (snapshot) => {
+            this.kategoriData = [];
+            snapshot.forEach(child => {
+                this.kategoriData.push({
+                    id: child.key,
+                    ...child.val()
+                });
+            });
+            this.renderList();
+        });
+    },
+    
+    renderList: function() {
+        const container = this.elements.listContainer;
+        const empty = this.elements.emptyState;
         
         if (!container) return;
         
-        container.innerHTML = '';
-        
-        if (!snapshot.exists()) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Belum ada kategori</p>';
+        if (this.kategoriData.length === 0) {
+            container.innerHTML = '';
+            if (empty) empty.style.display = 'block';
             return;
         }
         
-        snapshot.forEach(child => {
-            const kategori = child.val();
-            const item = document.createElement('div');
-            item.className = 'kategori-item';
-            item.innerHTML = `
-                <span class="kategori-nama">${kategori.nama}</span>
+        if (empty) empty.style.display = 'none';
+        
+        container.innerHTML = this.kategoriData.map((k, index) => `
+            <div class="kategori-item" style="animation: slideIn 0.3s ease ${index * 0.05}s both">
+                <div class="kategori-info">
+                    <h4>${this.escapeHtml(k.nama)}</h4>
+                    <p>${this.escapeHtml(k.deskripsi || 'Tidak ada deskripsi')}</p>
+                    <span class="kategori-count">${k.count || 0} produk</span>
+                </div>
                 <div class="kategori-actions">
-                    <button class="btn btn-sm btn-info" onclick="editKategori('${child.key}', '${kategori.nama}')" title="Edit">
+                    <button class="btn-icon-sm edit" onclick="KategoriManager.edit('${k.id}')" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="hapusKategori('${child.key}')" title="Hapus">
-                        <i class="fas fa-trash"></i>
+                    <button class="btn-icon-sm delete" onclick="KategoriManager.delete('${k.id}')" title="Hapus">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
-            `;
-            container.appendChild(item);
-        });
-        
-    } catch (error) {
-        console.error('Error load kategori:', error);
-    }
-}
-
-async function tambahKategori() {
-    const input = document.getElementById('nama-kategori-baru');
-    const nama = input.value.trim();
+            </div>
+        `).join('');
+    },
     
-    if (!nama) {
-        alert('Nama kategori tidak boleh kosong');
-        return;
-    }
-    
-    try {
-        // Cek duplikat
-        const snapshot = await database.ref('kategori').orderByChild('nama').equalTo(nama).once('value');
-        if (snapshot.exists()) {
-            alert('Kategori dengan nama tersebut sudah ada');
+    save: function() {
+        const nama = this.elements.inputNama?.value.trim();
+        if (!nama) {
+            showToast('❌ Nama kategori wajib diisi', 'error');
             return;
         }
         
-        await database.ref('kategori').push({
+        const data = {
             nama: nama,
-            created_at: firebase.database.ServerValue.TIMESTAMP
-        });
+            deskripsi: this.elements.inputDeskripsi?.value || '',
+            updated_at: Date.now()
+        };
         
-        input.value = '';
-        loadKategoriList();
-        loadKategoriForFilter(); // Refresh filter di toolbar
+        const btn = this.elements.btnSave;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
         
-        showToast('Kategori berhasil ditambahkan', 'success');
+        const promise = this.editingId 
+            ? firebase.database().ref(`kategori/${this.editingId}`).update(data)
+            : firebase.database().ref('kategori').push({...data, created_at: Date.now(), count: 0});
         
-    } catch (error) {
-        console.error('Error tambah kategori:', error);
-        alert('Gagal menambah kategori');
-    }
-}
-
-async function editKategori(kategoriId, namaLama) {
-    const namaBaru = prompt('Edit nama kategori:', namaLama);
-    
-    if (!namaBaru || namaBaru === namaLama) return;
-    
-    try {
-        await database.ref(`kategori/${kategoriId}`).update({
-            nama: namaBaru.trim(),
-            updated_at: firebase.database.ServerValue.TIMESTAMP
-        });
-        
-        loadKategoriList();
-        loadKategoriForFilter();
-        loadProduk(); // Refresh untuk update nama kategori di produk
-        
-        showToast('Kategori berhasil diupdate', 'success');
-        
-    } catch (error) {
-        console.error('Error edit kategori:', error);
-        alert('Gagal mengupdate kategori');
-    }
-}
-
-async function hapusKategori(kategoriId) {
-    if (!confirm('Hapus kategori ini? Produk dengan kategori ini tidak akan terhapus.')) {
-        return;
-    }
-    
-    try {
-        // Cek apakah ada produk yang menggunakan kategori ini
-        const produkSnapshot = await database.ref('products').orderByChild('kategori').equalTo(kategoriId).once('value');
-        
-        if (produkSnapshot.exists()) {
-            const count = produkSnapshot.numChildren();
-            if (!confirm(`Ada ${count} produk yang menggunakan kategori ini. Kategori akan dihapus dari produk tersebut. Lanjutkan?`)) {
-                return;
-            }
-            
-            // Update produk yang menggunakan kategori ini menjadi tanpa kategori
-            const updates = {};
-            produkSnapshot.forEach(child => {
-                updates[`products/${child.key}/kategori`] = '';
+        promise
+            .then(() => {
+                showToast(this.editingId ? '✅ Kategori diupdate' : '✅ Kategori ditambahkan', 'success');
+                this.resetForm();
+            })
+            .catch(err => {
+                showToast('❌ Gagal menyimpan: ' + err.message, 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             });
-            await database.ref().update(updates);
+    },
+    
+    edit: function(id) {
+        const kategori = this.kategoriData.find(k => k.id === id);
+        if (!kategori) return;
+        
+        this.editingId = id;
+        this.elements.inputNama.value = kategori.nama;
+        this.elements.inputDeskripsi.value = kategori.deskripsi || '';
+        this.elements.btnSave.innerHTML = '<i class="fas fa-save"></i> Update Kategori';
+    },
+    
+    delete: function(id) {
+        const kategori = this.kategoriData.find(k => k.id === id);
+        if (!kategori) return;
+        
+        if (!confirm(`Yakin hapus kategori "${kategori.nama}"?\n\nProduk dengan kategori ini tidak akan terhapus.`)) {
+            return;
         }
         
-        await database.ref(`kategori/${kategoriId}`).remove();
-        
-        loadKategoriList();
-        loadKategoriForFilter();
-        loadProduk();
-        
-        showToast('Kategori berhasil dihapus', 'success');
-        
-    } catch (error) {
-        console.error('Error hapus kategori:', error);
-        alert('Gagal menghapus kategori');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const btnTambah = document.getElementById('btn-tambah-kategori');
-    if (btnTambah) {
-        btnTambah.addEventListener('click', tambahKategori);
-    }
+        firebase.database().ref(`kategori/${id}`).remove()
+            .then(() => {
+                showToast('✅ Kategori dihapus', 'success');
+            })
+            .catch(err => {
+                showToast('❌ Gagal menghapus: ' + err.message, 'error');
+            });
+    },
     
-    // Enter untuk tambah
-    const input = document.getElementById('nama-kategori-baru');
-    if (input) {
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') tambahKategori();
-        });
+    resetForm: function() {
+        this.editingId = null;
+        this.elements.form.reset();
+        this.elements.btnSave.innerHTML = '<i class="fas fa-plus"></i> Tambah Kategori';
+    },
+    
+    close: function() {
+        this.resetForm();
+        // Unsubscribe listener
+        if (typeof firebase !== 'undefined') {
+            firebase.database().ref('kategori').off();
+        }
+        ProdukMain.closeModal('modal-kategori');
+    },
+    
+    escapeHtml: function(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
-});
-
-window.loadKategoriList = loadKategoriList;
-window.tambahKategori = tambahKategori;
-window.editKategori = editKategori;
-window.hapusKategori = hapusKategori;
+};
