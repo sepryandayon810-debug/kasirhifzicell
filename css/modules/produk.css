@@ -1003,3 +1003,288 @@
         min-width: 800px;
     }
 }
+
+
+/* ============================================
+   KASIR MODULE - DARK MODE SUPPORT
+   ============================================ */
+
+/* Kategori Chips Dark Mode */
+[data-theme="dark"] .kategori-chip {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .kategori-chip:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .kategori-chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Produk Card Dark Mode */
+[data-theme="dark"] .produk-card-modern {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .produk-card-modern:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+[data-theme="dark"] .produk-nama-modern {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .produk-kategori-modern {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .harga-jual {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .harga-modal {
+    color: var(--text-muted);
+}
+
+/* Stok Badge Dark Mode */
+[data-theme="dark"] .stok-badge.high {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+[data-theme="dark"] .stok-badge.medium {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .stok-badge.low {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+[data-theme="dark"] .stok-badge.empty {
+    background: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+/* Keranjang Dark Mode */
+[data-theme="dark"] .keranjang-section-modern {
+    background: var(--bg-card);
+    border-left-color: var(--border-color);
+}
+
+[data-theme="dark"] .keranjang-header-modern {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .keranjang-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .empty-cart-modern {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .empty-cart-modern i {
+    color: var(--text-muted);
+    opacity: 0.3;
+}
+
+/* Search Box Dark Mode */
+[data-theme="dark"] .search-box-modern {
+    background: var(--input-bg);
+    border-color: var(--input-border);
+}
+
+[data-theme="dark"] .search-box-modern input {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .search-box-modern input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Transaksi Type Buttons Dark Mode */
+[data-theme="dark"] .type-btn {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .type-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .type-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Payment Section Dark Mode */
+[data-theme="dark"] .payment-section-modern {
+    background: var(--bg-tertiary);
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .input-amount-modern {
+    background: var(--input-bg);
+    border-color: var(--input-border);
+}
+
+[data-theme="dark"] .input-amount-modern input {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .quick-btn {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .quick-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Summary Dark Mode */
+[data-theme="dark"] .summary-row-modern {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .summary-row-modern.total {
+    color: var(--text-primary);
+    border-top-color: var(--border-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Loading State */
+.loading-produk {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-state p {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.empty-state span {
+    font-size: 14px;
+}
+
+.empty-state.error i {
+    color: var(--danger);
+    opacity: 1;
+}
+
+.btn-retry {
+    margin-top: 16px;
+    padding: 10px 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-retry:hover {
+    background: var(--primary-dark);
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    border: 1px solid var(--border-color);
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    border-left: 4px solid var(--success);
+}
+
+.toast-error {
+    border-left: 4px solid var(--danger);
+}
+
+.toast-info {
+    border-left: 4px solid var(--info);
+}
