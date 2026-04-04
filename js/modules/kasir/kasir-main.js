@@ -185,20 +185,72 @@ async function loadProduk() {
             throw new Error('Database not initialized');
         }
         
-        const snapshot = await database.ref('products').orderByChild('status').equalTo('aktif').once('value');
-        produkData = [];
+        // PERBAIKAN: Load dari cache dulu untuk tampilkan sementara
+        const cached = localStorage.getItem('produk_data_cache');
+        if (cached) {
+            try {
+                const cachedData = JSON.parse(cached);
+                if (cachedData && cachedData.length > 0) {
+                    console.log('[Kasir] Loading from cache:', cachedData.length, 'produk');
+                    produkData = cachedData;
+                    renderProduk(produkData);
+                    
+                    // Clear loading setelah render cache
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                }
+            } catch (e) {
+                console.error('[Kasir] Error parsing cache:', e);
+            }
+        }
+        
+        // Load fresh data dari Firebase
+        const snapshot = await database.ref('produk').orderByChild('status').equalTo('aktif').once('value');
+        const freshData = [];
         
         snapshot.forEach(child => {
-            produkData.push({
+            freshData.push({
                 id: child.key,
                 ...child.val()
             });
         });
         
-        renderProduk(produkData);
+        // Update cache dan render ulang jika ada perubahan
+        if (freshData.length > 0) {
+            produkData = freshData;
+            localStorage.setItem('produk_data_cache', JSON.stringify(freshData));
+            localStorage.setItem('produk_last_update', Date.now());
+            console.log('[Kasir] Fresh data loaded:', freshData.length, 'produk');
+            renderProduk(produkData);
+        } else if (!cached) {
+            // Jika tidak ada cache dan tidak ada data
+            if (container) {
+                container.innerHTML = `
+                    <div class="loading-produk" style="grid-column: 1/-1;">
+                        <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p>Belum ada produk</p>
+                    </div>
+                `;
+            }
+        }
         
     } catch (error) {
         console.error('Error loading produk:', error);
+        
+        // Fallback ke cache jika error
+        const cached = localStorage.getItem('produk_data_cache');
+        if (cached) {
+            try {
+                produkData = JSON.parse(cached);
+                renderProduk(produkData);
+                showToast('Menggunakan data cache', 'warning');
+                return;
+            } catch (e) {
+                console.error('Error parsing cache:', e);
+            }
+        }
+        
         const container = document.getElementById('produk-container');
         if (container) {
             container.innerHTML = `
@@ -213,7 +265,6 @@ async function loadProduk() {
         }
     }
 }
-
 // FIX: Render produk dengan class modern
 function renderProduk(produkList) {
     const container = document.getElementById('produk-container');
