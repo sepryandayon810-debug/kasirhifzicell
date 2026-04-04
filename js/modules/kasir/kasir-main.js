@@ -1,6 +1,7 @@
 /**
  * Kasir Main Controller - FIXED VERSION
  * File: js/modules/kasir/kasir-main.js
+ * Fix: Filter kategori by ID & nama, Grid 4+ kolom, Dark mode sync
  */
 
 // State global
@@ -8,9 +9,13 @@ let currentView = 'grid';
 let currentJenis = 'penjualan';
 let produkData = [];
 let pelangganData = [];
+let kategoriMap = {}; // FIX: Tambah map untuk lookup nama kategori
 
 // Inisialisasi saat DOM ready
 document.addEventListener('DOMContentLoaded', function() {
+    // FIX: Dark mode sync
+    initTheme();
+    
     if (typeof auth !== 'undefined') {
         auth.onAuthStateChanged(function(user) {
             if (user) {
@@ -25,6 +30,18 @@ document.addEventListener('DOMContentLoaded', function() {
         initKasir();
     }
 });
+
+// FIX: Theme sync function
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'theme') {
+            document.documentElement.setAttribute('data-theme', e.newValue || 'light');
+        }
+    });
+}
 
 function initKasir() {
     loadProduk();
@@ -111,7 +128,7 @@ function setupEventListeners() {
         });
     }
     
-    // Search input
+    // Search input - FIX: Panggil filterProduk dengan kategori aktif
     const searchInput = document.getElementById('search-produk');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
@@ -208,9 +225,20 @@ async function loadProduk() {
         const freshData = [];
         
         snapshot.forEach(child => {
+            const val = child.val();
             freshData.push({
                 id: child.key,
-                ...child.val()
+                kode: (val.kode || '').toString(),
+                barcode: (val.barcode || '').toString(),
+                nama: (val.nama || '').toString(),
+                kategori: (val.kategori || '').toString(), // ID kategori
+                kategori_nama: (val.kategori_nama || '').toString(),
+                satuan: (val.satuan || 'pcs').toString(),
+                harga_jual: parseInt(val.harga_jual || val.hargaJual || 0),
+                harga_modal: parseInt(val.harga_modal || val.hargaModal || 0),
+                stok: parseInt(val.stok || 0),
+                gambar: val.gambar || null,
+                status: (val.status || 'aktif').toString().toLowerCase()
             });
         });
         
@@ -277,7 +305,7 @@ function renderProduk(produkList) {
         return;
     }
     
-    // Set class modern
+    // FIX: Set class modern dengan view yang benar
     container.className = `produk-container-modern ${currentView}-view`;
     
     // Gunakan module yang sudah ada (ProdukGrid & ProdukList)
@@ -298,6 +326,7 @@ function renderProduk(produkList) {
 
 function toggleView(view) {
     currentView = view;
+    localStorage.setItem('kasir_view_preference', view); // FIX: Simpan preference
     
     document.querySelectorAll('.view-btn-modern').forEach(btn => {
         btn.classList.remove('active');
@@ -305,24 +334,10 @@ function toggleView(view) {
     const activeBtn = document.querySelector(`.view-btn-modern[data-view="${view}"]`);
     if (activeBtn) activeBtn.classList.add('active');
     
-    const searchTerm = document.getElementById('search-produk')?.value.toLowerCase() || '';
-    let filtered = [...produkData];
-    
-    if (searchTerm) {
-        filtered = produkData.filter(p => 
-            p.nama.toLowerCase().includes(searchTerm) ||
-            (p.kode && p.kode.toLowerCase().includes(searchTerm))
-        );
-    }
-    
+    // FIX: Panggil filterProduk dengan kategori aktif
     const activeChip = document.querySelector('.kategori-chip.active');
     const kategori = activeChip ? activeChip.dataset.kategori : '';
-    
-    if (kategori) {
-        filtered = filtered.filter(p => p.kategori === kategori);
-    }
-    
-    renderProduk(filtered);
+    filterProduk(kategori);
 }
 
 function switchJenisTransaksi(jenis) {
@@ -386,6 +401,14 @@ async function loadKategori() {
         const scrollContainer = document.getElementById('kategori-scroll');
         if (!scrollContainer) return;
         
+        // FIX: Build kategoriMap
+        kategoriMap = {};
+        snapshot.forEach(child => {
+            const kategori = child.val();
+            kategoriMap[child.key] = kategori.nama || '';
+            kategoriMap[(kategori.nama || '').toLowerCase()] = kategori.nama || '';
+        });
+        
         const semuaBtn = scrollContainer.querySelector('.kategori-chip');
         if (!semuaBtn) return;
         
@@ -403,7 +426,7 @@ async function loadKategori() {
             const kategori = child.val();
             const btn = document.createElement('button');
             btn.className = 'kategori-chip';
-            btn.dataset.kategori = child.key;
+            btn.dataset.kategori = child.key; // FIX: Simpan ID kategori
             btn.innerHTML = `<span>${kategori.nama}</span>`;
             scrollContainer.appendChild(btn);
         });
@@ -424,18 +447,33 @@ async function loadKategori() {
     }
 }
 
+// FIX: Fungsi filterProduk yang benar
 function filterProduk(kategori) {
     const searchTerm = document.getElementById('search-produk')?.value.toLowerCase() || '';
     let filtered = [...produkData];
     
+    // FIX: Filter by kategori ID atau nama
     if (kategori) {
-        filtered = filtered.filter(p => p.kategori === kategori);
+        const selectedLower = kategori.toLowerCase();
+        
+        filtered = filtered.filter(p => {
+            const prodKategori = p.kategori.toLowerCase(); // ID kategori
+            const prodKategoriNama = (kategoriMap[p.kategori] || p.kategori_nama || '').toLowerCase();
+            
+            // Match jika ID kategori sama ATAU nama kategori sama
+            return prodKategori === selectedLower || 
+                   prodKategoriNama === selectedLower;
+        });
+        
+        console.log('[Kasir] Filter by kategori:', kategori, 'Result:', filtered.length);
     }
     
+    // Filter by search term
     if (searchTerm) {
         filtered = filtered.filter(p => 
             p.nama?.toLowerCase().includes(searchTerm) ||
-            (p.kode && p.kode.toLowerCase().includes(searchTerm))
+            (p.kode && p.kode.toLowerCase().includes(searchTerm)) ||
+            (p.barcode && p.barcode.toLowerCase().includes(searchTerm))
         );
     }
     
@@ -557,12 +595,9 @@ async function prosesPembayaran() {
             // Simpan transaksi
             await database.ref(`transaksi/${today}/${kodeTransaksi}`).set(transaksiData);
             
-            // =================================================================
-            // PERBAIKAN: UPDATE STOK PRODUK - GANTI 'products' MENJADI 'produk'
-            // =================================================================
+            // Update stok produk
             for (const item of keranjang) {
                 if (item.jenis === 'penjualan' && item.id && !item.id.startsWith('manual_')) {
-                    // BENAR: pakai 'produk' bukan 'products'
                     const produkRef = database.ref(`produk/${item.id}`);
                     const snapshot = await produkRef.once('value');
                     const produk = snapshot.val();
@@ -573,7 +608,7 @@ async function prosesPembayaran() {
                         const newStok = Math.max(0, currentStok - qty);
                         const currentTerjual = parseInt(produk.terjual) || 0;
                         
-                        console.log(`[Kasir] Update stok ${produk.nama}: ${currentStok} -> ${newStok} (terjual: ${qty})`);
+                        console.log(`[Kasir] Update stok ${produk.nama}: ${currentStok} -> ${newStok}`);
                         
                         await produkRef.update({
                             stok: newStok,
@@ -581,7 +616,7 @@ async function prosesPembayaran() {
                             updated_at: Date.now()
                         });
                         
-                        // Update cache juga agar konsisten
+                        // Update cache
                         const cached = localStorage.getItem('produk_data_cache');
                         if (cached) {
                             try {
@@ -599,7 +634,6 @@ async function prosesPembayaran() {
                     }
                 }
             }
-            // =================================================================
             
             await updateDailyData(session.uid, keranjang, total);
             
@@ -850,4 +884,4 @@ window.generateKodeTransaksi = generateKodeTransaksi;
 window.hitungKembalian = hitungKembalian;
 window.cleanItemsForFirebase = cleanItemsForFirebase;
 
-console.log('Kasir Main Module Loaded');
+console.log('Kasir Main Module Loaded (Fixed Version)');
