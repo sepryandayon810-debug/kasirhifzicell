@@ -6,11 +6,10 @@
     <meta name="theme-color" content="#6366f1">
     <title>WebPOS - Kasir</title>
     
-    <!-- CSS THEME DASHBOARD -->
+    <!-- CSS Theme -->
     <link rel="stylesheet" href="../css/dashboard-theme.css">
-    <link rel="stylesheet" href="css/dashboard-enhanced.css">
-    
-    <!-- CSS SPESIFIK KASIR - MODERN (UPDATE - timpa file lama) -->
+    <link rel="stylesheet" href="../css/dashboard-enhanced.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <link rel="stylesheet" href="../css/modules/kasir.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,26 +18,25 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
-    <!-- Theme Sync (BARU - untuk dark mode antar halaman) -->
-    <script src="../js/theme-sync.js"></script>
+    <!-- Theme Manager (Load first) -->
+    <script src="../js/theme-manager.js"></script>
 </head>
 <body>
     <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
     
-    <!-- MOBILE NAV -->
+    <!-- Mobile Nav -->
     <nav class="mobile-nav">
         <ul>
-            <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
-            <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i> Kasir</a></li>
-            <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
-            <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
-            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Menu</a></li>
+            <li><a href="../dashboard.html"><i class="fas fa-home"></i></a></li>
+            <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i></a></li>
+            <li><a href="./produk.html"><i class="fas fa-box"></i></a></li>
+            <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i></a></li>
+            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i></a></li>
         </ul>
     </nav>
 
-    <!-- SIDEBAR -->
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo"><i class="fas fa-cash-register"></i></div>
@@ -46,7 +44,6 @@
         </div>
         
         <nav class="sidebar-nav">
-            <!-- UTAMA - Dropdown (EXPANDED) -->
             <div class="nav-section utama">
                 <div class="nav-section-header active" onclick="toggleDropdown('utama')">
                     <div class="nav-section-title-group">
@@ -65,7 +62,6 @@
                 </div>
             </div>
             
-            <!-- TRANSAKSI - Dropdown -->
             <div class="nav-section transaksi">
                 <div class="nav-section-header" onclick="toggleDropdown('transaksi')">
                     <div class="nav-section-title-group">
@@ -76,15 +72,14 @@
                 </div>
                 <div class="nav-dropdown" id="dropdown-transaksi">
                     <ul>
-                        <li><a href="./riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat Transaksi</a></li>
-                        <li><a href="./modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal Harian</a></li>
-                        <li><a href="./kas-management.html"><i class="fas fa-wallet"></i> Kas Management</a></li>
-                        <li><a href="./hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang Piutang</a></li>
+                        <li><a href="./riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat</a></li>
+                        <li><a href="./modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal</a></li>
+                        <li><a href="./kas-management.html"><i class="fas fa-wallet"></i> Kas</a></li>
+                        <li><a href="./hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang</a></li>
                     </ul>
                 </div>
             </div>
             
-            <!-- LAINNYA - Dropdown -->
             <div class="nav-section lainnya">
                 <div class="nav-section-header" onclick="toggleDropdown('lainnya')">
                     <div class="nav-section-title-group">
@@ -96,13 +91,12 @@
                 <div class="nav-dropdown" id="dropdown-lainnya">
                     <ul>
                         <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
-                        <li><a href="./data-pelanggan.html"><i class="fas fa-users"></i> Data Pelanggan</a></li>
+                        <li><a href="./data-pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
                         <li><a href="./telegram.html"><i class="fas fa-paper-plane"></i> Telegram</a></li>
                     </ul>
                 </div>
             </div>
             
-            <!-- PENGATURAN - Dropdown -->
             <div class="nav-section pengaturan">
                 <div class="nav-section-header" onclick="toggleDropdown('pengaturan')">
                     <div class="nav-section-title-group">
@@ -116,7 +110,7 @@
                         <li><a href="./setting.html"><i class="fas fa-sliders-h"></i> Setting</a></li>
                         <li><a href="./printer.html"><i class="fas fa-print"></i> Printer</a></li>
                         <li><a href="./user.html"><i class="fas fa-user-cog"></i> User</a></li>
-                        <li><a href="./reset.html"><i class="fas fa-redo"></i> Reset Data</a></li>
+                        <li><a href="./reset.html"><i class="fas fa-redo"></i> Reset</a></li>
                     </ul>
                 </div>
             </div>
@@ -136,9 +130,9 @@
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- Main Content -->
     <main class="main-content" id="main-content">
-        <!-- HEADER -->
+        <!-- Header -->
         <header class="main-header">
             <div class="header-left">
                 <button class="menu-toggle" onclick="toggleSidebar()">
@@ -151,7 +145,7 @@
             </div>
             
             <div class="header-actions">
-                <button class="btn-darkmode" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                <button class="btn-darkmode" data-theme-toggle title="Toggle Dark Mode">
                     <i class="fas fa-moon"></i>
                     <i class="fas fa-sun"></i>
                 </button>
@@ -161,17 +155,17 @@
             </div>
         </header>
 
-        <!-- KASIR CONTAINER -->
+        <!-- Kasir Container -->
         <div class="kasir-container">
             
-            <!-- PRODUK SECTION - UPDATED STRUCTURE -->
+            <!-- Produk Section -->
             <div class="produk-section">
                 
-                <!-- Sticky Search Header - BARU (2 row, tidak tumpang tindih) -->
+                <!-- Search Header -->
                 <div class="search-sticky-header">
                     <div class="search-container-modern">
                         
-                        <!-- ROW 1: Search + Manual -->
+                        <!-- Row 1: Search + Manual -->
                         <div class="search-row-main">
                             <div class="search-box-wrapper">
                                 <div class="search-box-modern">
@@ -184,13 +178,13 @@
                                 </div>
                             </div>
                             
-                            <button class="btn-floating-manual" id="btn-transaksi-manual">
+                            <button class="btn-floating-manual" id="btn-transaksi-manual" onclick="openModal('modal-transaksi-manual')">
                                 <i class="fas fa-plus"></i>
                                 <span>Manual</span>
                             </button>
                         </div>
                         
-                        <!-- ROW 2: Filter Kategori + View Toggle -->
+                        <!-- Row 2: Filter Kategori + View Toggle -->
                         <div class="filter-row-modern">
                             <div class="filter-group">
                                 <label>Kategori:</label>
@@ -212,7 +206,7 @@
                     </div>
                 </div>
                 
-                <!-- Kategori Chips - DIPISAH DARI HEADER -->
+                <!-- Kategori Chips -->
                 <div class="kategori-section-modern">
                     <span class="kategori-label">Filter Cepat:</span>
                     <div class="kategori-chips-container">
@@ -224,7 +218,7 @@
                     </div>
                 </div>
                 
-                <!-- Produk Container - BARU (minimal 4 kolom di laptop) -->
+                <!-- Produk Container -->
                 <div id="produk-container" class="produk-container-modern grid-view">
                     <div class="loading-produk">
                         <div class="spinner"></div>
@@ -233,8 +227,8 @@
                 </div>
                 
             </div>
-            
-            <!-- KERANJANG SECTION - CLASS TETAP SAMA -->
+
+            <!-- Keranjang Section -->
             <div class="keranjang-section-modern" id="keranjang-section">
                 
                 <div class="keranjang-header-modern">
@@ -250,11 +244,11 @@
                         <i class="fas fa-shopping-bag"></i>
                         <span>Penjualan</span>
                     </button>
-                    <button class="type-btn" data-jenis="topup">
+                    <button class="type-btn" data-jenis="topup" onclick="openModal('modal-topup')">
                         <i class="fas fa-mobile-alt"></i>
                         <span>Top Up</span>
                     </button>
-                    <button class="type-btn" data-jenis="tarik">
+                    <button class="type-btn" data-jenis="tarik" onclick="openModal('modal-tarik')">
                         <i class="fas fa-hand-holding-usd"></i>
                         <span>Tarik Tunai</span>
                     </button>
@@ -328,13 +322,15 @@
         </footer>
     </main>
 
-    <!-- MOBILE CART BUTTON -->
-    <button class="btn-cart-mobile" id="btn-cart-mobile">
+    <!-- Mobile Cart Button -->
+    <button class="btn-cart-mobile" id="btn-cart-mobile" onclick="toggleKeranjangMobile()">
         <i class="fas fa-shopping-basket"></i>
         <span class="badge-float" id="mobile-count">0</span>
     </button>
 
-    <!-- MODALS (tetap sama) -->
+    <!-- MODALS -->
+
+    <!-- Modal Transaksi Manual -->
     <div class="modal" id="modal-transaksi-manual">
         <div class="modal-content modal-lg">
             <div class="modal-header">
@@ -344,42 +340,39 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Nama Produk/Item</label>
-                    <input type="text" id="manual-nama" class="form-control" placeholder="Masukkan nama item">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Nama Produk/Item</label>
+                    <input type="text" id="manual-nama" class="form-input-modern" placeholder="Masukkan nama item">
                 </div>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="form-group">
-                            <label>Harga Modal</label>
-                            <input type="number" id="manual-harga-modal" class="form-control" placeholder="0">
-                        </div>
+                <div class="form-row-modern">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Harga Modal</label>
+                        <input type="number" id="manual-harga-modal" class="form-input-modern" placeholder="0">
                     </div>
-                    <div class="col-6">
-                        <div class="form-group">
-                            <label>Harga Jual</label>
-                            <input type="number" id="manual-harga-jual" class="form-control" placeholder="0">
-                        </div>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Harga Jual</label>
+                        <input type="number" id="manual-harga-jual" class="form-input-modern" placeholder="0">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Jumlah</label>
-                    <input type="number" id="manual-jumlah" class="form-control" value="1" min="1">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Jumlah</label>
+                    <input type="number" id="manual-jumlah" class="form-input-modern" value="1" min="1">
                 </div>
-                <div class="form-group">
-                    <label>Keterangan (Opsional)</label>
-                    <textarea id="manual-keterangan" class="form-control" rows="2"></textarea>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Keterangan (Opsional)</label>
+                    <textarea id="manual-keterangan" class="form-textarea-modern" rows="2"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-transaksi-manual')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-manual">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-transaksi-manual')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-manual">
                     <i class="fas fa-plus"></i> Tambah
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Modal Top Up -->
     <div class="modal" id="modal-topup">
         <div class="modal-content">
             <div class="modal-header">
@@ -389,44 +382,39 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Provider</label>
-                    <select id="topup-provider" class="form-control">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Provider</label>
+                    <select id="topup-provider" class="form-select-modern">
                         <option value="ovo">OVO</option>
                         <option value="gopay">GoPay</option>
                         <option value="dana">DANA</option>
                         <option value="linkaja">LinkAja</option>
                         <option value="shopeepay">ShopeePay</option>
-                        <option value="bri">BRI</option>
-                        <option value="bni">BNI</option>
-                        <option value="bca">BCA</option>
-                        <option value="nagari">NAGARI</option>
-                        <option value="mandiri">MANDIRI</option>
-                        <option value="lainnya">Lainnya</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Nominal</label>
-                    <input type="number" id="topup-nominal" class="form-control" placeholder="0">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Nominal</label>
+                    <input type="number" id="topup-nominal" class="form-input-modern" placeholder="0">
                 </div>
-                <div class="form-group">
-                    <label>Admin Fee</label>
-                    <input type="number" id="topup-fee-input" class="form-control" value="0">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Admin Fee</label>
+                    <input type="number" id="topup-fee-input" class="form-input-modern" value="0">
                 </div>
-                <div class="form-group">
-                    <label>Total Bayar</label>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Total Bayar</label>
                     <div class="total-display" id="topup-total">Rp 0</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-topup')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-topup">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-topup')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-topup">
                     <i class="fas fa-plus"></i> Tambah
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Modal Tarik Tunai -->
     <div class="modal" id="modal-tarik">
         <div class="modal-content">
             <div class="modal-header">
@@ -436,76 +424,42 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Nominal Tarik</label>
-                    <input type="number" id="tarik-nominal" class="form-control" placeholder="0">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Nominal Tarik</label>
+                    <input type="number" id="tarik-nominal" class="form-input-modern" placeholder="0">
                 </div>
-                <div class="form-group">
-                    <label>Admin Fee</label>
-                    <input type="number" id="tarik-fee-input" class="form-control" value="0">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Admin Fee</label>
+                    <input type="number" id="tarik-fee-input" class="form-input-modern" value="0">
                 </div>
-                <div class="form-group">
-                    <label>Total Diterima</label>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Total Diterima</label>
                     <div class="total-display" id="tarik-total">Rp 0</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-tarik')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-tarik">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-tarik')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-tarik">
                     <i class="fas fa-plus"></i> Tambah
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="modal-edit-harga">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-edit"></i> Edit Item</h3>
-                <button class="btn-close" onclick="closeModal('modal-edit-harga')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="edit-index">
-                <div class="form-group">
-                    <label>Harga Jual</label>
-                    <input type="number" id="edit-harga-baru" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Jumlah</label>
-                    <input type="number" id="edit-jumlah-baru" class="form-control" min="1">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-edit-harga')">Batal</button>
-                <button class="btn btn-primary" id="btn-simpan-edit">
-                    <i class="fas fa-save"></i> Simpan
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
-    <!-- SCRIPTS -->
+    <!-- Scripts -->
     <script src="../js/firebase-config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/components/darkmode.js"></script>
-    <script src="../js/components/sidebar.js"></script>
+    
+    <!-- Kasir Modules -->
     <script src="../js/modules/kasir/keranjang.js"></script>
-    <script src="../js/modules/kasir/produk-grid.js"></script>
-    <script src="../js/modules/kasir/produk-list.js"></script>
-    <script src="../js/modules/kasir/transaksi-manual.js"></script>
-    <script src="../js/modules/kasir/topup.js"></script>
-    <script src="../js/modules/kasir/tarik-tunai.js"></script>
-    <script src="../js/modules/kasir/edit-harga.js"></script>
-    <script src="../js/modules/kasir/uang-pas.js"></script>
-    <script src="../js/modules/kasir/pencarian-produk.js"></script>
-    <!-- UPDATE - timpa dengan file fix kategori -->
     <script src="../js/modules/kasir/kasir-main.js"></script>
     
     <script>
-        // ... (script bawaan tetap sama)
+        // Sidebar Functions
         function toggleDropdown(section) {
             const dropdown = document.getElementById(`dropdown-${section}`);
             const arrow = document.getElementById(`arrow-${section}`);
@@ -528,19 +482,6 @@
             }
         }
         
-        function toggleDarkMode() {
-            const current = document.documentElement.getAttribute('data-theme');
-            const newTheme = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('webpos-theme', newTheme);
-            
-            // Trigger sync untuk halaman lain
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: 'theme',
-                newValue: newTheme
-            }));
-        }
-        
         function logout() {
             firebase.auth().signOut().then(() => {
                 window.location.replace('../login.html');
@@ -551,18 +492,27 @@
             const btn = document.querySelector('.btn-icon i.fa-sync-alt');
             if (btn) btn.classList.add('fa-spin');
             
-            if (window.loadProduk) {
-                window.loadProduk();
+            if (window.KasirMain) {
+                window.KasirMain.refresh();
             }
             
             setTimeout(() => btn?.classList.remove('fa-spin'), 500);
+        }
+        
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+                document.getElementById('overlay')?.classList.add('active');
+            }
         }
         
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
-                modal.style.display = 'none';
+                setTimeout(() => modal.style.display = 'none', 300);
             }
             document.getElementById('overlay')?.classList.remove('active');
         }
@@ -577,20 +527,12 @@
             document.getElementById('overlay')?.classList.remove('active');
         }
         
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-                setTimeout(() => modal.classList.add('active'), 10);
-                document.getElementById('overlay')?.classList.add('active');
-            }
-        }
-        
         function toggleKeranjangMobile() {
             const keranjang = document.getElementById('keranjang-section');
             keranjang?.classList.toggle('open');
         }
         
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Restore dropdowns
             ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
@@ -606,10 +548,21 @@
                 }
             });
             
-            // Date
+            // Set date
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('current-date').textContent = 
                 new Date().toLocaleDateString('id-ID', options);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('search-produk')?.focus();
+            }
+            if (e.key === 'Escape') {
+                closeAllModals();
+            }
         });
     </script>
 </body>
