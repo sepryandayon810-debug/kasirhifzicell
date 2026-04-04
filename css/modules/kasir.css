@@ -1,20 +1,18 @@
 /* ============================================
    KASIR MODERN - GLASSMORPHISM THEME
-   WebPOS - Fixed Version
+   WebPOS v2.0 - Complete Fixed Version
    ============================================ */
 
-/* ===== KASIR CONTAINER - 80% WIDTH ===== */
+/* ===== KASIR CONTAINER ===== */
 .kasir-container {
     display: grid;
     grid-template-columns: 1fr 380px;
-    gap: 20px;
+    gap: 24px;
     min-height: calc(100vh - 140px);
     align-items: start;
-    max-width: 1400px; /* Batasi lebar maksimal */
-    margin: 0 auto; /* Center */
-    padding: 0 16px;
-    transform: scale(0.95); /* Zoom out 95% = ~80% feel */
-    transform-origin: top center;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px;
 }
 
 /* ===== PRODUK SECTION ===== */
@@ -35,7 +33,7 @@
     gap: 20px;
     position: relative;
     overflow: hidden;
-    min-width: 0; /* Prevent overflow */
+    min-width: 0;
 }
 
 /* ===== SEARCH HEADER ===== */
@@ -214,7 +212,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== PRODUK CONTAINER ===== */
+/* ===== PRODUK CONTAINER - DEFAULT (MOBILE FIRST) ===== */
 .produk-container-modern {
     flex: 1;
     overflow-y: auto;
@@ -224,40 +222,45 @@
 }
 
 .produk-container-modern.grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
 }
 
 .produk-container-modern.list-view {
     grid-template-columns: 1fr;
 }
 
-/* ===== PRODUK CARD ===== */
-.produk-card-modern {
+/* ===== KASIR GRID - LEBIH BESAR (DESKTOP) ===== */
+.kasir-container .produk-container-modern.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.kasir-container .produk-card-modern {
+    border-radius: 20px;
+    padding: 20px;
     background: var(--bg-card);
-    border-radius: 16px;
-    padding: 16px;
     border: 2px solid transparent;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.produk-card-modern:hover {
+.kasir-container .produk-card-modern:hover {
     border-color: var(--accent-indigo);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(99, 102, 241, 0.2);
 }
 
-.produk-card-modern::before {
+.kasir-container .produk-card-modern::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 4px;
     background: linear-gradient(90deg, 
         var(--accent-indigo), 
         var(--accent-purple));
@@ -265,110 +268,140 @@
     transition: transform 0.3s ease;
 }
 
-.produk-card-modern:hover::before {
+.kasir-container .produk-card-modern:hover::before {
     transform: scaleX(1);
 }
 
-.produk-img-container {
-    width: 70px;
-    height: 70px;
-    margin: 0 auto 12px;
+/* ===== CARD IMAGE - BESAR ===== */
+.kasir-container .produk-card-modern .card-image-wrapper,
+.kasir-container .produk-img-container {
     position: relative;
+    aspect-ratio: 4/3;
+    height: 200px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-.produk-img-modern {
+.kasir-container .produk-card-modern .card-image-wrapper img,
+.kasir-container .produk-img-modern {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.kasir-container .produk-img-modern {
     background: linear-gradient(135deg, 
         var(--accent-indigo) 0%, 
         var(--accent-purple) 100%);
-    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
     color: white;
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+    font-size: 48px;
 }
 
-.stock-badge {
+.kasir-container .produk-card-modern:hover .card-image-wrapper img {
+    transform: scale(1.08);
+}
+
+/* ===== STOCK BADGE ===== */
+.kasir-container .stock-badge {
     position: absolute;
-    bottom: -6px;
-    right: -6px;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 10px;
+    bottom: 12px;
+    right: 12px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 700;
     background: var(--accent-emerald);
     color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     z-index: 2;
 }
 
-.stock-badge.low {
+.kasir-container .stock-badge.low {
     background: var(--accent-amber);
 }
 
-.stock-badge.empty {
+.kasir-container .stock-badge.empty {
     background: var(--accent-rose);
 }
 
-.produk-nama-modern {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* ===== CARD CONTENT - BESAR ===== */
+.kasir-container .produk-card-modern .card-content {
+    padding: 0;
 }
 
-.produk-harga-modern {
-    font-size: 16px;
+.kasir-container .produk-card-modern .card-nama,
+.kasir-container .produk-nama-modern {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 48px;
+}
+
+.kasir-container .produk-card-modern .harga-jual,
+.kasir-container .produk-harga-modern {
+    font-size: 24px;
     font-weight: 800;
     color: var(--accent-indigo);
 }
 
-/* ===== ACTION BUTTONS ON CARD ===== */
-.card-actions {
+.kasir-container .produk-card-modern .harga-modal {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-decoration: line-through;
+    margin-top: 4px;
+}
+
+/* ===== CARD ACTIONS ===== */
+.kasir-container .card-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     justify-content: center;
-    margin-top: 12px;
+    margin-top: 16px;
     opacity: 0;
     transform: translateY(10px);
     transition: all 0.3s ease;
 }
 
-.produk-card-modern:hover .card-actions {
+.kasir-container .produk-card-modern:hover .card-actions {
     opacity: 1;
     transform: translateY(0);
 }
 
-.btn-card-action {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+.kasir-container .btn-card-action {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
     transition: all 0.2s ease;
 }
 
-.btn-card-action.edit {
+.kasir-container .btn-card-action.edit {
     background: var(--accent-indigo);
     color: white;
 }
 
-.btn-card-action.delete {
+.kasir-container .btn-card-action.delete {
     background: var(--accent-rose);
     color: white;
 }
 
-.btn-card-action:hover {
+.kasir-container .btn-card-action:hover {
     transform: scale(1.1);
 }
 
@@ -654,11 +687,6 @@
     gap: 4px;
 }
 
-.btn-remove-item[title="Edit"]:hover {
-    background: var(--accent-indigo);
-    color: white;
-}
-
 /* ===== SUMMARY ===== */
 .summary-modern {
     background: var(--bg-hover);
@@ -745,7 +773,7 @@
     border-color: var(--accent-indigo);
 }
 
-/* ===== INPUT AMOUNT - FIX POSITION ===== */
+/* ===== INPUT AMOUNT ===== */
 .input-amount-modern {
     position: relative;
     background: var(--bg-card);
@@ -900,188 +928,7 @@
     justify-content: center;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1200px) {
-    .kasir-container {
-        grid-template-columns: 1fr;
-        transform: none; /* Reset scale di mobile */
-        max-width: 100%;
-    }
-    
-    .keranjang-section-modern {
-        position: fixed;
-        bottom: 70px;
-        left: 16px;
-        right: 16px;
-        top: auto;
-        max-height: 75vh;
-        z-index: 50;
-        display: none;
-        border-radius: 20px 20px 0 0;
-        animation: slideUp 0.3s ease;
-    }
-    
-    .keranjang-section-modern.open {
-        display: flex;
-    }
-    
-    .btn-cart-mobile {
-        display: flex;
-    }
-    
-    .produk-container-modern.grid-view {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .produk-section {
-        padding: 16px;
-    }
-    
-    .search-sticky-header {
-        margin: -16px -16px 12px -16px;
-        padding: 12px;
-    }
-    
-    .kategori-chips-container {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .btn-floating-manual {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .produk-container-modern.grid-view {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-    
-    .produk-card-modern {
-        padding: 12px;
-    }
-    
-    .produk-img-container {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .produk-img-modern {
-        font-size: 24px;
-    }
-    
-    .card-actions {
-        opacity: 1;
-        transform: none;
-        margin-top: 8px;
-    }
-    
-    .transaksi-type-modern {
-        grid-template-columns: 1fr;
-    }
-    
-    .cart-item-modern {
-        grid-template-columns: 40px 1fr auto;
-    }
-    
-    .cart-item-total {
-        display: none;
-    }
-    
-    .produk-list-item {
-        grid-template-columns: 50px 1fr auto;
-        gap: 12px;
-    }
-    
-    .list-item-harga,
-    .list-item-stok {
-        display: none;
-    }
-}
-
-/* ===== ANIMATIONS ===== */
-@keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.produk-card-modern {
-    animation: fadeIn 0.4s ease backwards;
-}
-
-.produk-card-modern:nth-child(1) { animation-delay: 0.05s; }
-.produk-card-modern:nth-child(2) { animation-delay: 0.1s; }
-.produk-card-modern:nth-child(3) { animation-delay: 0.15s; }
-.produk-card-modern:nth-child(4) { animation-delay: 0.2s; }
-
-/* ===== LOADING ===== */
-.loading-produk {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-    grid-column: 1 / -1;
-}
-
-.spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--border);
-    border-top-color: var(--accent-indigo);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ===== UTILITIES ===== */
-.hidden {
-    display: none !important;
-}
-
-.empty-cart-modern {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    color: var(--text-muted);
-    text-align: center;
-}
-
-.empty-cart-modern i {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.3;
-}
-
-.empty-cart-modern p {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 4px;
-}
-
-.empty-cart-modern span {
-    font-size: 12px;
-}
-
-/* ============================================
-   MODAL STYLES - TAMBAHAN
-   ============================================ */
-
-/* ===== MODAL OVERLAY ===== */
+/* ===== MODAL STYLES ===== */
 .modal {
     display: none;
     position: fixed;
@@ -1106,7 +953,6 @@
     opacity: 1;
 }
 
-/* ===== MODAL CONTENT ===== */
 .modal-content {
     background: var(--bg-card);
     border-radius: 24px;
@@ -1131,7 +977,6 @@
     max-width: 600px;
 }
 
-/* ===== MODAL HEADER ===== */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -1154,7 +999,6 @@
     color: var(--accent-indigo);
 }
 
-/* ===== CLOSE BUTTON ===== */
 .btn-close {
     width: 36px;
     height: 36px;
@@ -1177,7 +1021,6 @@
     transform: rotate(90deg);
 }
 
-/* ===== MODAL BODY ===== */
 .modal-body {
     padding: 24px;
     overflow-y: auto;
@@ -1226,7 +1069,6 @@
     font-family: inherit;
 }
 
-/* ===== ROW & COL ===== */
 .modal-body .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1237,7 +1079,6 @@
     min-width: 0;
 }
 
-/* ===== TOTAL DISPLAY ===== */
 .total-display {
     padding: 20px;
     background: linear-gradient(135deg, 
@@ -1251,7 +1092,6 @@
     border: 2px solid var(--accent-indigo);
 }
 
-/* ===== MODAL FOOTER ===== */
 .modal-footer {
     display: flex;
     gap: 12px;
@@ -1261,7 +1101,6 @@
     background: var(--bg-hover);
 }
 
-/* ===== BUTTONS IN MODAL ===== */
 .modal .btn {
     padding: 12px 24px;
     border-radius: 12px;
@@ -1297,105 +1136,131 @@
     color: var(--accent-indigo);
 }
 
-/* ===== RESPONSIVE MODAL ===== */
-@media (max-width: 768px) {
-    .modal {
-        padding: 16px;
-        align-items: flex-end;
-    }
-    
-    .modal-content {
-        max-height: 80vh;
-        border-radius: 20px 20px 0 0;
-        transform: translateY(100%);
-    }
-    
-    .modal.active .modal-content {
-        transform: translateY(0);
-    }
-    
-    .modal-body {
-        padding: 20px;
-        max-height: 60vh;
-    }
-    
-    .modal-body .row {
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.produk-card-modern {
+    animation: fadeIn 0.4s ease backwards;
+}
+
+.produk-card-modern:nth-child(1) { animation-delay: 0.05s; }
+.produk-card-modern:nth-child(2) { animation-delay: 0.1s; }
+.produk-card-modern:nth-child(3) { animation-delay: 0.15s; }
+.produk-card-modern:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== LOADING ===== */
+.loading-produk {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    grid-column: 1 / -1;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent-indigo);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+/* ===== UTILITIES ===== */
+.hidden {
+    display: none !important;
+}
+
+.empty-cart-modern {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.empty-cart-modern i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-cart-modern p {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.empty-cart-modern span {
+    font-size: 12px;
+}
+
+/* ===== RESPONSIVE - TABLET ===== */
+@media (max-width: 1200px) {
+    .kasir-container {
         grid-template-columns: 1fr;
-    }
-    
-    .modal-footer {
-        flex-direction: column;
-        padding: 16px 20px;
-    }
-    
-    .modal .btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* ============================================
-   MOBILE FIX - MODAL & LAYOUT
-   ============================================ */
-
-/* ===== MODAL MOBILE FIX ===== */
-@media (max-width: 768px) {
-    .modal {
-        padding: 0;
-        align-items: flex-end;
-        z-index: 99999;
-    }
-    
-    .modal-content {
-        width: 100%;
         max-width: 100%;
-        max-height: 85vh;
+        padding: 0 16px;
+    }
+    
+    .keranjang-section-modern {
+        position: fixed;
+        bottom: 70px;
+        left: 16px;
+        right: 16px;
+        top: auto;
+        max-height: 75vh;
+        z-index: 50;
+        display: none;
         border-radius: 20px 20px 0 0;
-        margin: 0;
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
+        animation: slideUp 0.3s ease;
     }
     
-    .modal.active .modal-content {
-        transform: translateY(0);
+    .keranjang-section-modern.open {
+        display: flex;
     }
     
-    .modal-header {
-        padding: 16px 20px;
-        border-radius: 20px 20px 0 0;
+    .btn-cart-mobile {
+        display: flex;
     }
     
-    .modal-body {
-        padding: 20px;
-        max-height: 55vh;
+    /* Reset grid kasir ke default di tablet */
+    .kasir-container .produk-container-modern.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
     }
     
-    .modal-footer {
-        padding: 12px 20px;
-        flex-direction: column;
-        gap: 8px;
+    .kasir-container .produk-card-modern .card-image-wrapper,
+    .kasir-container .produk-img-container {
+        height: 160px;
     }
     
-    .modal .btn {
-        width: 100%;
-        justify-content: center;
-        padding: 14px;
+    .kasir-container .produk-card-modern .card-nama,
+    .kasir-container .produk-nama-modern {
+        font-size: 15px;
     }
     
-    /* Overlay lebih gelap */
-    .modal::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: -1;
+    .kasir-container .produk-card-modern .harga-jual,
+    .kasir-container .produk-harga-modern {
+        font-size: 20px;
     }
 }
 
-/* ===== KASIR CONTAINER MOBILE FIX ===== */
+/* ===== RESPONSIVE - MOBILE ===== */
 @media (max-width: 768px) {
     .kasir-container {
-        transform: none;
         padding: 0 12px;
         gap: 16px;
     }
@@ -1434,61 +1299,46 @@
         padding: 12px;
     }
     
+    /* Mobile: 2 kolom */
+    .kasir-container .produk-container-modern.grid-view,
     .produk-container-modern.grid-view {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
     
-    .produk-card-modern {
+    .kasir-container .produk-card-modern {
         padding: 12px;
     }
     
-    .produk-img-container {
-        width: 60px;
-        height: 60px;
+    .kasir-container .produk-card-modern .card-image-wrapper,
+    .kasir-container .produk-img-container {
+        height: 140px;
     }
     
-    .produk-img-modern {
-        font-size: 24px;
-        border-radius: 16px;
+    .kasir-container .produk-img-modern {
+        font-size: 32px;
     }
     
-    .produk-nama-modern {
-        font-size: 12px;
+    .kasir-container .produk-card-modern .card-nama,
+    .kasir-container .produk-nama-modern {
+        font-size: 13px;
+        min-height: 36px;
     }
     
-    .produk-harga-modern {
-        font-size: 14px;
+    .kasir-container .produk-card-modern .harga-jual,
+    .kasir-container .produk-harga-modern {
+        font-size: 16px;
     }
     
-    /* Keranjang mobile */
-    .keranjang-section-modern {
-        position: fixed;
-        bottom: 70px;
-        left: 12px;
-        right: 12px;
-        top: auto;
-        max-height: 75vh;
-        z-index: 9999;
-        display: none;
-        border-radius: 20px 20px 0 0;
-        padding: 16px;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+    .kasir-container .card-actions {
+        opacity: 1;
+        transform: none;
+        margin-top: 10px;
     }
     
-    .keranjang-section-modern.open {
-        display: flex;
-        animation: slideUpMobile 0.3s ease;
-    }
-    
-    @keyframes slideUpMobile {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
-    
-    .keranjang-header-modern {
-        padding-bottom: 12px;
-        margin-bottom: 12px;
+    .kasir-container .btn-card-action {
+        width: 36px;
+        height: 36px;
     }
     
     .transaksi-type-modern {
@@ -1527,9 +1377,51 @@
         font-size: 16px;
     }
     
+    /* Modal mobile */
+    .modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    .modal-content {
+        max-width: 100%;
+        max-height: 85vh;
+        border-radius: 20px 20px 0 0;
+        margin: 0;
+        transform: translateY(100%);
+    }
+    
+    .modal.active .modal-content {
+        transform: translateY(0);
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .modal-body {
+        padding: 20px;
+        max-height: 55vh;
+    }
+    
+    .modal-body .row {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+        padding: 12px 20px;
+    }
+    
+    .modal .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px;
+    }
+    
     /* Mobile cart button */
     .btn-cart-mobile {
-        display: flex;
         bottom: 80px;
         right: 16px;
         width: 56px;
@@ -1537,23 +1429,29 @@
     }
 }
 
-/* ===== SMALL MOBILE FIX ===== */
+/* ===== SMALL MOBILE ===== */
 @media (max-width: 380px) {
+    .kasir-container .produk-container-modern.grid-view,
     .produk-container-modern.grid-view {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
     
-    .produk-card-modern {
+    .kasir-container .produk-card-modern {
         padding: 10px;
     }
     
-    .produk-img-container {
-        width: 50px;
-        height: 50px;
+    .kasir-container .produk-card-modern .card-image-wrapper,
+    .kasir-container .produk-img-container {
+        height: 120px;
     }
     
-    .produk-img-modern {
-        font-size: 20px;
+    .kasir-container .produk-img-modern {
+        font-size: 28px;
     }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
