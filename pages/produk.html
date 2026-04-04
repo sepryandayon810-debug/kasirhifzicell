@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../css/dashboard-theme.css">
     <link rel="stylesheet" href="../css/dashboard-enhanced.css">
     
-    <!-- CSS SPESIFIK PRODUK - MODERN -->
+    <!-- CSS SPESIFIK PRODUK - MODERN (UPDATE - timpa file lama) -->
     <link rel="stylesheet" href="../css/modules/produk.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,6 +23,9 @@
     
     <!-- SheetJS for Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Theme Sync (BARU - untuk dark mode antar halaman) -->
+    <script src="../js/theme-sync.js"></script>
 </head>
 <body>
     <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
@@ -48,14 +51,14 @@
         <nav class="sidebar-nav">
             <!-- UTAMA - Dropdown -->
             <div class="nav-section utama">
-                <div class="nav-section-header" onclick="toggleDropdown('utama')">
+                <div class="nav-section-header active" onclick="toggleDropdown('utama')">
                     <div class="nav-section-title-group">
                         <div class="nav-section-icon"><i class="fas fa-th-large"></i></div>
                         <span class="nav-section-title">Utama</span>
                     </div>
-                    <div class="dropdown-arrow" id="arrow-utama"><i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown-arrow rotate" id="arrow-utama"><i class="fas fa-chevron-down"></i></div>
                 </div>
-                <div class="nav-dropdown" id="dropdown-utama">
+                <div class="nav-dropdown open" id="dropdown-utama">
                     <ul>
                         <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                         <li><a href="./kasir.html"><i class="fas fa-cash-register"></i> Kasir</a></li>
@@ -164,88 +167,103 @@
             </div>
         </header>
 
-        <!-- STATS CARDS -->
-        <div class="stats-grid">
-            <div class="stat-card" id="stat-total">
-                <div class="stat-icon primary"><i class="fas fa-boxes"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">Total Produk</span>
-                    <span class="stat-value">0</span>
-                </div>
+        <!-- STATS CARDS - UPDATED CLASS -->
+        <div class="stats-grid-modern">
+            <div class="stat-card-modern" id="stat-total">
+                <div class="stat-icon-modern blue"><i class="fas fa-boxes"></i></div>
+                <div class="stat-value-modern" id="stat-total-value">0</div>
+                <div class="stat-label-modern">Total Produk</div>
             </div>
-            <div class="stat-card" id="stat-aktif">
-                <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">Aktif</span>
-                    <span class="stat-value">0</span>
-                </div>
+            <div class="stat-card-modern" id="stat-aktif">
+                <div class="stat-icon-modern green"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value-modern" id="stat-aktif-value">0</div>
+                <div class="stat-label-modern">Aktif</div>
             </div>
-            <div class="stat-card" id="stat-nonaktif">
-                <div class="stat-icon warning"><i class="fas fa-eye-slash"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">Nonaktif</span>
-                    <span class="stat-value">0</span>
-                </div>
+            <div class="stat-card-modern" id="stat-nonaktif">
+                <div class="stat-icon-modern amber"><i class="fas fa-eye-slash"></i></div>
+                <div class="stat-value-modern" id="stat-nonaktif-value">0</div>
+                <div class="stat-label-modern">Nonaktif</div>
             </div>
-            <div class="stat-card" id="stat-stok-habis">
-                <div class="stat-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">Stok Habis</span>
-                    <span class="stat-value">0</span>
-                </div>
+            <div class="stat-card-modern" id="stat-stok-habis">
+                <div class="stat-icon-modern red"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-value-modern" id="stat-stok-value">0</div>
+                <div class="stat-label-modern">Stok Habis</div>
             </div>
         </div>
 
-        <!-- TOOLBAR -->
+        <!-- TOOLBAR - UPDATED STRUCTURE -->
         <div class="toolbar-modern">
-            <div class="toolbar-left">
-                <div class="search-box-modern">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="search-produk" placeholder="Cari produk (nama, kode, barcode)...">
-                    <div class="search-shortcuts">
-                        <span class="kbd">Ctrl</span>
-                        <span class="kbd">K</span>
+            <div class="toolbar-row">
+                
+                <!-- Search -->
+                <div class="toolbar-search-wrapper">
+                    <div class="toolbar-search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-produk" placeholder="Cari produk (nama, kode, barcode)...">
                     </div>
                 </div>
                 
-                <select id="filter-kategori" class="filter-select-modern">
-                    <option value="">Semua Kategori</option>
-                </select>
+                <!-- Filters -->
+                <div class="toolbar-filters">
+                    <div class="filter-group">
+                        <label>Kategori:</label>
+                        <select id="filter-kategori" class="toolbar-select">
+                            <option value="">Semua Kategori</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="filter-status" class="toolbar-select">
+                            <option value="all">Semua Status</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
                 
-                <select id="filter-status" class="filter-select-modern">
-                    <option value="all">Semua Status</option>
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Nonaktif</option>
-                </select>
+                <!-- View Toggle + Actions -->
+                <div class="toolbar-actions">
+                    <div class="view-toggle-toolbar">
+                        <button class="view-btn-toolbar active" id="view-grid" data-view="grid" title="Grid View">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn-toolbar" id="view-list" data-view="list" title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    
+                    <button class="btn-modern btn-primary-modern" id="btn-tambah-produk">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                    
+                    <div class="dropdown-modern">
+                        <button class="btn-modern btn-secondary-modern" onclick="toggleDropdownMenu(this)">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-menu-modern">
+                            <a href="#" id="btn-import-excel"><i class="fas fa-file-import"></i> Import Excel</a>
+                            <a href="#" id="btn-export-excel"><i class="fas fa-file-export"></i> Export Excel</a>
+                            <a href="#" id="btn-download-template"><i class="fas fa-download"></i> Template Excel</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" id="btn-kategori-manager"><i class="fas fa-tags"></i> Manajemen Kategori</a>
+                            <a href="#" id="btn-stok-masal"><i class="fas fa-cubes"></i> Update Stok Masal</a>
+                            <a href="#" id="btn-toggle-produk"><i class="fas fa-exchange-alt"></i> Toggle Status</a>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
-            
-            <div class="toolbar-right">
-                <div class="view-toggle-modern">
-                    <button id="view-grid" class="view-btn-modern active" title="Grid View">
-                        <i class="fas fa-th-large"></i>
+        </div>
+
+        <!-- KATEGORI CHIPS - BARU (sama seperti kasir) -->
+        <div class="kategori-section-modern">
+            <span class="kategori-label">Filter Cepat:</span>
+            <div class="kategori-chips-container">
+                <div class="kategori-scroll-modern" id="kategori-chips">
+                    <button class="kategori-chip active" data-kategori="">
+                        <span>Semua</span>
                     </button>
-                    <button id="view-list" class="view-btn-modern" title="List View">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-                
-                <button class="btn btn-primary" id="btn-tambah-produk">
-                    <i class="fas fa-plus"></i> Tambah
-                </button>
-                
-                <div class="dropdown-modern">
-                    <button class="btn btn-secondary" onclick="toggleDropdownMenu(this)">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                    <div class="dropdown-menu-modern">
-                        <a href="#" id="btn-import-excel"><i class="fas fa-file-import"></i> Import Excel</a>
-                        <a href="#" id="btn-export-excel"><i class="fas fa-file-export"></i> Export Excel</a>
-                        <a href="#" id="btn-download-template"><i class="fas fa-download"></i> Template Excel</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" id="btn-kategori-manager"><i class="fas fa-tags"></i> Manajemen Kategori</a>
-                        <a href="#" id="btn-stok-masal"><i class="fas fa-cubes"></i> Update Stok Masal</a>
-                        <a href="#" id="btn-toggle-produk"><i class="fas fa-exchange-alt"></i> Toggle Status</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -265,18 +283,18 @@
             </div>
         </div>
 
-        <!-- PRODUK CONTAINER -->
-        <div class="produk-container-wrapper">
-            <div id="produk-container" class="produk-container">
-                <div class="loading-state-produk">
-                    <div class="spinner-modern"></div>
+        <!-- PRODUK CONTAINER - UPDATED CLASS -->
+        <div class="produk-page-container">
+            <div id="produk-container" class="produk-grid-container grid-view">
+                <div class="loading-produk">
+                    <div class="spinner"></div>
                     <p>Memuat produk...</p>
                 </div>
             </div>
         </div>
 
         <!-- PAGINATION -->
-        <div id="pagination-container" class="pagination-container-modern"></div>
+        <div id="pagination-container" class="pagination-modern"></div>
 
         <footer class="page-footer">
             <p>WebPOS v2.0 • <span id="last-update">Terakhir update: -</span></p>
@@ -296,40 +314,36 @@
                 <form id="form-tambah-produk">
                     <div class="row">
                         <div class="col-8">
-                            <div class="form-group">
-                                <label>Kode Produk <span class="text-muted">(Auto)</span></label>
-                                <input type="text" id="input-kode" class="form-control" placeholder="Klik untuk generate">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Kode Produk <span class="text-muted">(Auto)</span></label>
+                                <input type="text" id="input-kode" class="form-input-modern" placeholder="Klik untuk generate">
                             </div>
                             
-                            <div class="form-group">
-                                <label>Barcode</label>
-                                <div class="input-group">
-                                    <input type="text" id="input-barcode" class="form-control" placeholder="Scan atau ketik barcode">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Barcode</label>
+                                <div class="input-group-modern">
+                                    <input type="text" id="input-barcode" class="form-input-modern" placeholder="Scan atau ketik barcode">
                                     <button type="button" class="btn btn-secondary" onclick="openModal('modal-scanner')">
                                         <i class="fas fa-barcode"></i>
                                     </button>
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label>Nama Produk <span class="required">*</span></label>
-                                <input type="text" id="input-nama" class="form-control" placeholder="Masukkan nama produk" required>
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Nama Produk <span class="required">*</span></label>
+                                <input type="text" id="input-nama" class="form-input-modern" placeholder="Masukkan nama produk" required>
                             </div>
                             
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Kategori</label>
-                                        <select id="input-kategori" class="form-control">
-                                            <option value="">Pilih Kategori</option>
-                                        </select>
-                                    </div>
+                            <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">Kategori</label>
+                                    <select id="input-kategori" class="form-select-modern">
+                                        <option value="">Pilih Kategori</option>
+                                    </select>
                                 </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Satuan</label>
-                                        <input type="text" id="input-satuan" class="form-control" value="pcs">
-                                    </div>
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">Satuan</label>
+                                    <input type="text" id="input-satuan" class="form-input-modern" value="pcs">
                                 </div>
                             </div>
                         </div>
@@ -348,63 +362,43 @@
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Harga Modal</label>
-                                <div class="input-group">
-                                    <span class="input-prefix">Rp</span>
-                                    <input type="number" id="input-harga-modal" class="form-control" placeholder="0">
-                                </div>
+                    <div class="form-row-modern">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Harga Modal</label>
+                            <div class="input-group-modern">
+                                <span class="input-group-prefix">Rp</span>
+                                <input type="number" id="input-harga-modal" class="form-input-modern" placeholder="0">
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Harga Jual <span class="required">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-prefix">Rp</span>
-                                    <input type="number" id="input-harga-jual" class="form-control" placeholder="0" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="profit-calc-box">
-                                <div class="profit-item">
-                                    <span class="label">Profit</span>
-                                    <span class="value" id="profit-display">Rp 0</span>
-                                </div>
-                                <div class="profit-item">
-                                    <span class="label">Margin</span>
-                                    <span class="value" id="margin-display">0%</span>
-                                </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Harga Jual <span class="required">*</span></label>
+                            <div class="input-group-modern">
+                                <span class="input-group-prefix">Rp</span>
+                                <input type="number" id="input-harga-jual" class="form-input-modern" placeholder="0" required>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Stok Awal</label>
-                                <input type="number" id="input-stok" class="form-control" value="0" min="0">
-                            </div>
+                    <div class="form-row-modern">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Stok Awal</label>
+                            <input type="number" id="input-stok" class="form-input-modern" value="0" min="0">
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Min Stok</label>
-                                <input type="number" id="input-min-stok" class="form-control" value="5" min="0">
-                            </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Min Stok</label>
+                            <input type="number" id="input-min-stok" class="form-input-modern" value="5" min="0">
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Deskripsi</label>
-                        <textarea id="input-deskripsi" class="form-control" rows="3" placeholder="Deskripsi produk (opsional)"></textarea>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Deskripsi</label>
+                        <textarea id="input-deskripsi" class="form-textarea-modern" rows="3" placeholder="Deskripsi produk (opsional)"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-tambah" onclick="closeModal('modal-tambah-produk')">Batal</button>
-                <button type="submit" class="btn btn-primary" id="save-tambah" form="form-tambah-produk">
+                <button type="button" class="btn-modal btn-modal-secondary" id="cancel-tambah" onclick="closeModal('modal-tambah-produk')">Batal</button>
+                <button type="submit" class="btn-modal btn-modal-primary" id="save-tambah" form="form-tambah-produk">
                     <i class="fas fa-save"></i> Simpan Produk
                 </button>
             </div>
@@ -425,35 +419,31 @@
                     <input type="hidden" id="edit-id">
                     <div class="row">
                         <div class="col-8">
-                            <div class="form-group">
-                                <label>Kode Produk</label>
-                                <input type="text" id="edit-kode" class="form-control" readonly>
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Kode Produk</label>
+                                <input type="text" id="edit-kode" class="form-input-modern" readonly>
                             </div>
                             
-                            <div class="form-group">
-                                <label>Barcode</label>
-                                <input type="text" id="edit-barcode" class="form-control">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Barcode</label>
+                                <input type="text" id="edit-barcode" class="form-input-modern">
                             </div>
                             
-                            <div class="form-group">
-                                <label>Nama Produk <span class="required">*</span></label>
-                                <input type="text" id="edit-nama" class="form-control" required>
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Nama Produk <span class="required">*</span></label>
+                                <input type="text" id="edit-nama" class="form-input-modern" required>
                             </div>
                             
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Kategori</label>
-                                        <select id="edit-kategori" class="form-control">
-                                            <option value="">Pilih Kategori</option>
-                                        </select>
-                                    </div>
+                            <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">Kategori</label>
+                                    <select id="edit-kategori" class="form-select-modern">
+                                        <option value="">Pilih Kategori</option>
+                                    </select>
                                 </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Satuan</label>
-                                        <input type="text" id="edit-satuan" class="form-control">
-                                    </div>
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">Satuan</label>
+                                    <input type="text" id="edit-satuan" class="form-input-modern">
                                 </div>
                             </div>
                         </div>
@@ -472,72 +462,50 @@
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Harga Modal</label>
-                                <div class="input-group">
-                                    <span class="input-prefix">Rp</span>
-                                    <input type="number" id="edit-harga-modal" class="form-control">
-                                </div>
+                    <div class="form-row-modern">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Harga Modal</label>
+                            <div class="input-group-modern">
+                                <span class="input-group-prefix">Rp</span>
+                                <input type="number" id="edit-harga-modal" class="form-input-modern">
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Harga Jual <span class="required">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-prefix">Rp</span>
-                                    <input type="number" id="edit-harga-jual" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="profit-calc-box">
-                                <div class="profit-item">
-                                    <span class="label">Profit</span>
-                                    <span class="value" id="edit-profit-display">Rp 0</span>
-                                </div>
-                                <div class="profit-item">
-                                    <span class="label">Margin</span>
-                                    <span class="value" id="edit-margin-display">0%</span>
-                                </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Harga Jual <span class="required">*</span></label>
+                            <div class="input-group-modern">
+                                <span class="input-group-prefix">Rp</span>
+                                <input type="number" id="edit-harga-jual" class="form-input-modern" required>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Stok</label>
-                                <input type="number" id="edit-stok" class="form-control" min="0">
-                            </div>
+                    <div class="form-row-modern">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Stok</label>
+                            <input type="number" id="edit-stok" class="form-input-modern" min="0">
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Min Stok</label>
-                                <input type="number" id="edit-min-stok" class="form-control" min="0">
-                            </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Min Stok</label>
+                            <input type="number" id="edit-min-stok" class="form-input-modern" min="0">
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label>Status</label>
-                                <select id="edit-status" class="form-control">
-                                    <option value="aktif">Aktif</option>
-                                    <option value="nonaktif">Nonaktif</option>
-                                </select>
-                            </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Status</label>
+                            <select id="edit-status" class="form-select-modern">
+                                <option value="aktif">Aktif</option>
+                                <option value="nonaktif">Nonaktif</option>
+                            </select>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Deskripsi</label>
-                        <textarea id="edit-deskripsi" class="form-control" rows="3"></textarea>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Deskripsi</label>
+                        <textarea id="edit-deskripsi" class="form-textarea-modern" rows="3"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-edit" onclick="closeModal('modal-edit-produk')">Batal</button>
-                <button type="submit" class="btn btn-primary" id="save-edit" form="form-edit-produk">
+                <button type="button" class="btn-modal btn-modal-secondary" id="cancel-edit" onclick="closeModal('modal-edit-produk')">Batal</button>
+                <button type="submit" class="btn-modal btn-modal-primary" id="save-edit" form="form-edit-produk">
                     <i class="fas fa-save"></i> Update Produk
                 </button>
             </div>
@@ -667,8 +635,8 @@
                 <div class="import-stats" id="import-stats"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-import" onclick="closeModal('modal-import')">Batal</button>
-                <button type="button" class="btn btn-primary" id="start-import" disabled>
+                <button type="button" class="btn-modal btn-modal-secondary" id="cancel-import" onclick="closeModal('modal-import')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="start-import" disabled>
                     <i class="fas fa-file-import"></i> Import Data
                 </button>
             </div>
@@ -686,15 +654,15 @@
             </div>
             <div class="modal-body">
                 <form id="form-kategori" class="kategori-form">
-                    <div class="form-group">
-                        <label>Nama Kategori <span class="required">*</span></label>
-                        <input type="text" id="kategori-nama" class="form-control" placeholder="Nama kategori" required>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Nama Kategori <span class="required">*</span></label>
+                        <input type="text" id="kategori-nama" class="form-input-modern" placeholder="Nama kategori" required>
                     </div>
-                    <div class="form-group">
-                        <label>Deskripsi</label>
-                        <textarea id="kategori-deskripsi" class="form-control" rows="2" placeholder="Deskripsi (opsional)"></textarea>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Deskripsi</label>
+                        <textarea id="kategori-deskripsi" class="form-textarea-modern" rows="2" placeholder="Deskripsi (opsional)"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block" id="save-kategori">
+                    <button type="submit" class="btn-modal btn-modal-primary btn-block" id="save-kategori">
                         <i class="fas fa-plus"></i> Tambah Kategori
                     </button>
                 </form>
@@ -710,7 +678,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-kategori" onclick="closeModal('modal-kategori')">Tutup</button>
+                <button type="button" class="btn-modal btn-modal-secondary" id="cancel-kategori" onclick="closeModal('modal-kategori')">Tutup</button>
             </div>
         </div>
     </div>
@@ -727,9 +695,9 @@
             <div class="modal-body">
                 <div class="stok-layout">
                     <div class="stok-left">
-                        <div class="form-group">
-                            <label>Cari Produk</label>
-                            <input type="text" id="stok-search" class="form-control" placeholder="Ketik nama produk...">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Cari Produk</label>
+                            <input type="text" id="stok-search" class="form-input-modern" placeholder="Ketik nama produk...">
                         </div>
                         <div class="stok-produk-list" id="stok-produk-list">
                             <!-- List produk -->
@@ -745,23 +713,23 @@
                         </div>
                         
                         <div class="stok-operation">
-                            <div class="form-group">
-                                <label>Operasi</label>
-                                <select id="stok-operation" class="form-control">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Operasi</label>
+                                <select id="stok-operation" class="form-select-modern">
                                     <option value="tambah">➕ Tambah Stok</option>
                                     <option value="kurang">➖ Kurangi Stok</option>
                                     <option value="set">📝 Set Stok (Ganti)</option>
                                 </select>
                             </div>
                             
-                            <div class="form-group">
-                                <label>Jumlah</label>
-                                <input type="number" id="stok-jumlah" class="form-control" placeholder="0" min="1">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Jumlah</label>
+                                <input type="number" id="stok-jumlah" class="form-input-modern" placeholder="0" min="1">
                             </div>
                             
-                            <div class="form-group">
-                                <label>Keterangan</label>
-                                <input type="text" id="stok-keterangan" class="form-control" placeholder="Alasan perubahan stok">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern">Keterangan</label>
+                                <input type="text" id="stok-keterangan" class="form-input-modern" placeholder="Alasan perubahan stok">
                             </div>
                             
                             <div class="stok-summary" id="stok-summary"></div>
@@ -770,8 +738,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-stok" onclick="closeModal('modal-stok')">Batal</button>
-                <button type="button" class="btn btn-primary" id="save-stok">
+                <button type="button" class="btn-modal btn-modal-secondary" id="cancel-stok" onclick="closeModal('modal-stok')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="save-stok">
                     <i class="fas fa-save"></i> Update Stok
                 </button>
             </div>
@@ -788,9 +756,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Filter</label>
-                    <select id="toggle-filter-status" class="form-control">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Filter</label>
+                    <select id="toggle-filter-status" class="form-select-modern">
                         <option value="all">Semua Produk</option>
                         <option value="aktif">Hanya Aktif</option>
                         <option value="nonaktif">Hanya Nonaktif</option>
@@ -820,8 +788,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-toggle" onclick="closeModal('modal-toggle')">Tutup</button>
-                <button type="button" class="btn btn-primary" id="apply-toggle">
+                <button type="button" class="btn-modal btn-modal-secondary" id="cancel-toggle" onclick="closeModal('modal-toggle')">Tutup</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="apply-toggle">
                     <i class="fas fa-check"></i> Selesai
                 </button>
             </div>
@@ -925,12 +893,18 @@
             }
         }
         
-        // Dark Mode Toggle
+        // Dark Mode Toggle - UPDATED dengan sync
         function toggleDarkMode() {
             const current = document.documentElement.getAttribute('data-theme');
             const newTheme = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('webpos-theme', newTheme);
+            
+            // Trigger sync untuk halaman lain
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'theme',
+                newValue: newTheme
+            }));
         }
         
         // Logout
@@ -999,7 +973,7 @@
             // Restore dropdowns
             ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
                 const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
-                if (isOpen) {
+                if (isOpen || section === 'utama') {
                     const dropdown = document.getElementById(`dropdown-${section}`);
                     const arrow = document.getElementById(`arrow-${section}`);
                     const header = dropdown?.previousElementSibling;
