@@ -56,6 +56,21 @@ const TelegramMain = {
         
         // Bind events setelah render
         this.modules.gas.bindEvents();
+        
+        // Auto focus untuk input saldo
+        if (this.modules.saldo.transaksiAktif) {
+            setTimeout(() => {
+                const input = document.getElementById('saldoNominal');
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 100);
+        }
+    },
+        
+        // Bind events setelah render
+        this.modules.gas.bindEvents();
         this.modules.saldo.bindEvents();
     },
     
