@@ -176,3 +176,6 @@ const KategoriManager = {
         return div.innerHTML;
     }
 };
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => KategoriManager.init());
