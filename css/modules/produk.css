@@ -394,6 +394,11 @@
     background: rgba(239, 68, 68, 0.9);
 }
 
+.badge-status.manual {
+    background: linear-gradient(135deg, var(--accent-amber), #d97706);
+    color: white;
+}
+
 .card-overlay {
     position: absolute;
     inset: 0;
