@@ -148,7 +148,7 @@ const ProdukMain = {
         this.updateViewButtons();
         this.filterAndRender();
     },
-    
+        
     updateViewButtons: function() {
         const view = this.state.currentView;
         
