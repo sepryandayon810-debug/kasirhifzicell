@@ -1,12 +1,14 @@
 /**
  * Produk Main Controller - WebPOS Modern
  * File: js/modules/produk/produk-main.js
+ * Fixed Version - April 2025
  */
 
 const ProdukMain = {
     state: {
         produkData: [],
         kategoriData: [],
+        kategoriMap: {}, // Cache ID -> Nama
         currentView: 'grid',
         currentPage: 1,
         itemsPerPage: 20,
@@ -102,11 +104,12 @@ const ProdukMain = {
             });
         }
         
-        // View Toggle - PERBAIKAN: bind langsung ke fungsi
+        // View Toggle - FIX: Event listener yang benar
         if (this.elements.btnGrid) {
             this.elements.btnGrid.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('[ProdukMain] Grid view clicked');
+                e.stopPropagation();
+                console.log('[ProdukMain] Grid clicked');
                 self.setView('grid');
             });
         }
@@ -114,7 +117,8 @@ const ProdukMain = {
         if (this.elements.btnList) {
             this.elements.btnList.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('[ProdukMain] List view clicked');
+                e.stopPropagation();
+                console.log('[ProdukMain] List clicked');
                 self.setView('list');
             });
         }
@@ -128,6 +132,14 @@ const ProdukMain = {
         this.bindSafe(this.elements.btnDeleteSelected, () => this.deleteSelected());
         this.bindSafe(this.elements.btnExport, () => this.exportToExcel());
         this.bindSafe(this.elements.btnTemplate, () => this.downloadTemplate());
+        
+        // Keyboard shortcut
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                self.elements.searchInput?.focus();
+            }
+        });
     },
     
     bindSafe: function(element, callback) {
@@ -140,7 +152,7 @@ const ProdukMain = {
     },
     
     setView: function(view) {
-        console.log('[ProdukMain] Setting view to:', view);
+        console.log('[ProdukMain] Setting view:', view);
         
         this.state.currentView = view;
         localStorage.setItem('produk_view_preference', view);
@@ -148,18 +160,23 @@ const ProdukMain = {
         this.updateViewButtons();
         this.filterAndRender();
     },
-        
+    
     updateViewButtons: function() {
-        const view = this.state.currentView;
+        const isGrid = this.state.currentView === 'grid';
         
         if (this.elements.btnGrid) {
-            this.elements.btnGrid.classList.toggle('active', view === 'grid');
+            this.elements.btnGrid.classList.toggle('active', isGrid);
         }
         if (this.elements.btnList) {
-            this.elements.btnList.classList.toggle('active', view === 'list');
+            this.elements.btnList.classList.toggle('active', !isGrid);
         }
         
-        console.log('[ProdukMain] View buttons updated:', view);
+        // Update container class
+        if (this.elements.container) {
+            this.elements.container.className = `produk-container-modern ${this.state.currentView}-view`;
+        }
+        
+        console.log('[ProdukMain] View updated:', this.state.currentView);
     },
     
     initRealtimeListener: function() {
@@ -184,22 +201,23 @@ const ProdukMain = {
             snapshot.forEach(function(child) {
                 const val = child.val();
                 
-                // PERBAIKAN: Normalisasi tipe data
+                // FIX: Normalisasi semua field ke string/number yang benar
                 data.push({
                     id: child.key,
-                    kode: self.normalizeString(val.kode),
-                    barcode: self.normalizeString(val.barcode),
-                    nama: self.normalizeString(val.nama),
-                    kategori: self.normalizeString(val.kategori),
-                    satuan: self.normalizeString(val.satuan) || 'pcs',
+                    kode: self.safeString(val.kode),
+                    barcode: self.safeString(val.barcode),
+                    nama: self.safeString(val.nama),
+                    kategori: self.safeString(val.kategori), // Bisa ID atau nama
+                    satuan: self.safeString(val.satuan) || 'pcs',
                     harga_modal: parseInt(val.harga_modal || val.hargaModal || 0),
                     harga_jual: parseInt(val.harga_jual || val.hargaJual || 0),
                     stok: parseInt(val.stok || 0),
                     min_stok: parseInt(val.min_stok || val.minStok || 5),
                     terjual: parseInt(val.terjual || 0),
-                    status: (val.status || 'aktif').toString().toLowerCase(),
-                    deskripsi: self.normalizeString(val.deskripsi),
+                    status: self.safeString(val.status).toLowerCase() || 'aktif',
+                    deskripsi: self.safeString(val.deskripsi),
                     gambar: val.gambar || null,
+                    is_manual: val.is_manual || false,
                     created_at: val.created_at || Date.now(),
                     updated_at: val.updated_at || Date.now()
                 });
@@ -208,7 +226,12 @@ const ProdukMain = {
             self.state.produkData = data;
             window.produkData = data;
             
+            // FIX: Simpan ke cache untuk kasir
+            localStorage.setItem('produk_data_cache', JSON.stringify(data));
+            localStorage.setItem('produk_last_update', Date.now());
+            
             console.log('[ProdukMain] 📊 Realtime update:', data.length, 'produk');
+            console.log('[ProdukMain] 💾 Cached for kasir');
             
             self.updateStats();
             self.filterAndRender();
@@ -219,10 +242,12 @@ const ProdukMain = {
         });
     },
     
-    // PERBAIKAN: Normalisasi string
-    normalizeString: function(value) {
+    // FIX: Safe string conversion
+    safeString: function(value) {
         if (value === null || value === undefined) return '';
-        return value.toString().trim();
+        if (typeof value === 'number') return value.toString();
+        if (typeof value === 'string') return value.trim();
+        return String(value).trim();
     },
     
     loadKategori: function() {
@@ -233,18 +258,36 @@ const ProdukMain = {
         firebase.database().ref('kategori').once('value')
             .then(function(snapshot) {
                 const data = [];
+                const map = {}; // ID -> Nama mapping
+                
                 snapshot.forEach(function(child) {
                     const val = child.val();
+                    const nama = self.safeString(val.nama);
+                    const id = child.key;
+                    
                     data.push({
-                        id: child.key,
-                        nama: self.normalizeString(val.nama),
-                        deskripsi: self.normalizeString(val.deskripsi)
+                        id: id,
+                        nama: nama,
+                        deskripsi: self.safeString(val.deskripsi)
                     });
+                    
+                    // Build reverse map
+                    map[id] = nama;
+                    map[nama.toLowerCase()] = nama; // Case insensitive
                 });
                 
                 self.state.kategoriData = data;
-                console.log('[ProdukMain] Kategori loaded:', data.length);
+                self.state.kategoriMap = map;
+                
+                console.log('[ProdukMain] Kategori loaded:', data.length, 'items');
+                console.log('[ProdukMain] Kategori map:', map);
+                
                 self.populateKategoriFilter();
+                
+                // Re-render untuk update nama kategori
+                if (self.state.produkData.length > 0) {
+                    self.filterAndRender();
+                }
             })
             .catch(err => {
                 console.error('[ProdukMain] Error loading kategori:', err);
@@ -255,7 +298,6 @@ const ProdukMain = {
         const select = this.elements.selectKategori;
         if (!select) return;
         
-        // Simpan value yang sedang dipilih
         const currentValue = select.value;
         
         // Clear options kecuali "Semua"
@@ -266,8 +308,8 @@ const ProdukMain = {
         // Tambah kategori
         this.state.kategoriData.forEach(k => {
             const option = document.createElement('option');
-            option.value = k.id || k.nama;
-            option.textContent = k.nama;
+            option.value = k.id; // Simpan ID
+            option.textContent = k.nama; // Tampilkan nama
             select.appendChild(option);
         });
         
@@ -275,8 +317,6 @@ const ProdukMain = {
         if (currentValue) {
             select.value = currentValue;
         }
-        
-        console.log('[ProdukMain] Kategori filter populated:', this.state.kategoriData.length, 'items');
     },
     
     updateStats: function() {
@@ -333,7 +373,7 @@ const ProdukMain = {
     filterAndRender: function() {
         let data = [...this.state.produkData];
         
-        // PERBAIKAN: Search dengan normalisasi string
+        // FIX: Search dengan safe string comparison
         if (this.state.searchQuery) {
             const q = this.state.searchQuery.toLowerCase();
             data = data.filter(p => {
@@ -344,9 +384,14 @@ const ProdukMain = {
             });
         }
         
-        // Filter kategori
+        // Filter kategori - cek ID atau nama
         if (this.state.selectedKategori) {
-            data = data.filter(p => p.kategori === this.state.selectedKategori);
+            const selected = this.state.selectedKategori.toLowerCase();
+            data = data.filter(p => {
+                const prodKategori = (p.kategori || '').toLowerCase();
+                const prodKategoriNama = (p.kategori_nama || '').toLowerCase();
+                return prodKategori === selected || prodKategoriNama === selected;
+            });
         }
         
         // Filter status
@@ -380,7 +425,7 @@ const ProdukMain = {
     },
     
     renderEmpty: function() {
-        const isSearching = this.state.searchQuery !== '';
+        const isSearching = this.state.searchQuery !== '' || this.state.selectedKategori !== '';
         
         this.elements.container.innerHTML = `
             <div class="empty-state-produk">
@@ -417,14 +462,16 @@ const ProdukMain = {
     },
     
     createGridCard: function(p, index) {
+        // FIX: Gunakan kategoriMap untuk lookup nama
         const kategoriNama = this.getKategoriName(p.kategori);
         const stokClass = this.getStokClass(p.stok, p.min_stok);
         const stokBadge = this.getStokBadge(p.stok, p.satuan, p.min_stok);
         const isInactive = p.status === 'nonaktif';
         const isSelected = this.state.selectedItems.has(p.id);
+        const isManual = p.is_manual;
         
         return `
-            <div class="produk-card-modern ${isInactive ? 'inactive' : ''} ${isSelected ? 'selected' : ''}" 
+            <div class="produk-card-modern ${isInactive ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isManual ? 'manual' : ''}" 
                  data-id="${p.id}" 
                  style="animation: fadeInUp 0.5s ease ${index * 0.05}s both">
                 
@@ -438,11 +485,14 @@ const ProdukMain = {
                 <div class="card-image-wrapper" onclick="ProdukMain.quickView('${p.id}')">
                     ${p.gambar ? 
                         `<img src="${p.gambar}" alt="${this.escapeHtml(p.nama)}" loading="lazy">` :
-                        `<div class="image-placeholder"><i class="fas fa-box"></i></div>`
+                        `<div class="image-placeholder ${isManual ? 'manual' : ''}">
+                            <i class="fas ${isManual ? 'fa-hand-holding-usd' : 'fa-box'}"></i>
+                        </div>`
                     }
                     <div class="card-badges">
                         ${stokBadge}
                         ${isInactive ? '<span class="badge-status nonaktif">Nonaktif</span>' : ''}
+                        ${isManual ? '<span class="badge-status manual">Manual</span>' : ''}
                     </div>
                     <div class="card-overlay">
                         <button class="btn-quick-view" title="Lihat Detail">
@@ -454,14 +504,14 @@ const ProdukMain = {
                 <div class="card-content" onclick="ProdukMain.quickView('${p.id}')">
                     <div class="produk-meta-top">
                         <span class="produk-kode">${p.kode || '-'}</span>
-                        <span class="produk-kategori">${kategoriNama}</span>
+                        <span class="produk-kategori" title="${this.escapeHtml(kategoriNama)}">${kategoriNama}</span>
                     </div>
                     
                     <h4 class="produk-nama" title="${this.escapeHtml(p.nama)}">${this.escapeHtml(p.nama)}</h4>
                     
                     <div class="produk-harga-wrapper">
                         <div class="harga-jual">${this.formatRupiah(p.harga_jual)}</div>
-                        <div class="harga-modal">Modal: ${this.formatRupiah(p.harga_modal)}</div>
+                        ${p.harga_modal > 0 ? `<div class="harga-modal">Modal: ${this.formatRupiah(p.harga_modal)}</div>` : ''}
                     </div>
                     
                     <div class="produk-stat">
@@ -523,9 +573,10 @@ const ProdukMain = {
         const kategoriNama = this.getKategoriName(p.kategori);
         const stokClass = this.getStokClass(p.stok, p.min_stok);
         const isSelected = this.state.selectedItems.has(p.id);
+        const isManual = p.is_manual;
         
         return `
-            <tr class="produk-row ${p.status === 'nonaktif' ? 'row-inactive' : ''} ${isSelected ? 'row-selected' : ''}" 
+            <tr class="produk-row ${p.status === 'nonaktif' ? 'row-inactive' : ''} ${isSelected ? 'row-selected' : ''} ${isManual ? 'row-manual' : ''}" 
                 data-id="${p.id}"
                 style="animation: fadeIn 0.3s ease ${index * 0.03}s both">
                 
@@ -539,7 +590,7 @@ const ProdukMain = {
                     <div class="table-thumb" onclick="ProdukMain.quickView('${p.id}')">
                         ${p.gambar ? 
                             `<img src="${p.gambar}" alt="">` :
-                            `<i class="fas fa-box"></i>`
+                            `<i class="fas ${isManual ? 'fa-hand-holding-usd' : 'fa-box'}"></i>`
                         }
                     </div>
                 </td>
@@ -552,13 +603,13 @@ const ProdukMain = {
                 </td>
                 
                 <td class="col-kategori">
-                    <span class="badge-kategori">${kategoriNama}</span>
+                    <span class="badge-kategori" title="${this.escapeHtml(kategoriNama)}">${kategoriNama}</span>
                 </td>
                 
                 <td class="col-harga">
                     <div class="harga-wrapper">
                         <span class="harga-jual">${this.formatRupiah(p.harga_jual)}</span>
-                        <span class="harga-modal">${this.formatRupiah(p.harga_modal)}</span>
+                        ${p.harga_modal > 0 ? `<span class="harga-modal">${this.formatRupiah(p.harga_modal)}</span>` : ''}
                     </div>
                 </td>
                 
@@ -567,8 +618,9 @@ const ProdukMain = {
                 </td>
                 
                 <td class="col-status">
-                    <span class="status-pill ${p.status}">
+                    <span class="status-pill ${p.status} ${isManual ? 'manual' : ''}">
                         ${p.status === 'aktif' ? 'Aktif' : 'Nonaktif'}
+                        ${isManual ? ' (M)' : ''}
                     </span>
                 </td>
                 
@@ -589,11 +641,41 @@ const ProdukMain = {
         `;
     },
     
-    renderPagination: function(totalPages) {
-        if (!this.elements.pagination) return;
+    // FIX: Get kategori name dengan multiple fallback
+    getKategoriName: function(kategoriId) {
+        if (!kategoriId || kategoriId === '') return '-';
         
-        if (totalPages <= 1) {
-            this.elements.pagination.innerHTML = '';
+        const idStr = kategoriId.toString();
+        
+        // 1. Cek di kategoriMap (ID -> Nama)
+        if (this.state.kategoriMap[idStr]) {
+            return this.state.kategoriMap[idStr];
+        }
+        
+        // 2. Cari di kategoriData
+        const found = this.state.kategoriData.find(k => 
+            k.id === idStr || 
+            k.nama === idStr ||
+            k.id.toLowerCase() === idStr.toLowerCase()
+        );
+        
+        if (found) {
+            // Update cache untuk next time
+            this.state.kategoriMap[idStr] = found.nama;
+            return found.nama;
+        }
+        
+        // 3. Kalau kategoriId itu sudah nama langsung
+        if (idStr.length > 0 && idStr !== '-') {
+            return idStr;
+        }
+        
+        return '-';
+    },
+    
+    renderPagination: function(totalPages) {
+        if (!this.elements.pagination || totalPages <= 1) {
+            if (this.elements.pagination) this.elements.pagination.innerHTML = '';
             return;
         }
         
@@ -665,13 +747,10 @@ const ProdukMain = {
         if (!this.elements.bulkActionBar) return;
         
         const count = this.state.selectedItems.size;
-        if (count > 0) {
-            this.elements.bulkActionBar.classList.add('active');
-            if (this.elements.selectedCount) {
-                this.elements.selectedCount.textContent = `${count} item dipilih`;
-            }
-        } else {
-            this.elements.bulkActionBar.classList.remove('active');
+        this.elements.bulkActionBar.classList.toggle('active', count > 0);
+        
+        if (this.elements.selectedCount) {
+            this.elements.selectedCount.textContent = `${count} item dipilih`;
         }
     },
     
@@ -697,7 +776,7 @@ const ProdukMain = {
             });
     },
     
-    // Actions
+    // Navigation
     goToPage: function(page) {
         const totalPages = Math.ceil(this.state.filteredData.length / this.state.itemsPerPage);
         if (page < 1 || page > totalPages) return;
@@ -720,6 +799,7 @@ const ProdukMain = {
         this.filterAndRender();
     },
     
+    // Actions
     toggleStatus: function(id, newStatus) {
         const produk = this.state.produkData.find(p => p.id === id);
         const nama = produk ? produk.nama : 'Produk';
@@ -738,19 +818,11 @@ const ProdukMain = {
         const produk = this.state.produkData.find(p => p.id === id);
         if (!produk) return;
         
-        if (!confirm(`Yakin hapus "${produk.nama}"?\n\nProduk akan dihapus permanen.`)) {
-            return;
-        }
-        
-        showToast('⏳ Menghapus...', 'info');
+        if (!confirm(`Yakin hapus "${produk.nama}"?\n\nProduk akan dihapus permanen.`)) return;
         
         firebase.database().ref(`produk/${id}`).remove()
-            .then(() => {
-                showToast('✅ Produk dihapus', 'success');
-            })
-            .catch(err => {
-                showToast('❌ Gagal menghapus: ' + err.message, 'error');
-            });
+            .then(() => showToast('✅ Produk dihapus', 'success'))
+            .catch(err => showToast('❌ Gagal menghapus: ' + err.message, 'error'));
     },
     
     quickView: function(id) {
@@ -874,11 +946,6 @@ const ProdukMain = {
     },
     
     // Utilities
-    getKategoriName: function(kategoriId) {
-        const k = this.state.kategoriData.find(k => k.id === kategoriId || k.nama === kategoriId);
-        return k ? k.nama : (kategoriId || '-');
-    },
-    
     getStokClass: function(stok, minStok = 5) {
         if (stok <= 0) return 'habis';
         if (stok <= minStok) return 'menipis';
@@ -886,12 +953,8 @@ const ProdukMain = {
     },
     
     getStokBadge: function(stok, satuan, minStok = 5) {
-        if (stok <= 0) {
-            return '<span class="badge-stok habis">Stok Habis</span>';
-        }
-        if (stok <= minStok) {
-            return `<span class="badge-stok menipis">Sisa ${stok} ${satuan}</span>`;
-        }
+        if (stok <= 0) return '<span class="badge-stok habis">Stok Habis</span>';
+        if (stok <= minStok) return `<span class="badge-stok menipis">Sisa ${stok} ${satuan}</span>`;
         return '';
     },
     
