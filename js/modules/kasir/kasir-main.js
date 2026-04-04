@@ -47,7 +47,7 @@ function setupEventListeners() {
         });
     });
     
-    // Jenis transaksi - FIX: prevent default untuk mobile
+    // Jenis transaksi
     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -57,17 +57,15 @@ function setupEventListeners() {
         });
     });
     
-    // Tombol manual - FIX: tambah touch event untuk mobile
+    // Tombol manual
     const btnManual = document.getElementById('btn-transaksi-manual');
     if (btnManual) {
-        // Click untuk desktop
         btnManual.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             openModal('modal-transaksi-manual');
         });
         
-        // Touch untuk mobile
         btnManual.addEventListener('touchend', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -144,6 +142,7 @@ function setupEventListeners() {
         }
     });
 }
+
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 'k') {
@@ -185,7 +184,7 @@ async function loadProduk() {
             throw new Error('Database not initialized');
         }
         
-        // PERBAIKAN: Load dari cache dulu untuk tampilkan sementara
+        // Load dari cache dulu untuk tampilkan sementara
         const cached = localStorage.getItem('produk_data_cache');
         if (cached) {
             try {
@@ -195,7 +194,6 @@ async function loadProduk() {
                     produkData = cachedData;
                     renderProduk(produkData);
                     
-                    // Clear loading setelah render cache
                     if (container) {
                         container.innerHTML = '';
                     }
@@ -224,7 +222,6 @@ async function loadProduk() {
             console.log('[Kasir] Fresh data loaded:', freshData.length, 'produk');
             renderProduk(produkData);
         } else if (!cached) {
-            // Jika tidak ada cache dan tidak ada data
             if (container) {
                 container.innerHTML = `
                     <div class="loading-produk" style="grid-column: 1/-1;">
@@ -265,7 +262,7 @@ async function loadProduk() {
         }
     }
 }
-// FIX: Render produk dengan class modern
+
 function renderProduk(produkList) {
     const container = document.getElementById('produk-container');
     if (!container) return;
@@ -299,7 +296,6 @@ function renderProduk(produkList) {
     }
 }
 
-// FIX: Toggle view dengan selector modern
 function toggleView(view) {
     currentView = view;
     
@@ -477,6 +473,9 @@ function cleanItemsForFirebase(items) {
     });
 }
 
+// =============================================================================
+// PROSES PEMBAYARAN - PERBAIKAN UPDATE STOK
+// =============================================================================
 async function prosesPembayaran() {
     const keranjang = window.Keranjang ? window.Keranjang.getItems() : [];
     
@@ -555,23 +554,52 @@ async function prosesPembayaran() {
         };
         
         if (typeof database !== 'undefined') {
+            // Simpan transaksi
             await database.ref(`transaksi/${today}/${kodeTransaksi}`).set(transaksiData);
             
+            // =================================================================
+            // PERBAIKAN: UPDATE STOK PRODUK - GANTI 'products' MENJADI 'produk'
+            // =================================================================
             for (const item of keranjang) {
                 if (item.jenis === 'penjualan' && item.id && !item.id.startsWith('manual_')) {
-                    const produkRef = database.ref(`products/${item.id}`);
+                    // BENAR: pakai 'produk' bukan 'products'
+                    const produkRef = database.ref(`produk/${item.id}`);
                     const snapshot = await produkRef.once('value');
                     const produk = snapshot.val();
                     
                     if (produk) {
-                        const newStok = Math.max(0, (produk.stok || 0) - item.qty);
+                        const currentStok = parseInt(produk.stok) || 0;
+                        const qty = parseInt(item.qty) || 1;
+                        const newStok = Math.max(0, currentStok - qty);
+                        const currentTerjual = parseInt(produk.terjual) || 0;
+                        
+                        console.log(`[Kasir] Update stok ${produk.nama}: ${currentStok} -> ${newStok} (terjual: ${qty})`);
+                        
                         await produkRef.update({
                             stok: newStok,
-                            terjual: (produk.terjual || 0) + item.qty
+                            terjual: currentTerjual + qty,
+                            updated_at: Date.now()
                         });
+                        
+                        // Update cache juga agar konsisten
+                        const cached = localStorage.getItem('produk_data_cache');
+                        if (cached) {
+                            try {
+                                const cachedData = JSON.parse(cached);
+                                const idx = cachedData.findIndex(p => p.id === item.id);
+                                if (idx >= 0) {
+                                    cachedData[idx].stok = newStok;
+                                    cachedData[idx].terjual = currentTerjual + qty;
+                                    localStorage.setItem('produk_data_cache', JSON.stringify(cachedData));
+                                }
+                            } catch (e) {
+                                console.error('Error updating cache:', e);
+                            }
+                        }
                     }
                 }
             }
+            // =================================================================
             
             await updateDailyData(session.uid, keranjang, total);
             
@@ -587,6 +615,8 @@ async function prosesPembayaran() {
         if (jumlahBayarInput) jumlahBayarInput.value = '';
         
         showToast(`Transaksi ${kodeTransaksi} berhasil`, 'success');
+        
+        // Reload produk untuk refresh stok
         setTimeout(loadProduk, 500);
         
     } catch (error) {
