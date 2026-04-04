@@ -1,18 +1,9 @@
 /**
  * Produk Main Controller - WebPOS Modern
  * File: js/modules/produk/produk-main.js
- * 
- * Features:
- * - Realtime Firebase sync
- * - Grid/List view dengan animasi
- * - Search & filter
- * - Export/Import Excel
- * - Soft delete (status based)
- * - Integrasi tema modern
  */
 
 const ProdukMain = {
-    // State Management
     state: {
         produkData: [],
         kategoriData: [],
@@ -27,22 +18,16 @@ const ProdukMain = {
         selectedItems: new Set()
     },
     
-    // DOM Cache
     elements: {},
-    
-    // Firebase Listener
     produkListener: null,
     
-    // ========================================================================
-    // INITIALIZATION
-    // ========================================================================
     init: function() {
         console.log('[ProdukMain] 🚀 Initializing...');
         
         this.cacheElements();
         
-        if (!this.validateElements()) {
-            console.error('[ProdukMain] ❌ Critical elements missing!');
+        if (!this.elements.container) {
+            console.error('[ProdukMain] ❌ Container not found!');
             return;
         }
         
@@ -50,7 +35,11 @@ const ProdukMain = {
         this.initRealtimeListener();
         this.loadKategori();
         
-        // Expose ke global
+        // Restore view preference
+        const savedView = localStorage.getItem('produk_view_preference') || 'grid';
+        this.state.currentView = savedView;
+        this.updateViewButtons();
+        
         window.produkData = this.state.produkData;
         window.ProdukMain = this;
         
@@ -59,19 +48,13 @@ const ProdukMain = {
     
     cacheElements: function() {
         this.elements = {
-            // Container
             container: document.getElementById('produk-container'),
             pagination: document.getElementById('pagination-container'),
-            emptyState: document.getElementById('empty-state'),
-            
-            // Controls
             searchInput: document.getElementById('search-produk'),
             btnGrid: document.getElementById('view-grid'),
             btnList: document.getElementById('view-list'),
             selectKategori: document.getElementById('filter-kategori'),
             selectStatus: document.getElementById('filter-status'),
-            
-            // Toolbar Buttons
             btnTambah: document.getElementById('btn-tambah-produk'),
             btnImport: document.getElementById('btn-import-excel'),
             btnExport: document.getElementById('btn-export-excel'),
@@ -80,31 +63,15 @@ const ProdukMain = {
             btnKategori: document.getElementById('btn-kategori-manager'),
             btnStok: document.getElementById('btn-stok-masal'),
             btnDeleteSelected: document.getElementById('btn-delete-selected'),
-            
-            // Stats
             statTotal: document.getElementById('stat-total'),
             statAktif: document.getElementById('stat-aktif'),
             statNonaktif: document.getElementById('stat-nonaktif'),
             statStokHabis: document.getElementById('stat-stok-habis'),
-            
-            // Bulk Actions
             bulkActionBar: document.getElementById('bulk-action-bar'),
             selectedCount: document.getElementById('selected-count')
         };
     },
     
-    validateElements: function() {
-        const critical = ['container'];
-        return critical.every(key => {
-            const exists = !!this.elements[key];
-            if (!exists) console.warn(`[ProdukMain] Missing element: ${key}`);
-            return exists;
-        });
-    },
-    
-    // ========================================================================
-    // EVENT LISTENERS
-    // ========================================================================
     setupEventListeners: function() {
         const self = this;
         
@@ -135,12 +102,21 @@ const ProdukMain = {
             });
         }
         
-        // View Toggle
+        // View Toggle - PERBAIKAN: bind langsung ke fungsi
         if (this.elements.btnGrid) {
-            this.elements.btnGrid.addEventListener('click', () => this.setView('grid'));
+            this.elements.btnGrid.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('[ProdukMain] Grid view clicked');
+                self.setView('grid');
+            });
         }
+        
         if (this.elements.btnList) {
-            this.elements.btnList.addEventListener('click', () => this.setView('list'));
+            this.elements.btnList.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('[ProdukMain] List view clicked');
+                self.setView('list');
+            });
         }
         
         // Toolbar Actions
@@ -150,7 +126,6 @@ const ProdukMain = {
         this.bindSafe(this.elements.btnKategori, () => this.openModal('modal-kategori'));
         this.bindSafe(this.elements.btnStok, () => this.openModal('modal-stok'));
         this.bindSafe(this.elements.btnDeleteSelected, () => this.deleteSelected());
-        
         this.bindSafe(this.elements.btnExport, () => this.exportToExcel());
         this.bindSafe(this.elements.btnTemplate, () => this.downloadTemplate());
     },
@@ -165,9 +140,18 @@ const ProdukMain = {
     },
     
     setView: function(view) {
-        this.state.currentView = view;
+        console.log('[ProdukMain] Setting view to:', view);
         
-        // Update button states dengan animasi
+        this.state.currentView = view;
+        localStorage.setItem('produk_view_preference', view);
+        
+        this.updateViewButtons();
+        this.filterAndRender();
+    },
+    
+    updateViewButtons: function() {
+        const view = this.state.currentView;
+        
         if (this.elements.btnGrid) {
             this.elements.btnGrid.classList.toggle('active', view === 'grid');
         }
@@ -175,15 +159,9 @@ const ProdukMain = {
             this.elements.btnList.classList.toggle('active', view === 'list');
         }
         
-        // Simpan preference
-        localStorage.setItem('produk_view_preference', view);
-        
-        this.filterAndRender();
+        console.log('[ProdukMain] View buttons updated:', view);
     },
     
-    // ========================================================================
-    // REALTIME DATA
-    // ========================================================================
     initRealtimeListener: function() {
         const self = this;
         
@@ -193,7 +171,6 @@ const ProdukMain = {
             return;
         }
         
-        // Cleanup listener lama
         if (this.produkListener) {
             this.produkListener.off();
         }
@@ -206,21 +183,22 @@ const ProdukMain = {
             const data = [];
             snapshot.forEach(function(child) {
                 const val = child.val();
-                // Normalize data structure
+                
+                // PERBAIKAN: Normalisasi tipe data
                 data.push({
                     id: child.key,
-                    kode: val.kode || '',
-                    barcode: val.barcode || '',
-                    nama: val.nama || '',
-                    kategori: val.kategori || '',
-                    satuan: val.satuan || 'pcs',
+                    kode: self.normalizeString(val.kode),
+                    barcode: self.normalizeString(val.barcode),
+                    nama: self.normalizeString(val.nama),
+                    kategori: self.normalizeString(val.kategori),
+                    satuan: self.normalizeString(val.satuan) || 'pcs',
                     harga_modal: parseInt(val.harga_modal || val.hargaModal || 0),
                     harga_jual: parseInt(val.harga_jual || val.hargaJual || 0),
                     stok: parseInt(val.stok || 0),
-                    min_stok: parseInt(val.min_stok || 5),
+                    min_stok: parseInt(val.min_stok || val.minStok || 5),
                     terjual: parseInt(val.terjual || 0),
-                    status: val.status || 'aktif',
-                    deskripsi: val.deskripsi || '',
+                    status: (val.status || 'aktif').toString().toLowerCase(),
+                    deskripsi: self.normalizeString(val.deskripsi),
                     gambar: val.gambar || null,
                     created_at: val.created_at || Date.now(),
                     updated_at: val.updated_at || Date.now()
@@ -228,7 +206,7 @@ const ProdukMain = {
             });
             
             self.state.produkData = data;
-            window.produkData = data; // Global access
+            window.produkData = data;
             
             console.log('[ProdukMain] 📊 Realtime update:', data.length, 'produk');
             
@@ -241,6 +219,12 @@ const ProdukMain = {
         });
     },
     
+    // PERBAIKAN: Normalisasi string
+    normalizeString: function(value) {
+        if (value === null || value === undefined) return '';
+        return value.toString().trim();
+    },
+    
     loadKategori: function() {
         const self = this;
         
@@ -250,13 +234,20 @@ const ProdukMain = {
             .then(function(snapshot) {
                 const data = [];
                 snapshot.forEach(function(child) {
+                    const val = child.val();
                     data.push({
                         id: child.key,
-                        ...child.val()
+                        nama: self.normalizeString(val.nama),
+                        deskripsi: self.normalizeString(val.deskripsi)
                     });
                 });
+                
                 self.state.kategoriData = data;
+                console.log('[ProdukMain] Kategori loaded:', data.length);
                 self.populateKategoriFilter();
+            })
+            .catch(err => {
+                console.error('[ProdukMain] Error loading kategori:', err);
             });
     },
     
@@ -264,12 +255,15 @@ const ProdukMain = {
         const select = this.elements.selectKategori;
         if (!select) return;
         
+        // Simpan value yang sedang dipilih
         const currentValue = select.value;
         
+        // Clear options kecuali "Semua"
         while (select.options.length > 1) {
             select.remove(1);
         }
         
+        // Tambah kategori
         this.state.kategoriData.forEach(k => {
             const option = document.createElement('option');
             option.value = k.id || k.nama;
@@ -277,12 +271,14 @@ const ProdukMain = {
             select.appendChild(option);
         });
         
-        if (currentValue) select.value = currentValue;
+        // Restore value jika masih ada
+        if (currentValue) {
+            select.value = currentValue;
+        }
+        
+        console.log('[ProdukMain] Kategori filter populated:', this.state.kategoriData.length, 'items');
     },
     
-    // ========================================================================
-    // STATS UPDATE
-    // ========================================================================
     updateStats: function() {
         const data = this.state.produkData;
         
@@ -290,8 +286,7 @@ const ProdukMain = {
             total: data.length,
             aktif: data.filter(p => p.status === 'aktif').length,
             nonaktif: data.filter(p => p.status === 'nonaktif').length,
-            stokHabis: data.filter(p => p.stok <= 0 && p.status === 'aktif').length,
-            stokMenipis: data.filter(p => p.stok > 0 && p.stok <= p.min_stok && p.status === 'aktif').length
+            stokHabis: data.filter(p => p.stok <= 0 && p.status === 'aktif').length
         };
         
         this.updateStatElement(this.elements.statTotal, stats.total);
@@ -335,20 +330,18 @@ const ProdukMain = {
         requestAnimationFrame(animate);
     },
     
-    // ========================================================================
-    // FILTER & RENDER
-    // ========================================================================
     filterAndRender: function() {
         let data = [...this.state.produkData];
         
-        // Filter search
+        // PERBAIKAN: Search dengan normalisasi string
         if (this.state.searchQuery) {
-            const q = this.state.searchQuery;
-            data = data.filter(p => 
-                (p.nama || '').toLowerCase().includes(q) ||
-                (p.kode || '').toLowerCase().includes(q) ||
-                (p.barcode || '').includes(q)
-            );
+            const q = this.state.searchQuery.toLowerCase();
+            data = data.filter(p => {
+                const nama = (p.nama || '').toLowerCase();
+                const kode = (p.kode || '').toLowerCase();
+                const barcode = (p.barcode || '').toLowerCase();
+                return nama.includes(q) || kode.includes(q) || barcode.includes(q);
+            });
         }
         
         // Filter kategori
@@ -635,9 +628,7 @@ const ProdukMain = {
         this.elements.pagination.innerHTML = html;
     },
     
-    // ========================================================================
-    // BULK ACTIONS
-    // ========================================================================
+    // Bulk Actions
     toggleSelect: function(id) {
         if (this.state.selectedItems.has(id)) {
             this.state.selectedItems.delete(id);
@@ -664,7 +655,6 @@ const ProdukMain = {
     },
     
     refreshSelectionUI: function() {
-        // Update card/row selection state
         document.querySelectorAll('.produk-card-modern, .produk-row').forEach(el => {
             const id = el.dataset.id;
             el.classList.toggle('selected', this.state.selectedItems.has(id));
@@ -707,9 +697,7 @@ const ProdukMain = {
             });
     },
     
-    // ========================================================================
-    // ACTIONS
-    // ========================================================================
+    // Actions
     goToPage: function(page) {
         const totalPages = Math.ceil(this.state.filteredData.length / this.state.itemsPerPage);
         if (page < 1 || page > totalPages) return;
@@ -769,17 +757,12 @@ const ProdukMain = {
         const produk = this.state.produkData.find(p => p.id === id);
         if (!produk) return;
         
-        // Buka modal detail
         if (window.DetailProduk) {
             window.DetailProduk.open(produk);
-        } else {
-            console.log('[ProdukMain] DetailProduk not available', produk);
         }
     },
     
-    // ========================================================================
-    // EXPORT/IMPORT
-    // ========================================================================
+    // Export/Import
     exportToExcel: function() {
         const data = this.state.filteredData.length > 0 ? this.state.filteredData : this.state.produkData;
         
@@ -823,7 +806,7 @@ const ProdukMain = {
             'Kode': 'PRD-001',
             'Barcode': '8991234567890',
             'Nama Produk': 'Contoh Produk',
-            'Kategori': 'IPHONE',
+            'Kategori': 'ELEKTRONIK',
             'Satuan': 'pcs',
             'Harga Modal': 50000,
             'Harga Jual': 75000,
@@ -847,14 +830,13 @@ const ProdukMain = {
         showToast('✅ Template diunduh', 'success');
     },
     
-    // ========================================================================
-    // MODAL HELPERS
-    // ========================================================================
+    // Modal Helpers
     openModal: function(id) {
         const modal = document.getElementById(id);
         if (modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            document.getElementById('overlay')?.classList.add('active');
         }
     },
     
@@ -862,13 +844,12 @@ const ProdukMain = {
         const modal = document.getElementById(id);
         if (modal) {
             modal.classList.remove('active');
-            document.body.style.overflow = '';
+            setTimeout(() => modal.style.display = 'none', 300);
         }
+        document.getElementById('overlay')?.classList.remove('active');
     },
     
-    // ========================================================================
-    // UI HELPERS
-    // ========================================================================
+    // UI Helpers
     showLoading: function() {
         if (!this.elements.container) return;
         this.elements.container.innerHTML = `
@@ -892,9 +873,7 @@ const ProdukMain = {
         `;
     },
     
-    // ========================================================================
-    // UTILITIES
-    // ========================================================================
+    // Utilities
     getKategoriName: function(kategoriId) {
         const k = this.state.kategoriData.find(k => k.id === kategoriId || k.nama === kategoriId);
         return k ? k.nama : (kategoriId || '-');
@@ -936,7 +915,6 @@ const ProdukMain = {
         };
     },
     
-    // Cleanup
     destroy: function() {
         if (this.produkListener) {
             this.produkListener.off();
@@ -946,8 +924,5 @@ const ProdukMain = {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Restore view preference
-    const savedView = localStorage.getItem('produk_view_preference') || 'grid';
-    ProdukMain.state.currentView = savedView;
     ProdukMain.init();
 });
