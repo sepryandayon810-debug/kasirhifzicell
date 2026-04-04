@@ -60,42 +60,33 @@ const TelegramSaldo = {
         
         let fileWarning = '';
         if (isFileProtocol) {
-            fileWarning = `
-                <div style="background: #e3f2fd; border: 2px solid #2196f3; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                    <div style="color: #1565c0; font-weight: 600; margin-bottom: 8px;">ℹ️ Mode File Lokal Terdeteksi</div>
-                    <div style="color: #1565c0; font-size: 13px; margin-bottom: 12px;">
-                        Menggunakan proxy untuk koneksi ke Google Sheets.
-                    </div>
-                    <button onclick="TelegramModule.testProxy()" 
-                            style="background: #2196f3; color: white; border: none; padding: 8px 16px; 
-                                   border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 8px;">
-                        🧪 Test Proxy
-                    </button>
-                </div>
-            `;
+            fileWarning = TelegramUI.renderInfoBox('warning', 'ℹ️ Mode File Lokal Terdeteksi', 
+                `Menggunakan proxy untuk koneksi ke Google Sheets.<br>
+                <button class="tg-btn tg-btn-outline" onclick="TelegramModule.testProxy()" style="margin-top: 12px;">
+                    🧪 Test Proxy
+                </button>`);
         }
         
         let warningHtml = '';
         if (!validation.valid && !isWaiting) {
-            warningHtml = `
-                <div style="background: #fff3e0; border: 2px solid #ff9800; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                    <div style="color: #e65100; font-weight: 600; margin-bottom: 8px;">⚠️ Konfigurasi Belum Lengkap</div>
-                    <ul style="margin: 0; padding-left: 20px; color: #e65100; font-size: 13px;">
-                        ${validation.errors.map(e => `<li>${e}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
+            warningHtml = TelegramUI.renderInfoBox('error', '⚠️ Konfigurasi Belum Lengkap',
+                `<ul>${validation.errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                <div style="margin-top: 12px; font-size: 12px;">
+                    ⬇️ Isi konfigurasi di bagian "☁️ Konfigurasi Google Sheet" di bawah
+                </div>`);
         }
         
+        const content = isWaiting ? this.renderInputNominal() : this.renderPilihJenis();
+        
         return `
-            <div class="tg-saldo-section" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); 
-                        border: 2px solid #4caf50; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 16px 0; color: #2e7d32; display: flex; align-items: center; gap: 8px;">
-                    💰 Input Saldo ke Google Sheets
-                </h3>
+            <div class="tg-saldo-section">
+                <div class="tg-saldo-header">
+                    <div class="tg-saldo-header-icon">💰</div>
+                    <span>Input Saldo ke Google Sheets</span>
+                </div>
                 ${fileWarning}
                 ${warningHtml}
-                ${isWaiting ? this.renderInputNominal() : this.renderPilihJenis()}
+                ${content}
                 ${this.renderDebugInfo()}
             </div>
         `;
@@ -106,27 +97,23 @@ const TelegramSaldo = {
         const disabled = !validation.valid;
         
         const buttons = this.data.jenisSaldo.map(jenis => `
-            <button onclick="TelegramModule.pilihJenisSaldo('${jenis}')" 
-                    ${disabled ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
-                    style="background: white; border: 2px solid #4caf50; color: #4caf50; padding: 20px; 
-                           border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s;
-                           display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%;">
-                <span style="font-size: 32px;">${this.getIcon(jenis)}</span>
-                <span style="font-size: 16px;">${jenis}</span>
+            <button class="tg-jenis-btn" onclick="TelegramModule.pilihJenisSaldo('${jenis}')" 
+                    ${disabled ? 'disabled' : ''}>
+                <span class="tg-jenis-icon">${this.getIcon(jenis)}</span>
+                <span class="tg-jenis-label">${jenis}</span>
             </button>
         `).join('');
         
         return `
-            <div style="background: white; border-left: 4px solid #4caf50; padding: 16px; margin-bottom: 16px; border-radius: 8px;">
-                <strong style="color: #2e7d32;">📋 Cara Penggunaan:</strong>
-                <ol style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: #555; line-height: 1.8;">
-                    <li>Klik jenis saldo yang ingin diinput (DANA/DIGIPOS/MASTERLOAD)</li>
-                    <li>Masukkan nominal saldo yang diterima</li>
-                    <li>Klik tombol "✅ Simpan ke Sheet"</li>
-                </ol>
+            ${TelegramUI.renderInfoBox('success', '📋 Cara Penggunaan', [
+                'Klik jenis saldo yang ingin diinput (DANA/DIGIPOS/MASTERLOAD)',
+                'Masukkan nominal saldo yang diterima',
+                'Klik tombol "✅ Simpan ke Sheet"'
+            ])}
+            <div style="font-weight: 600; margin-bottom: 16px; color: var(--text-primary); font-size: 16px;">
+                Pilih Jenis Saldo:
             </div>
-            <div style="font-weight: 600; margin-bottom: 12px; color: #333; font-size: 16px;">Pilih Jenis Saldo:</div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
+            <div class="tg-jenis-grid">
                 ${buttons}
             </div>
         `;
@@ -137,46 +124,28 @@ const TelegramSaldo = {
         const icon = this.getIcon(jenis);
         
         return `
-            <div style="background: white; padding: 24px; border-radius: 16px; border: 3px solid #4caf50; 
-                        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2); animation: slideIn 0.3s ease;">
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; 
-                            border-bottom: 2px solid #e8f5e9;">
-                    <div style="font-size: 48px; background: #e8f5e9; width: 80px; height: 80px; 
-                                display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                        ${icon}
-                    </div>
-                    <div>
-                        <div style="font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
-                            Input Saldo
-                        </div>
-                        <div style="font-size: 28px; font-weight: 700; color: #2e7d32;">${jenis}</div>
+            <div class="tg-saldo-input-card">
+                <div class="tg-saldo-input-header">
+                    <div class="tg-saldo-input-icon">${icon}</div>
+                    <div class="tg-saldo-input-title">
+                        <div class="label">Input Saldo</div>
+                        <div class="value">${jenis}</div>
                     </div>
                 </div>
                 
-                <div style="margin-bottom: 24px;">
-                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #555; font-size: 15px;">
-                        Masukkan Nominal Saldo (Rp)
-                    </label>
-                    <input type="number" id="saldoNominal" placeholder="0" 
-                           style="width: 100%; padding: 20px; font-size: 32px; font-weight: 700; 
-                                  border: 2px solid #ddd; border-radius: 12px; text-align: center;"
+                <div class="tg-nominal-input-wrapper">
+                    <label>Masukkan Nominal Saldo (Rp)</label>
+                    <input type="number" id="saldoNominal" class="tg-nominal-input" placeholder="0"
                            onkeyup="TelegramSaldo.formatRupiah(this)"
                            onkeypress="if(event.key==='Enter')TelegramModule.kirimNominalSaldo()">
-                    <div id="nominalDisplay" style="text-align: center; margin-top: 12px; font-size: 18px; 
-                                                    color: #4caf50; font-weight: 600; min-height: 24px;"></div>
+                    <div id="nominalDisplay" class="tg-nominal-display"></div>
                 </div>
                 
-                <div style="display: flex; gap: 12px;">
-                    <button onclick="TelegramModule.kirimNominalSaldo()" 
-                            style="flex: 2; background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); 
-                                   color: white; padding: 18px; border: none; border-radius: 12px; 
-                                   font-weight: 700; cursor: pointer; font-size: 16px;">
+                <div class="tg-saldo-actions">
+                    <button class="tg-btn-primary" onclick="TelegramModule.kirimNominalSaldo()">
                         ✅ SIMPAN KE SHEET
                     </button>
-                    <button onclick="TelegramModule.batalSaldo()" 
-                            style="flex: 1; background: #f5f5f5; color: #666; padding: 18px; 
-                                   border: 2px solid #ddd; border-radius: 12px; font-weight: 600; 
-                                   cursor: pointer; font-size: 14px;">
+                    <button class="tg-btn-secondary" onclick="TelegramModule.batalSaldo()">
                         ❌ BATAL
                     </button>
                 </div>
@@ -187,17 +156,31 @@ const TelegramSaldo = {
     renderDebugInfo: function() {
         const validation = this.validateConfig();
         return `
-            <div style="margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 8px; 
-                        font-size: 11px; font-family: monospace;">
-                <div style="font-weight: 600; margin-bottom: 8px;">🔧 Debug Info:</div>
-                <div>Protocol: ${window.location.protocol}</div>
-                <div>Script URL: ${this.data.scriptUrl ? '✅ Set' : '❌ Empty'}</div>
-                <div>Sheet ID: ${this.data.sheetId ? '✅ Set' : '❌ Empty'}</div>
-                <div>Config Valid: ${validation.valid ? '✅ Yes' : '❌ No'}</div>
-                <div>Transaksi Aktif: ${this.transaksiAktif ? '✅ ' + this.transaksiAktif.namaItem : '❌ No'}</div>
+            <div class="tg-debug-box">
+                <div class="tg-debug-title">🔧 Debug Info</div>
+                <div class="tg-debug-item">
+                    <span>Protocol:</span>
+                    <span>${window.location.protocol}</span>
+                </div>
+                <div class="tg-debug-item">
+                    <span>Script URL:</span>
+                    <span>${this.data.scriptUrl ? '✅ Set' : '❌ Empty'}</span>
+                </div>
+                <div class="tg-debug-item">
+                    <span>Sheet ID:</span>
+                    <span>${this.data.sheetId ? '✅ Set' : '❌ Empty'}</span>
+                </div>
+                <div class="tg-debug-item">
+                    <span>Config Valid:</span>
+                    <span>${validation.valid ? '✅ Yes' : '❌ No'}</span>
+                </div>
+                <div class="tg-debug-item">
+                    <span>Transaksi Aktif:</span>
+                    <span>${this.transaksiAktif ? '✅ ' + this.transaksiAktif.namaItem : '❌ No'}</span>
+                </div>
             </div>
         `;
-    },
+    }
     
     getIcon: function(jenis) {
         const icons = { 'DANA': '💙', 'DIGIPOS': '🟡', 'MASTERLOAD': '🟢' };
