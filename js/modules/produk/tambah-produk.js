@@ -1,245 +1,250 @@
 /**
- * Tambah Produk Module - Fixed Version
+ * Tambah Produk Modal - WebPOS Modern
  * File: js/modules/produk/tambah-produk.js
  */
 
 const TambahProduk = {
+    elements: {},
+    imageFile: null,
+    
     init: function() {
-        console.log('[TambahProduk] Initializing...');
-        
-        // Cache elements dengan pengecekan null
-        this.elements = {
-            form: document.getElementById('form-tambah-produk'),
-            modal: document.getElementById('modal-tambah-produk'),
-            btnSimpan: document.getElementById('btn-simpan-produk'),
-            btnBatal: document.getElementById('btn-batal-produk'),
-            
-            // Input fields
-            kode: document.getElementById('produk-kode'),
-            barcode: document.getElementById('produk-barcode'),
-            nama: document.getElementById('produk-nama'),
-            kategori: document.getElementById('produk-kategori'),
-            satuan: document.getElementById('produk-satuan'),
-            hargaModal: document.getElementById('produk-harga-modal'),
-            hargaJual: document.getElementById('produk-harga-jual'),
-            stok: document.getElementById('produk-stok'),
-            deskripsi: document.getElementById('produk-deskripsi'),
-            status: document.getElementById('produk-status'),
-            
-            // Image
-            gambar: document.getElementById('produk-gambar'),
-            preview: document.getElementById('image-preview'),
-            btnHapusGambar: document.getElementById('btn-hapus-gambar')
-        };
-        
-        // Cek elemen kritis
-        if (!this.elements.modal) {
-            console.error('[TambahProduk] Modal tidak ditemukan!');
-            return;
-        }
-        
-        // Bind events
-        this.bindEvents();
-        
-        // Generate kode awal
-        this.generateKode();
-        
-        console.log('[TambahProduk] Initialized');
+        this.cacheElements();
+        this.setupEventListeners();
     },
     
-    bindEvents: function() {
-        // Tombol simpan
-        if (this.elements.btnSimpan) {
-            this.elements.btnSimpan.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.simpan();
-            });
-        }
+    cacheElements: function() {
+        this.elements = {
+            modal: document.getElementById('modal-tambah-produk'),
+            form: document.getElementById('form-tambah-produk'),
+            btnClose: document.getElementById('close-tambah'),
+            btnCancel: document.getElementById('cancel-tambah'),
+            btnSave: document.getElementById('save-tambah'),
+            
+            // Form fields
+            inputKode: document.getElementById('input-kode'),
+            inputBarcode: document.getElementById('input-barcode'),
+            inputNama: document.getElementById('input-nama'),
+            selectKategori: document.getElementById('input-kategori'),
+            inputSatuan: document.getElementById('input-satuan'),
+            inputHargaModal: document.getElementById('input-harga-modal'),
+            inputHargaJual: document.getElementById('input-harga-jual'),
+            inputStok: document.getElementById('input-stok'),
+            inputMinStok: document.getElementById('input-min-stok'),
+            inputDeskripsi: document.getElementById('input-deskripsi'),
+            
+            // Image upload
+            imageUpload: document.getElementById('image-upload'),
+            imagePreview: document.getElementById('image-preview'),
+            btnRemoveImage: document.getElementById('remove-image'),
+            
+            // Profit calc
+            profitDisplay: document.getElementById('profit-display'),
+            marginDisplay: document.getElementById('margin-display')
+        };
+    },
+    
+    setupEventListeners: function() {
+        const self = this;
         
-        // Tombol batal
-        if (this.elements.btnBatal) {
-            this.elements.btnBatal.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.close();
-            });
-        }
+        // Close buttons
+        this.elements.btnClose?.addEventListener('click', () => this.close());
+        this.elements.btnCancel?.addEventListener('click', () => this.close());
+        
+        // Form submit
+        this.elements.form?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.save();
+        });
+        
+        // Auto generate kode
+        this.elements.inputKode?.addEventListener('focus', () => {
+            if (!this.elements.inputKode.value) {
+                this.generateKode();
+            }
+        });
+        
+        // Profit calculation
+        [this.elements.inputHargaModal, this.elements.inputHargaJual].forEach(el => {
+            el?.addEventListener('input', () => this.calculateProfit());
+        });
         
         // Image upload
-        if (this.elements.gambar) {
-            this.elements.gambar.addEventListener('change', (e) => this.handleImage(e));
-        }
+        this.elements.imageUpload?.addEventListener('change', (e) => this.handleImageSelect(e));
+        this.elements.btnRemoveImage?.addEventListener('click', () => this.removeImage());
         
-        // Hapus gambar
-        if (this.elements.btnHapusGambar) {
-            this.elements.btnHapusGambar.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.hapusGambar();
-            });
-        }
-        
-        // Auto calculate harga jual dari modal (optional 20% markup)
-        if (this.elements.hargaModal && this.elements.hargaJual) {
-            this.elements.hargaModal.addEventListener('blur', () => {
-                const modal = parseInt(this.elements.hargaModal.value) || 0;
-                if (modal > 0 && !this.elements.hargaJual.value) {
-                    this.elements.hargaJual.value = Math.round(modal * 1.2);
-                }
-            });
-        }
+        // Load kategori when modal opens
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-tambah-produk')) {
+                this.loadKategori();
+                this.generateKode();
+            }
+        });
     },
     
     generateKode: function() {
-        if (!this.elements.kode) return;
-        
-        const timestamp = Date.now().toString().slice(-6);
+        const timestamp = Date.now().toString(36).toUpperCase();
         const random = Math.random().toString(36).substring(2, 5).toUpperCase();
-        this.elements.kode.value = `PRD-${timestamp}${random}`;
+        if (this.elements.inputKode) {
+            this.elements.inputKode.value = `PRD-${timestamp}${random}`;
+        }
     },
     
-    handleImage: function(e) {
+    loadKategori: function() {
+        const select = this.elements.selectKategori;
+        if (!select || typeof firebase === 'undefined') return;
+        
+        firebase.database().ref('kategori').once('value')
+            .then(snapshot => {
+                select.innerHTML = '<option value="">Pilih Kategori</option>';
+                snapshot.forEach(child => {
+                    const k = child.val();
+                    const option = document.createElement('option');
+                    option.value = child.key;
+                    option.textContent = k.nama;
+                    select.appendChild(option);
+                });
+            });
+    },
+    
+    calculateProfit: function() {
+        const modal = parseInt(this.elements.inputHargaModal?.value) || 0;
+        const jual = parseInt(this.elements.inputHargaJual?.value) || 0;
+        const profit = jual - modal;
+        const margin = modal > 0 ? ((profit / modal) * 100).toFixed(1) : 0;
+        
+        if (this.elements.profitDisplay) {
+            this.elements.profitDisplay.textContent = this.formatRupiah(profit);
+            this.elements.profitDisplay.className = profit >= 0 ? 'profit-positive' : 'profit-negative';
+        }
+        if (this.elements.marginDisplay) {
+            this.elements.marginDisplay.textContent = `${margin}%`;
+        }
+    },
+    
+    handleImageSelect: function(e) {
         const file = e.target.files[0];
         if (!file) return;
         
-        // Validasi ukuran (max 2MB)
         if (file.size > 2 * 1024 * 1024) {
-            showToast('Ukuran gambar maksimal 2MB', 'error');
+            showToast('❌ Gambar max 2MB', 'error');
             return;
         }
         
+        this.imageFile = file;
         const reader = new FileReader();
-        reader.onload = (event) => {
-            this.selectedImage = event.target.result;
-            
-            if (this.elements.preview) {
-                this.elements.preview.innerHTML = `<img src="${this.selectedImage}" alt="Preview">`;
-                this.elements.preview.classList.add('has-image');
-            }
-            
-            if (this.elements.btnHapusGambar) {
-                this.elements.btnHapusGambar.style.display = 'block';
+        reader.onload = (e) => {
+            if (this.elements.imagePreview) {
+                this.elements.imagePreview.src = e.target.result;
+                this.elements.imagePreview.classList.add('has-image');
             }
         };
         reader.readAsDataURL(file);
     },
     
-    hapusGambar: function() {
-        this.selectedImage = null;
-        
-        if (this.elements.preview) {
-            this.elements.preview.innerHTML = '<i class="fas fa-image"></i><span>Preview</span>';
-            this.elements.preview.classList.remove('has-image');
+    removeImage: function() {
+        this.imageFile = null;
+        if (this.elements.imagePreview) {
+            this.elements.imagePreview.src = '';
+            this.elements.imagePreview.classList.remove('has-image');
         }
-        
-        if (this.elements.gambar) {
-            this.elements.gambar.value = '';
-        }
-        
-        if (this.elements.btnHapusGambar) {
-            this.elements.btnHapusGambar.style.display = 'none';
+        if (this.elements.imageUpload) {
+            this.elements.imageUpload.value = '';
         }
     },
     
-    validate: function() {
-        const errors = [];
+    save: async function() {
+        const btn = this.elements.btnSave;
+        const originalText = btn?.innerHTML;
         
-        // Cek elemen exists sebelum ambil value
-        const nama = this.elements.nama?.value?.trim();
-        const kategori = this.elements.kategori?.value;
-        const hargaModal = parseInt(this.elements.hargaModal?.value) || 0;
-        const hargaJual = parseInt(this.elements.hargaJual?.value) || 0;
-        
-        if (!nama) errors.push('Nama produk wajib diisi');
-        if (!kategori) errors.push('Kategori wajib dipilih');
-        if (hargaModal <= 0) errors.push('Harga modal harus lebih dari 0');
-        if (hargaJual <= 0) errors.push('Harga jual harus lebih dari 0');
-        if (hargaJual <= hargaModal) errors.push('Harga jual harus lebih besar dari harga modal');
-        
-        return errors;
-    },
-    
-    simpan: async function() {
-        const errors = this.validate();
-        if (errors.length > 0) {
-            showToast(errors[0], 'error');
+        // Validasi
+        const nama = this.elements.inputNama?.value.trim();
+        if (!nama) {
+            showToast('❌ Nama produk wajib diisi', 'error');
+            this.elements.inputNama?.focus();
             return;
         }
         
-        // Disable button
-        if (this.elements.btnSimpan) {
-            this.elements.btnSimpan.disabled = true;
-            this.elements.btnSimpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        const hargaJual = parseInt(this.elements.inputHargaJual?.value) || 0;
+        if (hargaJual <= 0) {
+            showToast('❌ Harga jual harus lebih dari 0', 'error');
+            this.elements.inputHargaJual?.focus();
+            return;
+        }
+        
+        // Loading state
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
         }
         
         try {
+            let imageUrl = null;
+            
+            // Upload image if exists
+            if (this.imageFile && firebase.storage) {
+                const storageRef = firebase.storage().ref(`produk/${Date.now()}_${this.imageFile.name}`);
+                const snapshot = await storageRef.put(this.imageFile);
+                imageUrl = await snapshot.ref.getDownloadURL();
+            }
+            
             // Prepare data
             const data = {
-                kode: this.elements.kode?.value?.trim() || this.generateKode(),
-                barcode: this.elements.barcode?.value?.trim() || '',
-                nama: this.elements.nama?.value?.trim(),
-                kategori: this.elements.kategori?.value,
-                satuan: this.elements.satuan?.value || 'pcs',
-                harga_modal: parseInt(this.elements.hargaModal?.value) || 0,
-                harga_jual: parseInt(this.elements.hargaJual?.value) || 0,
-                stok: parseInt(this.elements.stok?.value) || 0,
-                deskripsi: this.elements.deskripsi?.value?.trim() || '',
-                status: this.elements.status?.value || 'aktif',
-                gambar: this.selectedImage || null,
-                created_at: firebase.database.ServerValue.TIMESTAMP,
-                updated_at: firebase.database.ServerValue.TIMESTAMP,
-                terjual: 0
+                kode: this.elements.inputKode?.value || '',
+                barcode: this.elements.inputBarcode?.value || '',
+                nama: nama,
+                kategori: this.elements.selectKategori?.value || '',
+                satuan: this.elements.inputSatuan?.value || 'pcs',
+                harga_modal: parseInt(this.elements.inputHargaModal?.value) || 0,
+                harga_jual: hargaJual,
+                stok: parseInt(this.elements.inputStok?.value) || 0,
+                min_stok: parseInt(this.elements.inputMinStok?.value) || 5,
+                deskripsi: this.elements.inputDeskripsi?.value || '',
+                gambar: imageUrl,
+                status: 'aktif',
+                terjual: 0,
+                created_at: Date.now(),
+                updated_at: Date.now()
             };
             
             // Save to Firebase
-            const newRef = firebase.database().ref('produk').push();
-            await newRef.set(data);
+            await firebase.database().ref('produk').push(data);
             
             showToast('✅ Produk berhasil ditambahkan', 'success');
-            this.reset();
             this.close();
-            
-            // Refresh produk list
-            if (window.ProdukMain && window.ProdukMain.refresh) {
-                window.ProdukMain.refresh();
-            }
+            this.resetForm();
             
         } catch (error) {
-            console.error('[TambahProduk] Error:', error);
+            console.error('Error saving produk:', error);
             showToast('❌ Gagal menyimpan: ' + error.message, 'error');
         } finally {
-            if (this.elements.btnSimpan) {
-                this.elements.btnSimpan.disabled = false;
-                this.elements.btnSimpan.innerHTML = 'Simpan Produk';
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         }
     },
     
-    reset: function() {
-        if (this.elements.form) {
-            this.elements.form.reset();
+    resetForm: function() {
+        this.elements.form?.reset();
+        this.removeImage();
+        if (this.elements.profitDisplay) {
+            this.elements.profitDisplay.textContent = 'Rp 0';
+            this.elements.profitDisplay.className = '';
         }
-        this.hapusGambar();
-        this.generateKode();
-    },
-    
-    open: function() {
-        if (this.elements.modal) {
-            this.elements.modal.classList.add('active');
-            this.reset();
+        if (this.elements.marginDisplay) {
+            this.elements.marginDisplay.textContent = '0%';
         }
     },
     
     close: function() {
-        if (this.elements.modal) {
-            this.elements.modal.classList.remove('active');
-        }
+        ProdukMain.closeModal('modal-tambah-produk');
+    },
+    
+    formatRupiah: function(angka) {
+        if (!angka) return 'Rp 0';
+        return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 };
 
-// Initialize when DOM ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => TambahProduk.init());
-} else {
-    TambahProduk.init();
-}
-
-window.TambahProduk = TambahProduk;
+// Initialize
+document.addEventListener('DOMContentLoaded', () => TambahProduk.init());
