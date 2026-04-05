@@ -1,6 +1,7 @@
 /**
- * WebPOS Kasir Main Module v3.0 - IMPROVED
+ * WebPOS Kasir Main Module v3.1 - FIXED
  * Features: Product loading, category filtering, search, grid/list view
+ * Fixed: Double click bug, proper categorization
  */
 
 const KasirMain = (function() {
@@ -16,7 +17,8 @@ const KasirMain = (function() {
             search: '',
             view: 'grid'
         },
-        isLoading: false
+        isLoading: false,
+        clickCooldown: false // Prevent double click
     };
     
     // DOM Elements Cache
@@ -42,7 +44,7 @@ const KasirMain = (function() {
         bindEvents();
         setupRealtimeListener();
         
-        console.log('KasirMain v3.0 initialized');
+        console.log('KasirMain v3.1 initialized');
     }
     
     // Cache DOM elements
@@ -66,7 +68,7 @@ const KasirMain = (function() {
         }
     }
     
-    // Load Kategori dari Firebase
+    // Load Kategori dari Firebase - SESUAIKAN DENGAN PRODUK
     function loadKategori() {
         const kategoriRef = firebase.database().ref('kategori');
         
@@ -84,15 +86,31 @@ const KasirMain = (function() {
                 });
             }
             
-            // Add "Umum" as default if no categories
+            // Add default categories if none exist
             if (state.kategori.length === 0) {
-                state.kategori.push({ id: 'umum', nama: 'Umum', icon: 'fa-box' });
+                state.kategori = [
+                    { id: 'umum', nama: 'Umum', icon: 'fa-box' },
+                    { id: 'iphone', nama: 'iPhone', icon: 'fa-mobile-alt' },
+                    { id: 'android', nama: 'Android', icon: 'fa-mobile' },
+                    { id: 'aksesoris', nama: 'Aksesoris', icon: 'fa-headphones' },
+                    { id: 'servis', nama: 'Servis', icon: 'fa-tools' }
+                ];
             }
             
             renderKategoriOptions();
             renderKategoriChips();
         }).catch(err => {
             console.error('Error loading kategori:', err);
+            // Fallback categories
+            state.kategori = [
+                { id: 'umum', nama: 'Umum', icon: 'fa-box' },
+                { id: 'iphone', nama: 'iPhone', icon: 'fa-mobile-alt' },
+                { id: 'android', nama: 'Android', icon: 'fa-mobile' },
+                { id: 'aksesoris', nama: 'Aksesoris', icon: 'fa-headphones' },
+                { id: 'servis', nama: 'Servis', icon: 'fa-tools' }
+            ];
+            renderKategoriOptions();
+            renderKategoriChips();
         });
     }
     
@@ -132,12 +150,12 @@ const KasirMain = (function() {
         
         elements.kategoriChips.innerHTML = html;
         
-        // Bind click events
+        // Bind click events - PENTING: bind sekali saja
         elements.kategoriChips.querySelectorAll('.kategori-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
+            chip.onclick = function() {
                 const kategoriId = this.dataset.kategori;
                 setKategoriFilter(kategoriId);
-            });
+            };
         });
     }
     
@@ -155,14 +173,11 @@ const KasirMain = (function() {
             chip.classList.toggle('active', chip.dataset.kategori === kategoriId);
         });
         
-        // Apply filter dengan animasi
+        // Apply filter
         filterAndRender();
-        
-        // Scroll ke container produk
-        elements.container?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     
-    // Load Produk dari Firebase
+    // Load Produk dari Firebase - Dikelompokkan per kategori
     function loadProduk() {
         state.isLoading = true;
         showLoading();
@@ -177,6 +192,10 @@ const KasirMain = (function() {
                 Object.keys(data).forEach(key => {
                     // Hanya tampilkan produk aktif
                     if (data[key].status !== 'nonaktif' && data[key].status !== 'deleted') {
+                        // Normalisasi kategori ID
+                        let kategoriId = data[key].kategoriId || data[key].kategori || 'umum';
+                        kategoriId = kategoriId.toString().toLowerCase().trim();
+                        
                         state.produk.push({
                             id: key,
                             nama: data[key].nama || 'Tanpa Nama',
@@ -185,7 +204,7 @@ const KasirMain = (function() {
                             hargaJual: parseInt(data[key].hargaJual) || parseInt(data[key].harga_jual) || 0,
                             hargaModal: parseInt(data[key].hargaModal) || parseInt(data[key].harga_modal) || parseInt(data[key].harga_beli) || 0,
                             stok: parseInt(data[key].stok) || 0,
-                            kategoriId: data[key].kategoriId || data[key].kategori || 'umum',
+                            kategoriId: kategoriId,
                             gambar: data[key].gambar || null,
                             satuan: data[key].satuan || 'pcs',
                             minStok: parseInt(data[key].minStok) || 5
@@ -205,7 +224,7 @@ const KasirMain = (function() {
         });
     }
     
-    // Filter dan Render
+    // Filter dan Render - KELOMPOKKAN PER KATEGORI
     function filterAndRender() {
         let filtered = [...state.produk];
         
@@ -227,7 +246,118 @@ const KasirMain = (function() {
         // Sort by nama
         filtered.sort((a, b) => a.nama.localeCompare(b.nama));
         
-        renderProduk(filtered);
+        // Jika tidak ada filter kategori, kelompokkan per kategori
+        if (!state.filter.kategori && !state.filter.search) {
+            renderProdukByKategori(filtered);
+        } else {
+            renderProduk(filtered);
+        }
+    }
+    
+    // Render Produk dikelompokkan per Kategori
+    function renderProdukByKategori(produkList) {
+        if (!elements.container) return;
+        
+        if (produkList.length === 0) {
+            elements.container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <p>Tidak ada produk</p>
+                    <span>Tambahkan produk baru</span>
+                </div>
+            `;
+            return;
+        }
+        
+        const isGrid = state.filter.view === 'grid';
+        elements.container.className = `produk-container-modern ${isGrid ? 'grid-view' : 'list-view'}`;
+        
+        // Kelompokkan produk per kategori
+        const grouped = {};
+        produkList.forEach(p => {
+            if (!grouped[p.kategoriId]) {
+                grouped[p.kategoriId] = [];
+            }
+            grouped[p.kategoriId].push(p);
+        });
+        
+        let html = '';
+        let delayIndex = 0;
+        
+        // Render per kategori
+        state.kategori.forEach(kat => {
+            const produkInKategori = grouped[kat.id] || [];
+            if (produkInKategori.length === 0) return;
+            
+            // Header kategori
+            html += `
+                <div class="kategori-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+                    <div class="kategori-group-header" style="
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 12px 16px;
+                        background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05));
+                        border-radius: 12px;
+                        margin-bottom: 12px;
+                    ">
+                        <i class="fas ${kat.icon}" style="color: var(--accent-indigo);"></i>
+                        <span style="font-weight: 700; color: var(--text-primary);">${kat.nama}</span>
+                        <span style="margin-left: auto; font-size: 12px; color: var(--text-muted);">${produkInKategori.length} produk</span>
+                    </div>
+                </div>
+            `;
+            
+            // Render produk dalam kategori
+            produkInKategori.forEach((produk, index) => {
+                if (isGrid) {
+                    html += renderGridItem(produk, delayIndex++);
+                } else {
+                    html += renderListItem(produk, delayIndex++);
+                }
+            });
+        });
+        
+        // Produk tanpa kategori yang cocok
+        const uncategorized = grouped['umum'] || [];
+        const otherUncategorized = produkList.filter(p => {
+            return !state.kategori.some(k => k.id === p.kategoriId);
+        });
+        
+        if (otherUncategorized.length > 0 && !grouped['umum']) {
+            html += `
+                <div class="kategori-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+                    <div class="kategori-group-header" style="
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 12px 16px;
+                        background: var(--bg-hover);
+                        border-radius: 12px;
+                        margin-bottom: 12px;
+                    ">
+                        <i class="fas fa-box" style="color: var(--text-muted);"></i>
+                        <span style="font-weight: 700; color: var(--text-primary);">Lainnya</span>
+                        <span style="margin-left: auto; font-size: 12px; color: var(--text-muted);">${otherUncategorized.length} produk</span>
+                    </div>
+                </div>
+            `;
+            
+            otherUncategorized.forEach((produk, index) => {
+                if (isGrid) {
+                    html += renderGridItem(produk, delayIndex++);
+                } else {
+                    html += renderListItem(produk, delayIndex++);
+                }
+            });
+        }
+        
+        elements.container.innerHTML = html;
+        
+        // Bind events dengan delay
+        setTimeout(() => {
+            bindProdukEvents();
+        }, 50);
     }
     
     // Render Loading State
@@ -255,7 +385,7 @@ const KasirMain = (function() {
         `;
     }
     
-    // Render Produk Grid/List
+    // Render Produk Grid/List (tanpa grouping)
     function renderProduk(produkList) {
         if (!elements.container) return;
         
@@ -285,7 +415,7 @@ const KasirMain = (function() {
         
         elements.container.innerHTML = html;
         
-        // Bind events dengan delay untuk animasi
+        // Bind events dengan delay
         setTimeout(() => {
             bindProdukEvents();
         }, 50);
@@ -314,7 +444,8 @@ const KasirMain = (function() {
         
         return `
             <div class="produk-card-modern ${isDisabled ? 'disabled' : ''}" 
-                 style="animation-delay: ${index * 0.05}s">
+                 style="animation-delay: ${index * 0.03}s"
+                 data-produk-id="${produk.id}">
                 <div class="produk-image-modern">
                     ${produk.gambar ? 
                         `<img src="${produk.gambar}" alt="${escapeHtml(produk.nama)}" loading="lazy">` : 
@@ -337,9 +468,10 @@ const KasirMain = (function() {
                     </div>
                 </div>
                 <button class="btn-add-cart ${isDisabled ? 'disabled' : ''}" 
-                        data-id="${produk.id}" 
+                        data-produk-id="${produk.id}" 
                         ${isDisabled ? 'disabled' : ''}
-                        title="${isDisabled ? 'Stok habis' : 'Tambah ke keranjang'}">
+                        title="${isDisabled ? 'Stok habis' : 'Tambah ke keranjang'}"
+                        onclick="event.stopPropagation(); KasirMain.addToCart('${produk.id}')">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
@@ -360,9 +492,10 @@ const KasirMain = (function() {
         
         return `
             <div class="produk-list-item-modern ${isDisabled ? 'disabled' : ''}"
-                 style="animation-delay: ${index * 0.03}s">
+                 style="animation-delay: ${index * 0.02}s"
+                 data-produk-id="${produk.id}">
                 <div class="list-checkbox">
-                    <input type="checkbox" class="select-item" data-id="${produk.id}">
+                    <input type="checkbox" class="select-item" data-produk-id="${produk.id}">
                 </div>
                 <div class="list-image">
                     ${produk.gambar ? 
@@ -383,55 +516,56 @@ const KasirMain = (function() {
                     <span class="price-jual">${formatRupiah(produk.hargaJual)}</span>
                 </div>
                 <button class="btn-add-cart ${isDisabled ? 'disabled' : ''}" 
-                        data-id="${produk.id}"
+                        data-produk-id="${produk.id}"
                         ${isDisabled ? 'disabled' : ''}
-                        title="${isDisabled ? 'Stok habis' : 'Tambah ke keranjang'}">
+                        title="${isDisabled ? 'Stok habis' : 'Tambah ke keranjang'}"
+                        onclick="event.stopPropagation(); KasirMain.addToCart('${produk.id}')">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
         `;
     }
     
-    // Bind events untuk produk items
+    // Bind events untuk produk items - HANYA SEKALI
     function bindProdukEvents() {
-        // Add to cart buttons
-        document.querySelectorAll('.btn-add-cart:not(.disabled)').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const produkId = this.dataset.id;
-                addToCart(produkId);
-                
-                // Visual feedback
-                this.classList.add('clicked');
-                setTimeout(() => this.classList.remove('clicked'), 200);
-            });
-        });
-        
-        // Card click untuk tambah ke keranjang (hanya untuk grid view)
-        document.querySelectorAll('.produk-card-modern:not(.disabled)').forEach(card => {
-            card.addEventListener('click', function(e) {
-                if (!e.target.closest('.btn-add-cart')) {
-                    const btn = this.querySelector('.btn-add-cart');
-                    if (btn && !btn.disabled) {
-                        btn.click();
+        // Hapus event listener lama dengan clone
+        const oldContainer = elements.container;
+        if (oldContainer) {
+            // Card click untuk tambah ke keranjang (hanya untuk grid view)
+            oldContainer.querySelectorAll('.produk-card-modern:not(.disabled)').forEach(card => {
+                // Gunakan onclick untuk menghindari multiple listeners
+                card.onclick = function(e) {
+                    if (!e.target.closest('.btn-add-cart')) {
+                        const produkId = this.dataset.produkId;
+                        if (produkId) {
+                            addToCart(produkId);
+                        }
                     }
-                }
+                };
             });
-        });
+        }
     }
     
-    // Add to Cart
+    // Add to Cart - DENGAN COOLDOWN UNTUK MENCEGAH DOUBLE CLICK
     function addToCart(produkId) {
+        // Cegah klik berulang
+        if (state.clickCooldown) return;
+        state.clickCooldown = true;
+        
         const produk = state.produk.find(p => p.id === produkId);
-        if (!produk) return;
+        if (!produk) {
+            state.clickCooldown = false;
+            return;
+        }
         
         // Cek stok
         if (produk.stok <= 0) {
             showToast('Stok produk habis!', 'error');
+            state.clickCooldown = false;
             return;
         }
         
-        // Tambah ke keranjang via global Keranjang module
+        // Tambah ke keranjang
         if (window.Keranjang && window.Keranjang.addItem) {
             window.Keranjang.addItem({
                 id: produk.id,
@@ -446,37 +580,41 @@ const KasirMain = (function() {
         } else {
             console.warn('Keranjang module not found');
         }
+        
+        // Reset cooldown setelah 300ms
+        setTimeout(() => {
+            state.clickCooldown = false;
+        }, 300);
     }
     
     // Bind Events
     function bindEvents() {
         // Search input dengan debounce
         if (elements.searchInput) {
-            elements.searchInput.addEventListener('input', debounce(function() {
-                state.filter.search = this.value;
-                filterAndRender();
-            }, 300));
+            let searchTimeout;
+            elements.searchInput.oninput = function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    state.filter.search = this.value;
+                    filterAndRender();
+                }, 300);
+            };
         }
         
         // Kategori Select
         if (elements.kategoriSelect) {
-            elements.kategoriSelect.addEventListener('change', function() {
+            elements.kategoriSelect.onchange = function() {
                 setKategoriFilter(this.value);
-            });
+            };
         }
         
         // View Toggle
         if (elements.viewGrid) {
-            elements.viewGrid.addEventListener('click', () => setView('grid'));
+            elements.viewGrid.onclick = () => setView('grid');
         }
         if (elements.viewList) {
-            elements.viewList.addEventListener('click', () => setView('list'));
+            elements.viewList.onclick = () => setView('list');
         }
-        
-        // Listen for theme changes
-        window.addEventListener('themechange', () => {
-            filterAndRender();
-        });
     }
     
     // Set View Mode
@@ -499,7 +637,6 @@ const KasirMain = (function() {
             const id = snapshot.key;
             const data = snapshot.val();
             
-            // Update local data
             const index = state.produk.findIndex(p => p.id === id);
             if (index !== -1) {
                 if (data.status === 'nonaktif' || data.status === 'deleted') {
@@ -511,7 +648,8 @@ const KasirMain = (function() {
                         hargaJual: parseInt(data.hargaJual) || parseInt(data.harga_jual) || state.produk[index].hargaJual,
                         hargaModal: parseInt(data.hargaModal) || parseInt(data.harga_modal) || state.produk[index].hargaModal,
                         stok: parseInt(data.stok) || state.produk[index].stok,
-                        gambar: data.gambar || state.produk[index].gambar
+                        gambar: data.gambar || state.produk[index].gambar,
+                        kategoriId: (data.kategoriId || data.kategori || 'umum').toString().toLowerCase().trim()
                     };
                 }
                 filterAndRender();
@@ -522,7 +660,6 @@ const KasirMain = (function() {
             const id = snapshot.key;
             const data = snapshot.val();
             
-            // Cek apakah produk sudah ada
             const existingIndex = state.produk.findIndex(p => p.id === id);
             
             if (existingIndex === -1 && data.status !== 'nonaktif' && data.status !== 'deleted') {
@@ -534,7 +671,7 @@ const KasirMain = (function() {
                     hargaJual: parseInt(data.hargaJual) || parseInt(data.harga_jual) || 0,
                     hargaModal: parseInt(data.hargaModal) || parseInt(data.harga_modal) || 0,
                     stok: parseInt(data.stok) || 0,
-                    kategoriId: data.kategoriId || 'umum',
+                    kategoriId: (data.kategoriId || data.kategori || 'umum').toString().toLowerCase().trim(),
                     gambar: data.gambar || null,
                     satuan: data.satuan || 'pcs',
                     minStok: parseInt(data.minStok) || 5
@@ -565,19 +702,6 @@ const KasirMain = (function() {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-    
-    // Helper: Debounce
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func.apply(this, args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
     }
     
     // Helper: Show Toast
@@ -625,6 +749,7 @@ const KasirMain = (function() {
         init,
         refresh: loadProduk,
         setKategoriFilter,
+        addToCart, // Expose untuk onclick
         getState: () => state,
         filterAndRender
     };
@@ -632,7 +757,6 @@ const KasirMain = (function() {
 
 // Auto-init
 document.addEventListener('DOMContentLoaded', () => {
-    // Delay untuk memastikan Firebase siap
     setTimeout(() => KasirMain.init(), 100);
 });
 
