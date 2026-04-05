@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#6366f1">
+    <title>WebPOS - Kasir</title>
+    
+    <!-- CSS Theme -->
+    <link rel="stylesheet" href="../css/dashboard-theme.css">
+    <link rel="stylesheet" href="../css/dashboard-enhanced.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <link rel="stylesheet" href="../css/modules/kasir-improved.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Theme Manager (Load first) -->
+    <script src="../js/theme-manager.js"></script>
+<base target="_blank">
+</head>
+<body>
+    <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
+    
+    <!-- Mobile Nav -->
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="../dashboard.html"><i class="fas fa-home"></i></a></li>
+            <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i></a></li>
+            <li><a href="./produk.html"><i class="fas fa-box"></i></a></li>
+            <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i></a></li>
+            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i></a></li>
+        </ul>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fas fa-cash-register"></i></div>
+            <h3>WebPOS</h3>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section utama">
+                <div class="nav-section-header active" onclick="toggleDropdown('utama')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-th-large"></i></div>
+                        <span class="nav-section-title">Utama</span>
+                    </div>
+                    <div class="dropdown-arrow rotate" id="arrow-utama"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown open" id="dropdown-utama">
+                    <ul>
+                        <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i> Kasir</a></li>
+                        <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
+                        <li><a href="./pembelian.html"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="nav-section transaksi">
+                <div class="nav-section-header" onclick="toggleDropdown('transaksi')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <span class="nav-section-title">Transaksi</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-transaksi"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-transaksi">
+                    <ul>
+                        <li><a href="./riwayat-transaksi.html"><i class="fas fa-history"></i> Riwayat</a></li>
+                        <li><a href="./modal-harian.html"><i class="fas fa-money-bill-wave"></i> Modal</a></li>
+                        <li><a href="./kas-management.html"><i class="fas fa-wallet"></i> Kas</a></li>
+                        <li><a href="./hutang-piutang.html"><i class="fas fa-hand-holding-usd"></i> Hutang</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="nav-section lainnya">
+                <div class="nav-section-header" onclick="toggleDropdown('lainnya')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-ellipsis-h"></i></div>
+                        <span class="nav-section-title">Lainnya</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-lainnya"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-lainnya">
+                    <ul>
+                        <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
+                        <li><a href="./data-pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
+                        <li><a href="./telegram.html"><i class="fas fa-paper-plane"></i> Telegram</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="nav-section pengaturan">
+                <div class="nav-section-header" onclick="toggleDropdown('pengaturan')">
+                    <div class="nav-section-title-group">
+                        <div class="nav-section-icon"><i class="fas fa-cog"></i></div>
+                        <span class="nav-section-title">Pengaturan</span>
+                    </div>
+                    <div class="dropdown-arrow" id="arrow-pengaturan"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="nav-dropdown" id="dropdown-pengaturan">
+                    <ul>
+                        <li><a href="./setting.html"><i class="fas fa-sliders-h"></i> Setting</a></li>
+                        <li><a href="./printer.html"><i class="fas fa-print"></i> Printer</a></li>
+                        <li><a href="./user.html"><i class="fas fa-user-cog"></i> User</a></li>
+                        <li><a href="./reset.html"><i class="fas fa-redo"></i> Reset</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">Loading...</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+                <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1>Kasir</h1>
+                    <p id="current-date">Memuat...</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn-darkmode" data-theme-toggle title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="btn-icon" onclick="refreshData()" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Kasir Container -->
+        <div class="kasir-container">
+            
+            <!-- Produk Section -->
+            <div class="produk-section">
+                
+                <!-- Search Header -->
+                <div class="search-sticky-header">
+                    <div class="search-container-modern">
+                        
+                        <!-- Row 1: Search + Manual -->
+                        <div class="search-row-main">
+                            <div class="search-box-wrapper">
+                                <div class="search-box-modern">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="search-produk" placeholder="Cari produk (nama, kode, barcode)...">
+                                    <div class="search-shortcuts">
+                                        <span class="kbd">Ctrl</span>
+                                        <span class="kbd">K</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-floating-manual" id="btn-transaksi-manual" onclick="openModal('modal-transaksi-manual')">
+                                <i class="fas fa-plus"></i>
+                                <span>Manual</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Row 2: Filter Kategori + View Toggle -->
+                        <div class="filter-row-modern">
+                            <div class="filter-group">
+                                <label>Kategori:</label>
+                                <select id="filter-kategori" class="filter-select-modern">
+                                    <option value="">Semua Kategori</option>
+                                </select>
+                            </div>
+                            
+                            <div class="view-toggle-modern">
+                                <button class="view-btn-modern active" id="view-grid" data-view="grid" title="Grid View">
+                                    <i class="fas fa-th-large"></i>
+                                </button>
+                                <button class="view-btn-modern" id="view-list" data-view="list" title="List View">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Kategori Chips -->
+                <div class="kategori-section-modern">
+                    <span class="kategori-label">Filter Cepat:</span>
+                    <div class="kategori-chips-container">
+                        <div class="kategori-scroll-modern" id="kategori-scroll">
+                            <button class="kategori-chip active" data-kategori="">
+                                <i class="fas fa-th-large"></i>
+                                <span>Semua</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Produk Container -->
+                <div id="produk-container" class="produk-container-modern grid-view">
+                    <div class="loading-produk">
+                        <div class="spinner"></div>
+                        <p>Memuat produk...</p>
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Keranjang Section -->
+            <div class="keranjang-section-modern" id="keranjang-section">
+                
+                <div class="keranjang-header-modern">
+                    <div class="keranjang-title">
+                        <i class="fas fa-shopping-basket"></i>
+                        Keranjang
+                    </div>
+                    <span class="badge-count" id="cart-count" style="display: none;">0</span>
+                </div>
+                
+                <div class="transaksi-type-modern">
+                    <button class="type-btn active" data-jenis="penjualan">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Penjualan</span>
+                    </button>
+                    <button class="type-btn" data-jenis="topup" onclick="openModal('modal-topup')">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Top Up</span>
+                    </button>
+                    <button class="type-btn" data-jenis="tarik" onclick="openModal('modal-tarik')">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Tarik Tunai</span>
+                    </button>
+                </div>
+                
+                <div class="keranjang-items-modern" id="keranjang-items">
+                    <div class="empty-cart-modern">
+                        <i class="fas fa-shopping-basket"></i>
+                        <p>Keranjang Kosong</p>
+                        <span>Tambahkan produk untuk memulai</span>
+                    </div>
+                </div>
+                
+                <div class="summary-modern">
+                    <div class="summary-row-modern">
+                        <span class="summary-label">Subtotal</span>
+                        <span class="summary-value" id="subtotal">Rp 0</span>
+                    </div>
+                    <div class="summary-row-modern total">
+                        <span class="summary-label">TOTAL</span>
+                        <span class="summary-value" id="total-bayar">Rp 0</span>
+                    </div>
+                </div>
+                
+                <div class="payment-section-modern">
+                    <div class="payment-method">
+                        <label>Metode Pembayaran</label>
+                        <select class="select-modern" id="metode-pembayaran">
+                            <option value="tunai">💵 Tunai</option>
+                            <option value="qris">📱 QRIS</option>
+                            <option value="transfer">🏦 Transfer</option>
+                            <option value="hutang">📝 Hutang</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-amount-modern" id="group-bayar">
+                        <span class="prefix">Rp</span>
+                        <input type="text" id="jumlah-bayar" placeholder="0" inputmode="numeric">
+                        <div class="quick-amounts">
+                            <button class="quick-btn" data-amount="50000">50K</button>
+                            <button class="quick-btn" data-amount="100000">100K</button>
+                            <button class="quick-btn" data-amount="200000">200K</button>
+                            <button class="quick-btn uang-pas" id="btn-uang-pas">Uang Pas</button>
+                        </div>
+                    </div>
+                    
+                    <div class="change-display-modern" id="group-kembalian" style="display: none;">
+                        <div class="change-label">Kembalian</div>
+                        <div class="change-amount" id="kembalian">Rp 0</div>
+                    </div>
+
+                    <div class="payment-method" id="group-pelanggan" style="display: none;">
+                        <label>Pelanggan</label>
+                        <select class="select-modern" id="select-pelanggan">
+                            <option value="">Pilih Pelanggan</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn-pay-modern" id="btn-bayar">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Bayar Sekarang</span>
+                    </button>
+                </div>
+                
+            </div>
+            
+        </div>
+
+        <footer class="page-footer">
+            <p>WebPOS v3.0 • <span id="last-update">Terakhir update: -</span></p>
+        </footer>
+    </main>
+
+    <!-- Mobile Cart Button -->
+    <button class="btn-cart-mobile" id="btn-cart-mobile" onclick="toggleKeranjangMobile()" style="display: none;">
+        <i class="fas fa-shopping-basket"></i>
+        <span class="badge-float" id="mobile-count" style="display: none;">0</span>
+    </button>
+
+    <!-- MODALS -->
+
+    <!-- Modal Transaksi Manual -->
+    <div class="modal" id="modal-transaksi-manual">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> Transaksi Manual</h3>
+                <button class="btn-close" onclick="closeModal('modal-transaksi-manual')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Nama Produk/Item</label>
+                    <input type="text" id="manual-nama" class="form-input-modern" placeholder="Masukkan nama item">
+                </div>
+                <div class="form-row-modern">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Harga Modal</label>
+                        <input type="number" id="manual-harga-modal" class="form-input-modern" placeholder="0">
+                    </div>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Harga Jual</label>
+                        <input type="number" id="manual-harga-jual" class="form-input-modern" placeholder="0">
+                    </div>
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Jumlah</label>
+                    <input type="number" id="manual-jumlah" class="form-input-modern" value="1" min="1">
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Keterangan (Opsional)</label>
+                    <textarea id="manual-keterangan" class="form-textarea-modern" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-transaksi-manual')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-manual">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Top Up -->
+    <div class="modal" id="modal-topup">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-mobile-alt"></i> Top Up</h3>
+                <button class="btn-close" onclick="closeModal('modal-topup')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Provider</label>
+                    <select id="topup-provider" class="form-select-modern">
+                        <option value="ovo">OVO</option>
+                        <option value="gopay">GoPay</option>
+                        <option value="dana">DANA</option>
+                        <option value="linkaja">LinkAja</option>
+                        <option value="shopeepay">ShopeePay</option>
+                    </select>
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Nominal</label>
+                    <input type="number" id="topup-nominal" class="form-input-modern" placeholder="0">
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Admin Fee</label>
+                    <input type="number" id="topup-fee-input" class="form-input-modern" value="0">
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Total Bayar</label>
+                    <div class="total-display" id="topup-total">Rp 0</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-topup')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-topup">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tarik Tunai -->
+    <div class="modal" id="modal-tarik">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-hand-holding-usd"></i> Tarik Tunai</h3>
+                <button class="btn-close" onclick="closeModal('modal-tarik')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Nominal Tarik</label>
+                    <input type="number" id="tarik-nominal" class="form-input-modern" placeholder="0">
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Admin Fee</label>
+                    <input type="number" id="tarik-fee-input" class="form-input-modern" value="0">
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Total Diterima</label>
+                    <div class="total-display" id="tarik-total">Rp 0</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-tarik')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-tarik">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Item -->
+    <div class="modal" id="modal-edit-item">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Item</h3>
+                <button class="btn-close" onclick="closeModal('modal-edit-item')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Harga</label>
+                    <input type="number" id="edit-item-harga" class="form-input-modern" placeholder="0">
+                </div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Jumlah</label>
+                    <input type="number" id="edit-item-qty" class="form-input-modern" placeholder="0" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeModal('modal-edit-item')">Batal</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="btn-simpan-edit-item">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    
+    <!-- Kasir Modules -->
+    <script src="../js/modules/kasir/keranjang-improved.js"></script>
+    <script src="../js/modules/kasir/kasir-main-improved.js"></script>
+    
+    <script>
+        // Global edit modal function
+        let currentEditIndex = -1;
+        
+        window.openEditModal = function(index) {
+            const items = window.Keranjang?.getItems?.() || [];
+            if (index < 0 || index >= items.length) return;
+            
+            currentEditIndex = index;
+            const item = items[index];
+            
+            document.getElementById('edit-item-harga').value = item.harga_jual;
+            document.getElementById('edit-item-qty').value = item.qty;
+            
+            openModal('modal-edit-item');
+        };
+        
+        // Save edit item
+        document.getElementById('btn-simpan-edit-item')?.addEventListener('click', function() {
+            if (currentEditIndex < 0) return;
+            
+            const harga = parseInt(document.getElementById('edit-item-harga').value) || 0;
+            const qty = parseInt(document.getElementById('edit-item-qty').value) || 1;
+            
+            if (window.Keranjang?.editItem) {
+                window.Keranjang.editItem(currentEditIndex, { harga, qty });
+                closeModal('modal-edit-item');
+                currentEditIndex = -1;
+            }
+        });
+        
+        // Sidebar Functions
+        function toggleDropdown(section) {
+            const dropdown = document.getElementById(`dropdown-${section}`);
+            const arrow = document.getElementById(`arrow-${section}`);
+            const header = dropdown?.previousElementSibling;
+            
+            dropdown?.classList.toggle('open');
+            arrow?.classList.toggle('rotate');
+            header?.classList.toggle('active');
+            
+            localStorage.setItem(`dropdown-${section}`, dropdown?.classList.contains('open'));
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar?.classList.toggle('open');
+                overlay?.classList.toggle('active');
+            }
+        }
+        
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.replace('../login.html');
+            });
+        }
+        
+        function refreshData() {
+            const btn = document.querySelector('.btn-icon i.fa-sync-alt');
+            if (btn) btn.classList.add('fa-spin');
+            
+            if (window.KasirMain) {
+                window.KasirMain.refresh();
+            }
+            
+            setTimeout(() => btn?.classList.remove('fa-spin'), 500);
+        }
+        
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+                document.getElementById('overlay')?.classList.add('active');
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+            document.getElementById('overlay')?.classList.remove('active');
+        }
+        
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            });
+            document.getElementById('sidebar')?.classList.remove('open');
+            document.getElementById('keranjang-section')?.classList.remove('open');
+            document.getElementById('overlay')?.classList.remove('active');
+        }
+        
+        function toggleKeranjangMobile() {
+            const keranjang = document.getElementById('keranjang-section');
+            keranjang?.classList.toggle('open');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restore dropdowns
+            ['utama', 'transaksi', 'lainnya', 'pengaturan'].forEach(section => {
+                const isOpen = localStorage.getItem(`dropdown-${section}`) === 'true';
+                if (isOpen || section === 'utama') {
+                    const dropdown = document.getElementById(`dropdown-${section}`);
+                    const arrow = document.getElementById(`arrow-${section}`);
+                    const header = dropdown?.previousElementSibling;
+                    
+                    dropdown?.classList.add('open');
+                    arrow?.classList.add('rotate');
+                    header?.classList.add('active');
+                }
+            });
+            
+            // Set date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = 
+                new Date().toLocaleDateString('id-ID', options);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('search-produk')?.focus();
+            }
+            if (e.key === 'Escape') {
+                closeAllModals();
+            }
+        });
+    </script>
+</body>
+</html>
