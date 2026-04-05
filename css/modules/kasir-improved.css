@@ -413,6 +413,53 @@
 .kategori-group-header i {
     color: var(--accent-indigo);
     font-size: 18px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border-radius: 8px;
+}
+
+.kategori-group-header span:first-of-type {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.kategori-group-header span:last-child {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+[data-theme="dark"] .kategori-group-header {
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+    border-color: rgba(99,102,241,0.3);
+}
+.kategori-group {
+    grid-column: 1 / -1;
+    margin-bottom: 8px;
+}
+
+.kategori-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05));
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(99,102,241,0.2);
+}
+
+.kategori-group-header i {
+    color: var(--accent-indigo);
+    font-size: 18px;
 }
 
 .kategori-group-header span:first-of-type {
