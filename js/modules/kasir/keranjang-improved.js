@@ -1,6 +1,7 @@
 /**
- * Keranjang Module - IMPROVED v2.0
+ * Keranjang Module - IMPROVED v2.1
  * File: js/modules/kasir/keranjang.js
+ * Fixed: Prevent default, no popup issues
  */
 
 const Keranjang = {
@@ -190,49 +191,56 @@ const Keranjang = {
         // Event untuk tombol bayar
         const btnBayar = document.getElementById('btn-bayar');
         if (btnBayar) {
-            btnBayar.addEventListener('click', () => this.prosesPembayaran());
+            btnBayar.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.prosesPembayaran();
+            };
         }
         
         // Event untuk input jumlah bayar
         const inputBayar = document.getElementById('jumlah-bayar');
         if (inputBayar) {
-            inputBayar.addEventListener('input', (e) => {
-                // Format input sebagai rupiah
+            inputBayar.oninput = (e) => {
                 let value = e.target.value.replace(/\D/g, '');
                 e.target.value = value;
                 this.hitungKembalian();
-            });
+            };
         }
         
         // Event untuk quick amount buttons
         document.querySelectorAll('.quick-btn[data-amount]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const amount = e.target.dataset.amount;
+            btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const amount = e.currentTarget.dataset.amount;
                 if (inputBayar) {
                     inputBayar.value = amount;
                     this.hitungKembalian();
                 }
-            });
+            };
         });
         
         // Event untuk tombol uang pas
         const btnUangPas = document.getElementById('btn-uang-pas');
         if (btnUangPas) {
-            btnUangPas.addEventListener('click', () => {
+            btnUangPas.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const total = this.items.reduce((sum, item) => sum + item.subtotal, 0);
                 if (inputBayar) {
                     inputBayar.value = total;
                     this.hitungKembalian();
                 }
-            });
+            };
         }
         
         // Event untuk metode pembayaran
         const metodePembayaran = document.getElementById('metode-pembayaran');
         if (metodePembayaran) {
-            metodePembayaran.addEventListener('change', (e) => {
+            metodePembayaran.onchange = (e) => {
                 this.handleMetodeChange(e.target.value);
-            });
+            };
         }
     },
     
@@ -400,7 +408,7 @@ const Keranjang = {
         if (subtotalEl) subtotalEl.textContent = formatRupiah(total);
         if (totalEl) totalEl.textContent = formatRupiah(total);
         
-        // Update kembalian jika ada input bayar
+        // Update kembalian
         this.hitungKembalian();
     },
     
@@ -411,30 +419,21 @@ const Keranjang = {
             tarik: 'fa-hand-holding-usd'
         };
         
-        const jenisLabel = {
-            penjualan: 'Penjualan',
-            topup: 'Top Up',
-            tarik: 'Tarik Tunai'
-        };
-        
-        const icon = jenisIcon[item.jenis] || 'fa-box';
-        const label = jenisLabel[item.jenis] || 'Penjualan';
-        
         return `
             <div class="cart-item-modern" data-index="${index}">
                 <div class="cart-item-img">
-                    <i class="fas ${icon}"></i>
+                    <i class="fas ${jenisIcon[item.jenis] || 'fa-box'}"></i>
                 </div>
                 <div class="cart-item-info">
                     <div class="cart-item-name" title="${escapeHtml(item.nama)}">${escapeHtml(item.nama)}</div>
                     <div class="cart-item-price">${formatRupiah(item.harga_jual)} x ${item.qty}</div>
                 </div>
                 <div class="qty-control-modern">
-                    <button class="qty-btn-modern" onclick="window.Keranjang.updateQty(${index}, -1)" title="Kurangi">
+                    <button class="qty-btn-modern" onclick="event.preventDefault(); event.stopPropagation(); window.Keranjang.updateQty(${index}, -1)" title="Kurangi">
                         <i class="fas fa-minus"></i>
                     </button>
                     <span class="qty-value-modern">${item.qty}</span>
-                    <button class="qty-btn-modern" onclick="window.Keranjang.updateQty(${index}, 1)" title="Tambah">
+                    <button class="qty-btn-modern" onclick="event.preventDefault(); event.stopPropagation(); window.Keranjang.updateQty(${index}, 1)" title="Tambah">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -442,10 +441,10 @@ const Keranjang = {
                     ${formatRupiah(item.subtotal)}
                 </div>
                 <div class="cart-item-actions">
-                    <button class="btn-remove-item" onclick="window.openEditModal(${index})" title="Edit" style="color: var(--accent-indigo);">
+                    <button class="btn-remove-item" onclick="event.preventDefault(); event.stopPropagation(); window.openEditModal(${index})" title="Edit" style="color: var(--accent-indigo);">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-remove-item" onclick="window.Keranjang.removeItem(${index})" title="Hapus">
+                    <button class="btn-remove-item" onclick="event.preventDefault(); event.stopPropagation(); window.Keranjang.removeItem(${index})" title="Hapus">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
