@@ -24,16 +24,16 @@
 <base target="_blank">
 </head>
 <body>
-    <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
+    <div class="overlay" id="overlay"></div>
     
     <!-- Mobile Nav -->
     <nav class="mobile-nav">
         <ul>
             <li><a href="../dashboard.html"><i class="fas fa-home"></i></a></li>
-            <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i></a></li>
+            <li><a href="./kasir-improved.html" class="active"><i class="fas fa-cash-register"></i></a></li>
             <li><a href="./produk.html"><i class="fas fa-box"></i></a></li>
             <li><a href="./laporan.html"><i class="fas fa-chart-bar"></i></a></li>
-            <li><a href="#" onclick="toggleSidebar()"><i class="fas fa-bars"></i></a></li>
+            <li><a href="#" onclick="event.preventDefault(); toggleSidebar();"><i class="fas fa-bars"></i></a></li>
         </ul>
     </nav>
 
@@ -56,7 +56,7 @@
                 <div class="nav-dropdown open" id="dropdown-utama">
                     <ul>
                         <li><a href="../dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                        <li><a href="./kasir.html" class="active"><i class="fas fa-cash-register"></i> Kasir</a></li>
+                        <li><a href="./kasir-improved.html" class="active"><i class="fas fa-cash-register"></i> Kasir</a></li>
                         <li><a href="./produk.html"><i class="fas fa-box"></i> Produk</a></li>
                         <li><a href="./pembelian.html"><i class="fas fa-shopping-cart"></i> Pembelian</a></li>
                     </ul>
@@ -506,7 +506,10 @@
         };
         
         // Save edit item
-        document.getElementById('btn-simpan-edit-item')?.addEventListener('click', function() {
+        document.getElementById('btn-simpan-edit-item')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             if (currentEditIndex < 0) return;
             
             const harga = parseInt(document.getElementById('edit-item-harga').value) || 0;
